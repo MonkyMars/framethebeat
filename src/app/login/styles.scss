@@ -1,0 +1,156 @@
+.section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5em;
+    backdrop-filter: blur(16px);
+    border-radius: 24px;
+    border: 1px solid rgba(var(--theme-rgb), 0.18);
+    background: linear-gradient(
+        145deg,
+        rgba(var(--background-rgb), 0.35),
+        rgba(var(--background-rgb), 0.15)
+    );
+    box-shadow: 0 12px 45px rgba(0, 0, 0, 0.18);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(90%, 520px);
+    input {
+        margin-top: 1.2em;
+        width: 100%;
+        padding: .6em 1em;
+        background: rgba(var(--background-rgb), 0.45);
+        border: 2px solid rgba(var(--theme-rgb), 0.25);
+        border-radius: 14px;
+        color: var(--foreground);
+        font-size: 1.15rem;
+        letter-spacing: 0.3px;
+        transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        backdrop-filter: blur(8px);
+    
+        &:focus {
+          outline: none;
+          border-color: rgba(var(--theme-rgb), 0.7);
+          box-shadow: 0 0 20px rgba(var(--theme-rgb), 0.25),
+            inset 0 0 10px rgba(var(--theme-rgb), 0.12);
+          transform: translateY(-3px);
+        }
+    
+        &::placeholder {
+          color: rgba(var(--foreground-rgb), 0.45);
+          font-weight: 400;
+        }
+      }
+    .checkboxContainer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            color: var(--foreground);
+            font-size: 0.9rem;
+
+            input[type="checkbox"] {
+                appearance: none;
+                -webkit-appearance: none;
+                width: 18px;
+                height: 18px;
+                border: 2px solid rgba(var(--theme-rgb), 0.4);
+                border-radius: 4px;
+                background: rgba(var(--background-rgb), 0.3);
+                cursor: pointer;
+                position: relative;
+                transition: all 0.3s ease;
+    
+                &:checked {
+                    background: var(--theme);
+                    border-color: var(--theme);
+    
+                    &:after {
+                        content: '';
+                        position: absolute;
+                        left: 5px;
+                        top: 2px;
+                        width: 5px;
+                        height: 9px;
+                        border: solid var(--background);
+                        border-width: 0 2px 2px 0;
+                        transform: rotate(45deg);
+                    }
+                }
+    
+                &:hover {
+                    border-color: rgba(var(--theme-rgb), 0.8);
+                }
+    
+                &:focus {
+                    outline: none;
+                    box-shadow: 0 0 0 2px rgba(var(--theme-rgb), 0.25);
+                }
+            }
+        }
+    }
+    .registerLink {
+        text-align: center;
+        margin-top: 1em;
+        color: var(--foreground);
+        font-size: 0.9rem;
+
+        a {
+            color: var(--theme);
+            text-decoration: none;
+            font-weight: 600;
+            
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+    .ctaButtonContainer {
+        margin: 2em 0;
+    
+        button {
+          width: 100%;
+          padding: .7em 0;
+          border-radius: 14px;
+          background: linear-gradient(
+            165deg,
+            rgba(var(--theme-rgb), 1),
+            rgba(var(--theme-rgb), 0.85)
+          );
+          color: var(--foreground);
+          font-size: 1.15rem;
+          font-weight: 600;
+          letter-spacing: 0.8px;
+          border: none;
+          cursor: pointer;
+          box-shadow: 0 6px 25px rgba(var(--theme-rgb), 0.35),
+            inset 0 1px 3px rgba(255, 255, 255, 0.25);
+          transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+          &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(var(--theme-rgb), 0.45),
+              inset 0 1px 4px rgba(255, 255, 255, 0.35);
+            background: linear-gradient(
+              165deg,
+              rgba(var(--theme-rgb), 1),
+              rgba(var(--theme-rgb), 0.9)
+            );
+          }
+    
+          &:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 20px rgba(var(--theme-rgb), 0.3),
+              inset 0 1px 2px rgba(255, 255, 255, 0.2);
+          }
+        }
+      }
+}

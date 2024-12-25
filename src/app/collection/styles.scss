@@ -1,0 +1,113 @@
+.mainContent {
+  padding: 2rem;
+}
+
+.collectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 2rem;
+  padding: 1rem 0;
+}
+
+.collectionCard {
+  background-color: var(--background);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 2px 8px rgba(var(--foreground-rgb), 0.1);
+  border: 1px solid rgba(var(--theme-rgb), 0.4);
+  position: relative;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .albumImage {
+    width: 100%;
+    position: relative;
+
+    img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+
+  .albumInfo {
+    padding: 1rem;
+
+    h3 {
+      margin: 0 0 0.5rem 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .artist {
+      margin: 0 0 0.25rem 0;
+      color: #666;
+    }
+
+    .date {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #888;
+    }
+  }
+  .albumActions {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 1em;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    & svg{
+        color: rgba(var(--theme-rgb), 0.8);
+    }
+    & span {
+        color: rgba(var(--foreground-rgb), 0.7);
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        transition: color 0.2s ease;
+    }
+  }
+  .active {
+    svg{
+        fill: var(--theme);
+    }
+  }
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  & h2 {
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.6),
+      0 0 25px rgba(255, 255, 255, 0.4), 0 0 35px rgba(var(--theme), 0.3);
+    background: linear-gradient(
+      135deg,
+      var(--foreground),
+      var(--foreground),
+      var(--foreground)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  p {
+    font-size: 1.2rem;
+    text-align: center;
+    max-width: 600px;
+    color: #888;
+  }
+}

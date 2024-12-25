@@ -1,95 +1,104 @@
+import React from "react";
+import styles from "./page.module.scss";
 import Image from "next/image";
-import styles from "./page.module.css";
-
+import { Album } from "@/app/utils/types";
+import Footer from "./components/Footer";
+import Cta from "./components/Cta";
+import StartCollection from "./components/StartCollection";
+import Featured from "./components/Featured";
+import SearchComponent from "./components/Search";
+import Categories from "./components/Categories";
+import Nav from "./components/Nav";
+import Discover from "./components/Discover";
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const ImageRandomizer = () => {
+    const images = [
+      "nothingbutthieves_moralpanic_fsei.jpg",
+      "kanyewest_mybeautifuldarktwist_ehfh.jpg",
+      "kendricklamar_goodkidmaadcity_4zxm.jpg",
+      "twentyonepilots_scaledandicy_e2xt.jpg",
+      "theweeknd_mydearmelancholy_albq.jpg",
+      "tameimpala_currents_857m.jpg",
+    ];
+    const selectedImage = Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1) * images.length);
+    return images[selectedImage];
+  };
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+  const AlbumCover = (index: number): Album => {
+    const albumCovers: Album[] = [
+      {
+        id: 1,
+        title: "Moral Panic",
+        artist: "Nothing But Thieves",
+        albumCover: {
+          src: "nothingbutthieves_moralpanic_fsei.jpg",
+          alt: "Moral Panic album cover",
+        },
+        date: "2020",
+      },
+      {
+        id: 2,
+        title: "My Beautiful Dark Twisted Fantasy",
+        artist: "Kanye West",
+        albumCover: {
+          src: "kanyewest_mybeautifuldarktwist_ehfh.jpg",
+          alt: "My Beautiful Dark Twisted Fantasy album cover",
+        },
+        date: "2010",
+      },
+      {
+        id: 3,
+        title: "Good Kid, M.A.A.D City",
+        artist: "Kendrick Lamar",
+        albumCover: {
+          src: "kendricklamar_goodkidmaadcity_4zxm.jpg",
+          alt: "Good Kid, M.A.A.D City album cover",
+        },
+        date: "2012",
+      },
+      {
+        id: 4,
+        title: "Scaled and Icy",
+        artist: "Twenty One Pilots",
+        albumCover: {
+          src: "twentyonepilots_scaledandicy_e2xt.jpg",
+          alt: "Scaled and Icy album cover",
+        },
+        date: "2021",
+      },
+    ];
+    return albumCovers[index];
+  };
+  return (
+    <>
+      <Nav/>
+      <main className={styles.mainContent}>
+        <div className={styles.mobile}>
+          <h1>Frame The Beat</h1>
+          <Image
+            src={`/albumcovers/${ImageRandomizer()}`}
+            width={2000}
+            height={2000}
+            alt="album cover"
+          />
+        </div>
+        <div className={styles.desktop}>
+          <h1>Frame The Beat</h1>
+          <Image
+            src={`/albumcovers/${ImageRandomizer()}`}
+            width={2000}
+            height={2000}
+            alt="album cover"
+          />
         </div>
       </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      <Discover/>
+      <SearchComponent/>
+      <Categories />
+      <Featured AlbumCover={AlbumCover} />
+      <StartCollection />
+      <Cta />
+      <Footer/>
+    </>
   );
 }
