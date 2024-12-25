@@ -22,40 +22,6 @@ interface API_RESPONSE {
   };
 }
 
-// const dummyData: {
-//   title: string;
-//   artist: string;
-// }[] = [
-//   {
-//     title: "Moral Panic",
-//     artist: "Nothing But Thieves",
-//   },
-//   {
-//     title: "The Slow Rush",
-//     artist: "Tame Impala",
-//   },
-//   {
-//     title: "A 20 Something Fuck",
-//     artist: "Two Feet",
-//   },
-//   {
-//     title: "After Hours",
-//     artist: "The Weeknd",
-//   },
-//   {
-//     title: "Fine Line",
-//     artist: "Harry Styles",
-//   },
-//   {
-//     title: "Fetch the Bolt Cutters",
-//     artist: "Fiona Apple",
-//   },
-//   {
-//     title: "RTJ4",
-//     artist: "Run the Jewels",
-//   },
-// ];
-
 const Saved = () => {
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");

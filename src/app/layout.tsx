@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Frame The Beat",
     description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
-    url: "https://www.framethebeat.vercel.app",
+    url: "localhost:3000",
     images: [
       {
         url: "/favicon.ico",

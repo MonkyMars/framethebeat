@@ -14,6 +14,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface API_RESPONSE {
   album: {
+    mbid: string;
     artist: string;
     name: string;
     image: { "#text": string }[];
@@ -40,7 +41,7 @@ const Collection = () => {
     };
     getCollection();
   }, []);
-
+  
   useEffect(() => {
       const fetchSavedAlbums = async ({
         title,
@@ -57,7 +58,11 @@ const Collection = () => {
           );
           const data = await response.json();
           const { album: model } = data as API_RESPONSE;
+          if (!model) {
+            return;
+          }
           const albumData = {
+            id: parseInt(model.mbid),
             albumArtist: model.artist,
             albumTitle: model.name,
             albumCover: {
@@ -69,7 +74,7 @@ const Collection = () => {
           };
           const returnData: Album[] = [
             {
-              id: Math.floor(Math.random() * 1000),
+              id: albumData.id,
               title: albumData.albumTitle,
               artist: albumData.albumArtist,
               date: albumData.albumDate,
@@ -108,7 +113,9 @@ const Collection = () => {
       setTitle("");
     }, 3000);
   };
-
+  if (!collectionNames || !collection) {
+    return <div>Loading...</div>;
+  }
   return (
     <>
       <Nav />

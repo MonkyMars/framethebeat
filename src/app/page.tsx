@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import styles from "./page.module.scss";
 import Image from "next/image";
@@ -10,20 +11,21 @@ import SearchComponent from "./components/Search";
 import Categories from "./components/Categories";
 import Nav from "./components/Nav";
 import Discover from "./components/Discover";
+
 export default function Home() {
+  const images = [
+    "nothingbutthieves_moralpanic_fsei.jpg",
+    "kanyewest_mybeautifuldarktwist_ehfh.jpg",
+    "kendricklamar_goodkidmaadcity_4zxm.jpg",
+    "twentyonepilots_scaledandicy_e2xt.jpg",
+    "theweeknd_mydearmelancholy_albq.jpg",
+    "tameimpala_currents_857m.jpg",
+  ];
   const ImageRandomizer = () => {
-    const images = [
-      "nothingbutthieves_moralpanic_fsei.jpg",
-      "kanyewest_mybeautifuldarktwist_ehfh.jpg",
-      "kendricklamar_goodkidmaadcity_4zxm.jpg",
-      "twentyonepilots_scaledandicy_e2xt.jpg",
-      "theweeknd_mydearmelancholy_albq.jpg",
-      "tameimpala_currents_857m.jpg",
-    ];
-    const selectedImage = Math.floor(crypto.getRandomValues(new Uint32Array(1))[0] / (0xffffffff + 1) * images.length);
+    const selectedImage = Math.floor(Math.random() * images.length);
     return images[selectedImage];
   };
-
+  const [randomImage, setRandomImage] = React.useState<string>(images[0]);
   const AlbumCover = (index: number): Album => {
     const albumCovers: Album[] = [
       {
@@ -69,14 +71,19 @@ export default function Home() {
     ];
     return albumCovers[index];
   };
+
+  React.useEffect(() => {
+    setRandomImage(ImageRandomizer());
+  }, []);
+
   return (
     <>
-      <Nav/>
+      <Nav />
       <main className={styles.mainContent}>
         <div className={styles.mobile}>
           <h1>Frame The Beat</h1>
           <Image
-            src={`/albumcovers/${ImageRandomizer()}`}
+            src={`/albumcovers/${randomImage}`}
             width={2000}
             height={2000}
             alt="album cover"
@@ -85,20 +92,20 @@ export default function Home() {
         <div className={styles.desktop}>
           <h1>Frame The Beat</h1>
           <Image
-            src={`/albumcovers/${ImageRandomizer()}`}
+            src={`/albumcovers/${randomImage}`}
             width={2000}
             height={2000}
             alt="album cover"
           />
         </div>
       </main>
-      <Discover/>
-      <SearchComponent/>
+      <Discover />
+      <SearchComponent />
       <Categories />
       <Featured AlbumCover={AlbumCover} />
       <StartCollection />
       <Cta />
-      <Footer/>
+      <Footer />
     </>
   );
 }
