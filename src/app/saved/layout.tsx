@@ -1,27 +1,25 @@
-"use client"
+"use client";
 import "../globals.css";
 import { ThemeProvider } from "../utils/theme-hook";
 import React from "react";
 
+import Head from "next/head";
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const [ready, setReady] = React.useState(false);
-
-  React.useEffect(() => {
-    setReady(true);
-  }, []);
-
-  if(!ready) return null;
   return (
-    <html lang="en">
-      <body>
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+    <>
+      <Head>
+        <link
+          rel="preconnect"
+          href="https://lastfm.freetls.fastly.net"
+          crossOrigin="anonymous"
+        />
+      </Head>
+      <ThemeProvider>{children}</ThemeProvider>
+    </>
+  );
 }
