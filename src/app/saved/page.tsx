@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Heart, Share2 } from "lucide-react";
 import { Album } from "../utils/types";
 import Footer from "../components/Footer";
+import { fetchUserCollection } from "../utils/database";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -21,45 +22,59 @@ interface API_RESPONSE {
   };
 }
 
-const dummyData: {
-  title: string;
-  artist: string;
-}[] = [
-  {
-    title: "Moral Panic",
-    artist: "Nothing But Thieves",
-  },
-  {
-    title: "The Slow Rush",
-    artist: "Tame Impala",
-  },
-  {
-    title: "A 20 Something Fuck",
-    artist: "Two Feet",
-  },
-  {
-    title: "After Hours",
-    artist: "The Weeknd",
-  },
-  {
-    title: "Fine Line",
-    artist: "Harry Styles",
-  },
-  {
-    title: "Fetch the Bolt Cutters",
-    artist: "Fiona Apple",
-  },
-  {
-    title: "RTJ4",
-    artist: "Run the Jewels",
-  },
-];
+// const dummyData: {
+//   title: string;
+//   artist: string;
+// }[] = [
+//   {
+//     title: "Moral Panic",
+//     artist: "Nothing But Thieves",
+//   },
+//   {
+//     title: "The Slow Rush",
+//     artist: "Tame Impala",
+//   },
+//   {
+//     title: "A 20 Something Fuck",
+//     artist: "Two Feet",
+//   },
+//   {
+//     title: "After Hours",
+//     artist: "The Weeknd",
+//   },
+//   {
+//     title: "Fine Line",
+//     artist: "Harry Styles",
+//   },
+//   {
+//     title: "Fetch the Bolt Cutters",
+//     artist: "Fiona Apple",
+//   },
+//   {
+//     title: "RTJ4",
+//     artist: "Run the Jewels",
+//   },
+// ];
 
 const Saved = () => {
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const [filterBy, setFilterBy] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [collectionNames, setCollectionNames] = useState<{artist: string; title: string; saves: number}[]>([]);
+   useEffect(() => {
+      const getCollection = async () => {
+        const data: {artist: string; album: string, saves: number}[] = await fetchUserCollection(1);
+        const mappedData = data.map(item => ({
+          artist: item.artist,
+          title: item.album,
+          saves: item.saves
+        }));
+        console.log(data);
+        setCollectionNames(mappedData);
+      };
+      getCollection();
+    }, []);
 
   useEffect(() => {
     const fetchSavedAlbums = async ({
@@ -89,7 +104,7 @@ const Saved = () => {
         };
         const returnData: Album[] = [
           {
-            id: Math.floor(Math.random() * 1000),
+            id: Math.floor(Math.random() * 10000),
             title: albumData.albumTitle,
             artist: albumData.albumArtist,
             date: albumData.albumDate,
@@ -114,13 +129,13 @@ const Saved = () => {
         console.error(`Error fetching album data for ${title} by ${artist}:`, error);
       }
     };
-    dummyData.map((album) => {
+    collectionNames.map((album) => {
       fetchSavedAlbums({
         title: album.title,
         artist: album.artist,
       });
     });
-  }, []);
+  }, [collectionNames]);
 
   const handleRemove = (id: number) => {
     setSavedAlbums(savedAlbums.filter((album) => album.id !== id));

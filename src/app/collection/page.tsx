@@ -25,15 +25,16 @@ interface API_RESPONSE {
 
 const Collection = () => {
   const [collection, setCollection] = useState<Album[]>([]);
-  const [collectionNames, setCollectionNames] = useState<{artist: string; title: string}[]>([]);
+  const [collectionNames, setCollectionNames] = useState<{artist: string; title: string; saves: number}[]>([]);
   const [title, setTitle] = useState<string>("");
 
   useEffect(() => {
     const getCollection = async () => {
-      const data: {artist: string; album: string}[] = await fetchCollection();
+      const data: {artist: string; album: string, saves: number}[] = await fetchCollection();
       const mappedData = data.map(item => ({
         artist: item.artist,
-        title: item.album
+        title: item.album,
+        saves: item.saves
       }));
       setCollectionNames(mappedData);
     };
@@ -118,11 +119,12 @@ const Collection = () => {
         </div>
         {title && <Banner title="Successfully saved" subtitle={title} />}
         <div className="collectionGrid">
-          {collection.map((album) => (
+          {collection.map((album, index) => (
             <CollectionCard
-              key={album.id}
+              key={index}
               {...album}
               onHeartClick={showBanner}
+              saves={collectionNames.find(item => item.title === album.title)?.saves || 0}
             />
           ))}
         </div>
@@ -134,6 +136,7 @@ const Collection = () => {
 
 type CollectionCardProps = Album & {
   onHeartClick: (albumTitle: string) => void;
+  saves: number
 };
 
 const CollectionCard = ({
@@ -143,11 +146,12 @@ const CollectionCard = ({
   albumCover,
   artist,
   onHeartClick,
+  saves,
 }: CollectionCardProps) => (
   <div className="collectionCard" key={id}>
     <div className="albumImage">
       <Image
-        src={albumCover.src}
+        src={albumCover.src || "/placeholder.png"}
         alt={albumCover.alt}
         width={1500}
         height={1500}
@@ -160,7 +164,7 @@ const CollectionCard = ({
     </div>
     <div className="albumActions">
       <Heart size={24} onClick={() => onHeartClick(title)} />
-      <span>{2}</span>
+      <span>{saves}</span>
     </div>
   </div>
 );
