@@ -22,6 +22,7 @@ const Nav = () => {
 
               <label onClick={() => router.push('/collection')}>Collection</label>
               <label onClick={() => router.push('/saved')}>Saved</label>
+              <label onClick={() => router.push('/tours')}>Tours</label>
             </ul>
             <ul>
               <span onClick={() => router.push('/login')}>Log in</span>

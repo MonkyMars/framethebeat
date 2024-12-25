@@ -19,6 +19,7 @@ const Aside = ({ isOpen, onClose }: AsideProps) => {
           <li onClick={() => router.push('/collection')}>Collection</li>
           <li onClick={() => router.push('/saved')}>Saved</li>
           <li onClick={() => router.push('/settings')}>Settings</li>
+          <li onClick={() => router.push('/tours')}>Tours</li>
         </ul>
         <ul>
           <span onClick={() => router.push('/login')}>Log in</span>
