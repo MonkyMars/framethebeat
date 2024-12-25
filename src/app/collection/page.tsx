@@ -7,42 +7,99 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import Banner from "../components/Banner";
+import { fetchCollection } from "../utils/database";
+
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+interface API_RESPONSE {
+  album: {
+    artist: string;
+    name: string;
+    image: { "#text": string }[];
+    wiki?: {
+      published: string;
+    };
+  };
+}
 
 const Collection = () => {
   const [collection, setCollection] = useState<Album[]>([]);
+  const [collectionNames, setCollectionNames] = useState<{artist: string; title: string}[]>([]);
   const [title, setTitle] = useState<string>("");
 
   useEffect(() => {
-    const fetchCollection = async () => {
-      try {
-        const response = await fetch("/api/collection", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        if (data.error) {
-          console.error(data.error);
-          return;
-        }
-      } catch (error) {
-        console.error(error);
-        const props: Album = {
-          id: 1,
-          title: "Moral Panic",
-          date: "2020",
-          albumCover: {
-            src: "/albumcovers/nothingbutthieves_moralpanic_fsei.jpg",
-            alt: "Moral Panic album cover",
-          },
-          artist: "Nothing But Thieves",
-        };
-        setCollection([props]);
-      }
+    const getCollection = async () => {
+      const data: {artist: string; album: string}[] = await fetchCollection();
+      const mappedData = data.map(item => ({
+        artist: item.artist,
+        title: item.album
+      }));
+      setCollectionNames(mappedData);
     };
-    fetchCollection();
+    getCollection();
   }, []);
+
+  useEffect(() => {
+      const fetchSavedAlbums = async ({
+        title,
+        artist,
+      }: {
+        title: string;
+        artist: string;
+      }) => {
+        try {
+          const response = await fetch(
+            `${API_URL}/2.0/?method=album.getinfo&api_key=${API_KEY}&artist=${encodeURIComponent(
+              artist
+            )}&album=${encodeURIComponent(title)}&format=json`
+          );
+          const data = await response.json();
+          const { album: model } = data as API_RESPONSE;
+          const albumData = {
+            albumArtist: model.artist,
+            albumTitle: model.name,
+            albumCover: {
+              src: model.image[3]["#text"],
+              alt: `${model.name} album cover`,
+            },
+            albumDate:
+              model.wiki?.published?.split(" ")[2].trim().slice(0, 4) || "unknown",
+          };
+          const returnData: Album[] = [
+            {
+              id: Math.floor(Math.random() * 1000),
+              title: albumData.albumTitle,
+              artist: albumData.albumArtist,
+              date: albumData.albumDate,
+              albumCover: {
+                src: albumData.albumCover.src,
+                alt: albumData.albumCover.alt,
+              },
+            },
+          ];
+          setCollection((prev) => {
+            const newAlbums = returnData.filter(
+              (newAlbum) =>
+                !prev.some(
+                  (existingAlbum) =>
+                    existingAlbum.title === newAlbum.title &&
+                    existingAlbum.artist === newAlbum.artist
+                )
+            );
+            return [...prev, ...newAlbums];
+          });
+        } catch (error) {
+          console.error(`Error fetching album data for ${title} by ${artist}:`, error);
+        }
+      };
+      collectionNames?.map((album) => {
+        fetchSavedAlbums({
+          title: album.title,
+          artist: album.artist,
+        });
+      });
+    }, [collectionNames]);
 
   const showBanner = (albumTitle: string): void => {
     setTitle(`${albumTitle} has been successfully saved.`);
