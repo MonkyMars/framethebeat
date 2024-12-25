@@ -24,88 +24,106 @@ interface API_RESPONSE {
   };
 }
 
+const isHighPriority = (src?: string): boolean => {
+  if (!src || src.includes("placeholder")) return false;
+  const extension = src.split(".").pop()?.toLowerCase();
+  return extension !== "gif";
+};
+
+const isGif = (src?: string): boolean => {
+  const extension = src?.split(".").pop()?.toLowerCase();
+  return extension === "gif";
+};
+
 const Collection = () => {
   const [collection, setCollection] = useState<Album[]>([]);
-  const [collectionNames, setCollectionNames] = useState<{artist: string; title: string; saves: number}[]>([]);
+  const [collectionNames, setCollectionNames] = useState<
+    { artist: string; title: string; saves: number }[]
+  >([]);
   const [title, setTitle] = useState<string>("");
 
   useEffect(() => {
     const getCollection = async () => {
-      const data: {artist: string; album: string, saves: number}[] = await fetchCollection();
-      const mappedData = data.map(item => ({
+      const data: { artist: string; album: string; saves: number }[] =
+        await fetchCollection();
+      const mappedData = data.map((item) => ({
         artist: item.artist,
         title: item.album,
-        saves: item.saves
+        saves: item.saves,
       }));
       setCollectionNames(mappedData);
     };
     getCollection();
   }, []);
-  
+
   useEffect(() => {
-      const fetchSavedAlbums = async ({
-        title,
-        artist,
-      }: {
-        title: string;
-        artist: string;
-      }) => {
-        try {
-          const response = await fetch(
-            `${API_URL}/2.0/?method=album.getinfo&api_key=${API_KEY}&artist=${encodeURIComponent(
-              artist
-            )}&album=${encodeURIComponent(title)}&format=json`
-          );
-          const data = await response.json();
-          const { album: model } = data as API_RESPONSE;
-          if (!model) {
-            return;
-          }
-          const albumData = {
-            id: parseInt(model.mbid),
-            albumArtist: model.artist,
-            albumTitle: model.name,
-            albumCover: {
-              src: model.image[3]["#text"],
-              alt: `${model.name} album cover`,
-            },
-            albumDate:
-              model.wiki?.published?.split(" ")[2].trim().slice(0, 4) || "unknown",
-          };
-          const returnData: Album[] = [
-            {
-              id: albumData.id,
-              title: albumData.albumTitle,
-              artist: albumData.albumArtist,
-              date: albumData.albumDate,
-              albumCover: {
-                src: albumData.albumCover.src,
-                alt: albumData.albumCover.alt,
-              },
-            },
-          ];
-          setCollection((prev) => {
-            const newAlbums = returnData.filter(
-              (newAlbum) =>
-                !prev.some(
-                  (existingAlbum) =>
-                    existingAlbum.title === newAlbum.title &&
-                    existingAlbum.artist === newAlbum.artist
-                )
-            );
-            return [...prev, ...newAlbums];
-          });
-        } catch (error) {
-          console.error(`Error fetching album data for ${title} by ${artist}:`, error);
+    const fetchSavedAlbums = async ({
+      title,
+      artist,
+    }: {
+      title: string;
+      artist: string;
+    }) => {
+      try {
+        const response = await fetch(
+          `${API_URL}/2.0/?method=album.getinfo&api_key=${API_KEY}&artist=${encodeURIComponent(
+            artist
+          )}&album=${encodeURIComponent(title)}&format=json`
+        );
+        const data = await response.json();
+        const { album: model } = data as API_RESPONSE;
+        if (!model) {
+          return;
         }
-      };
-      collectionNames?.map((album) => {
-        fetchSavedAlbums({
-          title: album.title,
-          artist: album.artist,
+        const albumData = {
+          id: parseInt(model.mbid),
+          albumArtist: model.artist,
+          albumTitle: model.name,
+          albumCover: {
+            src: model.image[3]["#text"],
+            alt: `${model.name} album cover`,
+          },
+          albumDate:
+            model.wiki?.published?.split(" ")[2].trim().slice(0, 4) ||
+            "unknown",
+        };
+        const returnData: Album[] = [
+          {
+            id: albumData.id,
+            title: albumData.albumTitle,
+            artist: albumData.albumArtist,
+            date: albumData.albumDate,
+            albumCover: {
+              src: albumData.albumCover.src,
+              alt: albumData.albumCover.alt,
+            },
+          },
+        ];
+        setCollection((prev) => {
+          const newAlbums = returnData.filter(
+            (newAlbum) =>
+              !prev.some(
+                (existingAlbum) =>
+                  existingAlbum.title === newAlbum.title &&
+                  existingAlbum.artist === newAlbum.artist
+              )
+          );
+          return [...prev, ...newAlbums];
         });
+      } catch (error) {
+        console.error(
+          `Error fetching album data for ${title} by ${artist}:`,
+          error
+        );
+      }
+    };
+    collectionNames?.map((album) => {
+      fetchSavedAlbums({
+        title: album.title,
+        artist: album.artist,
       });
-    }, [collectionNames]);
+    });
+  }, [collectionNames]);
 
   const showBanner = (albumTitle: string): void => {
     setTitle(`${albumTitle} has been successfully saved.`);
@@ -131,7 +149,10 @@ const Collection = () => {
               key={index}
               {...album}
               onHeartClick={showBanner}
-              saves={collectionNames.find(item => item.title === album.title)?.saves || 0}
+              saves={
+                collectionNames.find((item) => item.title === album.title)
+                  ?.saves || 0
+              }
             />
           ))}
         </div>
@@ -143,7 +164,7 @@ const Collection = () => {
 
 type CollectionCardProps = Album & {
   onHeartClick: (albumTitle: string) => void;
-  saves: number
+  saves: number;
 };
 
 const CollectionCard = ({
@@ -159,9 +180,11 @@ const CollectionCard = ({
     <div className="albumImage">
       <Image
         src={albumCover.src || "/placeholder.png"}
-        alt={albumCover.alt}
+        alt={albumCover.alt || "Album cover"}
         width={1500}
         height={1500}
+        priority={isHighPriority(albumCover.src)}
+        unoptimized={isGif(albumCover.src)}
       />
     </div>
     <div className="albumInfo">
