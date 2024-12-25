@@ -7,6 +7,6 @@ export interface Album {
     title: string;
     artist: string;
     albumCover: AlbumCover;
-    date: string;
+    date?: string;
     id: number;
 }

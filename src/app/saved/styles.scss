@@ -1,0 +1,199 @@
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3em 2em;
+    text-align: center;
+  
+    h2 {
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.6),
+        0 0 25px rgba(255, 255, 255, 0.4),
+        0 0 35px rgba(var(--theme), 0.3);
+      background: linear-gradient(
+        135deg,
+        var(--foreground),
+        var(--foreground),
+        var(--foreground)
+      );
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5em;
+    }
+  
+    p {
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      color: rgba(var(--foreground-rgb), 0.9);
+      max-width: 600px;
+    }
+  }
+  
+  .controlBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em 2em;
+    margin: 0 2em 2em;
+    background: rgba(var(--background-rgb), 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(var(--theme-rgb), 0.2);
+  
+    .filters {
+      display: flex;
+      gap: 1em;
+      
+      select {
+        padding: 0.6em 1.2em;
+        border-radius: 8px;
+        background: rgba(var(--background-rgb), 0.1);
+        border: 1px solid rgba(var(--theme-rgb), 0.3);
+        color: var(--foreground);
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+  
+        &:hover {
+          border-color: rgba(var(--theme-rgb), 0.5);
+        }
+  
+        &:focus {
+          outline: none;
+          border-color: var(--theme);
+          box-shadow: 0 0 10px rgba(var(--theme-rgb), 0.2);
+        }
+      }
+    }
+  
+    .search {
+      position: relative;
+      
+      input {
+        padding: 0.6em 1.2em;
+        width: 250px;
+        border-radius: 8px;
+        background: rgba(var(--background-rgb), 0.2);
+        border: 1px solid rgba(var(--theme-rgb), 0.3);
+        color: var(--foreground);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+  
+        &:focus {
+          outline: none;
+          border-color: var(--theme);
+          box-shadow: 0 0 10px rgba(var(--theme-rgb), 0.2);
+          width: 300px;
+        }
+  
+        &::placeholder {
+          color: rgba(var(--foreground-rgb), 0.5);
+        }
+      }
+    }
+  }
+  
+  .savedGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 2em;
+    padding: 0 2em 2em;
+  
+    .savedCard {
+      background: rgba(var(--background-rgb), 0.05);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      border: 1px solid rgba(var(--theme-rgb), 0.2);
+      overflow: hidden;
+      transition: all 0.3s ease;
+  
+      &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(var(--theme-rgb), 0.2);
+      }
+  
+      img {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        object-fit: cover;
+      }
+  
+      .cardContent {
+        padding: 1.2em;
+  
+        h3 {
+          font-size: 1.1rem;
+          font-weight: 600;
+          margin-bottom: 0.4em;
+          color: var(--foreground);
+        }
+  
+        p {
+          font-size: 0.9rem;
+          color: rgba(var(--foreground-rgb), 0.7);
+        }
+      }
+  
+      .cardActions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.8em 1.2em;
+        border-top: 1px solid rgba(var(--theme-rgb), 0.1);
+  
+        button {
+          background: none;
+          border: none;
+          color: var(--theme);
+          cursor: pointer;
+          padding: 0.5em;
+          transition: all 0.2s ease;
+  
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
+      }
+    }
+  }
+  
+  .emptyState {
+    text-align: center;
+    padding: 4em 2em;
+    color: rgba(var(--foreground-rgb), 0.7);
+  
+    h3 {
+      font-size: 1.4rem;
+      margin-bottom: 1em;
+    }
+  
+    p {
+      font-size: 1rem;
+      margin-bottom: 2em;
+    }
+  
+    button {
+      padding: 0.8em 1.5em;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--theme), rgba(var(--theme-rgb), 0.8));
+      color: var(--foreground);
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+  
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(var(--theme-rgb), 0.3);
+      }
+    }
+  }
+
+.heart{
+    fill: var(--theme);
+}

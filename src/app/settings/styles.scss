@@ -1,0 +1,239 @@
+.settingsContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+}
+
+.settingsHeader {
+  text-align: center;
+  margin-bottom: 3em;
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    margin-bottom: 0.5em;
+    background: linear-gradient(
+      135deg,
+      var(--foreground),
+      var(--theme),
+      var(--theme)
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+.settingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2em;
+}
+
+.settingsCard {
+  backdrop-filter: blur(10px);
+  border-radius: 12px;
+  border: 1px solid rgba(var(--theme-rgb), 0.2);
+  padding: 1.5em;
+  transition: all 0.3s ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(var(--theme-rgb), 0.2);
+  }
+
+  .cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 1.5em;
+    color: var(--theme);
+
+    h2 {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+.settingsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+
+  .settingItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.themeButtons {
+  display: flex;
+  gap: 0.5em;
+
+  button {
+    padding: 0.5em 1em;
+    border-radius: 6px;
+    border: 1px solid rgba(var(--theme-rgb), 0.3);
+    background: rgba(var(--background-rgb), 0.2);
+    color: var(--foreground);
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--theme);
+    }
+
+    &.active {
+      background: var(--theme);
+      color: var(--background);
+      border-color: var(--theme);
+    }
+  }
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+
+    &:checked + .slider {
+      background-color: var(--theme);
+    }
+
+    &:checked + .slider:before {
+      transform: translateX(26px);
+    }
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(var(--theme-rgb), 0.25);
+    transition: 0.4s;
+    border-radius: 34px;
+
+    &:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: var(--foreground);
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+  }
+}
+
+select {
+  padding: 0.5em 1em;
+  border-radius: 6px;
+  background: rgba(var(--background-rgb), 0.05);
+  border: 1px solid rgba(var(--theme-rgb), 0.3);
+  color: var(--foreground);
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: var(--theme);
+  }
+}
+
+.dangerButton {
+  width: 100%;
+  padding: 0.8em;
+  border-radius: 6px;
+  border: 1px solid #dc3545;
+  background: rgba(220, 53, 69, 0.1);
+  color: #dc3545;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(220, 53, 69, 0.2);
+  }
+}
+
+a {
+  color: var(--theme);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.comingsoon {
+  opacity: 0.5;
+  filter: blur(2px);
+  pointer-events: none;
+  position: relative;
+  &::after {
+    content: "Coming Soon";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--foreground);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: auto 0;
+  border: 1px solid rgba(var(--theme-rgb), 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  label {
+    font-weight: 500;
+    color: rgba(var(--theme-rgb), 0.8);
+  }
+
+  .settingsInput {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(var(--theme-rgb), 0.2);
+    background: rgba(var(--background-rgb), 0.05);
+    color: var(--foreground);
+    font-size: 1rem;
+    transition: all 0.2s ease;
+
+    &:focus {
+      outline: none;
+      border-color: rgba(var(--theme-rgb), 0.5);
+      box-shadow: 0 0 0 2px rgba(var(--theme-rgb), 0.1);
+    }
+  }
+
+  .primaryButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    background: rgba(var(--theme-rgb), 0.9);
+    color: var(--foreground);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+
+    &:hover {
+      background: rgba(var(--theme-rgb), 1);
+      transform: translateY(-1px);
+    }
+  }
+}

@@ -317,7 +317,7 @@
   align-items: center;
   padding: 2.5rem;
   color: var(--foreground);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(var(--theme-rgb), 0.2);
   backdrop-filter: blur(10px);
 
   p {
@@ -351,7 +351,6 @@
   left: -300px;
   width: 300px;
   height: 100vh;
-  background: rgba(var(--background-rgb), 0.95);
   backdrop-filter: blur(10px);
   border-right: 1px solid rgba(var(--theme-rgb), 0.1);
   padding: 2rem;
@@ -433,7 +432,7 @@
   left: 0;
   width: 100%;
   padding: 1rem;
-  background: rgba(var(--background-rgb), 0.95);
+  background: rgba(var(--background-rgb), 0.05);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid rgba(var(--theme-rgb), 0.1);
   transition: transform 0.3s ease-in-out;

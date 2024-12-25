@@ -4,7 +4,7 @@ const Footer = () => {
   return (
     <footer className={styles.footer}>
       <p>
-        &copy; {new Date().getFullYear()} Frame The Beat. All rights reserved.
+        &copy; 2024 Frame The Beat. All rights reserved.
       </p>
       <ul>
         <li>

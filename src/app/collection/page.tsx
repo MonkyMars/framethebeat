@@ -26,7 +26,6 @@ const Collection = () => {
           console.error(data.error);
           return;
         }
-        setCollection(data);
       } catch (error) {
         console.error(error);
         const props: Album = {
