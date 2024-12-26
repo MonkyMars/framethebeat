@@ -41,6 +41,7 @@ const Collection = () => {
     { artist: string; title: string; saves: number }[]
   >([]);
   const [title, setTitle] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   useEffect(() => {
     const getCollection = async () => {
@@ -54,7 +55,7 @@ const Collection = () => {
       setCollectionNames(mappedData);
     };
     getCollection();
-  }, []);
+  }, []); 
 
   useEffect(() => {
     const fetchSavedAlbums = async ({
@@ -115,6 +116,7 @@ const Collection = () => {
           `Error fetching album data for ${title} by ${artist}:`,
           error
         );
+        setError(`error: ${error}`);
       }
     };
     collectionNames?.map((album) => {
@@ -134,6 +136,7 @@ const Collection = () => {
   if (!collectionNames || !collection) {
     return <div>Loading...</div>;
   }
+
   return (
     <>
       <Nav />
@@ -144,7 +147,7 @@ const Collection = () => {
         </div>
         {title && <Banner title="Successfully saved" subtitle={title} />}
         <div className="collectionGrid">
-          {collection.map((album, index) => (
+          {collection.length > 0 ? collection.map((album, index) => (
             <CollectionCard
               key={index}
               {...album}
@@ -154,8 +157,12 @@ const Collection = () => {
                   ?.saves || 0
               }
             />
-          ))}
+          )) :<div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading your collection...</p>
+        </div>}
         </div>
+        {error && <Banner title="Error" subtitle={error} />}
       </main>
       <Footer />
     </>
