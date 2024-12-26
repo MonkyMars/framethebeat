@@ -122,6 +122,13 @@
   }
 }
 
+@media screen and (max-height: 690px) and (min-width: 575px) {
+  .desktop{
+    transform: scale(0.6);
+  }
+  
+}
+
 .mobile {
   display: none;
 }

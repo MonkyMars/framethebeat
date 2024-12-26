@@ -27,7 +27,11 @@
       );
       background-clip: text;
     }
+    @media screen and (max-width: 768px), screen and (max-height: 650px){
+    display: none;
   }
+  }
+  
 }
 
 .section {
