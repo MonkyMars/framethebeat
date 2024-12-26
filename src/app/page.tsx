@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Album } from "@/app/utils/types";
 import Footer from "./components/Footer";
 import Cta from "./components/Cta";
-import StartCollection from "./components/StartCollection";
 import Featured from "./components/Featured";
 import SearchComponent from "./components/Search";
 import Categories from "./components/Categories";
@@ -103,7 +102,6 @@ export default function Home() {
       <SearchComponent />
       <Categories />
       <Featured AlbumCover={AlbumCover} />
-      <StartCollection />
       <Cta />
       <Footer />
     </>
