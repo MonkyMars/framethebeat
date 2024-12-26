@@ -81,7 +81,7 @@ const Collection = () => {
           albumArtist: model.artist,
           albumTitle: model.name,
           albumCover: {
-            src: model.image[3]["#text"],
+            src: model.image[3]["#text"].replace('http:', 'https:'),
             alt: `${model.name} album cover`,
           },
           albumDate:
