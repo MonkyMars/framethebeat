@@ -8,7 +8,11 @@ import { useSearchParams } from "next/navigation";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import "../styles.scss";
 import { useAuth } from "@/app/utils/AuthContext";
-import { deleteAlbum, fetchUserCollection, saveAlbum } from "@/app/utils/database";
+import {
+  deleteAlbum,
+  fetchUserCollection,
+  saveAlbum,
+} from "@/app/utils/database";
 import Banner from "@/app/components/Banner";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
@@ -118,10 +122,15 @@ const SharePageContent = () => {
     return null;
   }
   const onHeart = async (artist: string, album: string, liked: boolean) => {
+    if (!session?.user?.id) {
+      setError("You must be logged in to like an album.");
+      return;
+    }
     setLiked(!liked);
-    if(!session?.user?.id) return;
     const user_id = session?.user?.id;
-    const response: {status: number; message: string} = liked ? await deleteAlbum(artist, album, user_id): await saveAlbum(artist, album, user_id);
+    const response: { status: number; message: string } = liked
+      ? await deleteAlbum(artist, album, user_id)
+      : await saveAlbum(artist, album, user_id);
     if (response.status !== 200) {
       setError(response.message);
     }
@@ -131,7 +140,7 @@ const SharePageContent = () => {
     <>
       <Nav />
       <main className="mainContent share">
-          <section className="shareCard">
+        <section className="shareCard">
           <Image
             src={album.image.src || "/placeholder.png"}
             className="shareCard__image"
@@ -161,7 +170,7 @@ const SharePageContent = () => {
       <Footer />
     </>
   );
-}
+};
 
 const SharePage = () => {
   return (
@@ -169,6 +178,6 @@ const SharePage = () => {
       <SharePageContent />
     </Suspense>
   );
-}
+};
 
 export default SharePage;
