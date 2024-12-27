@@ -2,7 +2,7 @@
 import "../globals.css";
 import { ThemeProvider } from "../utils/theme-hook";
 import React from "react";
-
+import { AuthProvider } from "../utils/AuthContext";
 export default function RootLayout({
   children,
 }: {
@@ -10,7 +10,9 @@ export default function RootLayout({
 }) {
   return (
     <>
-      <ThemeProvider>{children}</ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider>{children}</ThemeProvider>
+      </AuthProvider>
     </>
   );
 }

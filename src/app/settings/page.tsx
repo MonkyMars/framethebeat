@@ -3,10 +3,19 @@ import React, { useState, useEffect } from "react";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import "./styles.scss";
-import { Sun, Languages, User, Info, Mail, Lock, Eye, EyeClosed } from "lucide-react";
+import {
+  Sun,
+  Languages,
+  User,
+  Info,
+  Mail,
+  Lock,
+  Eye,
+  EyeClosed,
+} from "lucide-react";
 import { useAuth } from "../utils/AuthContext";
 import { useRouter } from "next/navigation";
-import { updateUser } from "../utils/database";
+import { logOutUser, updateUser } from "../utils/database";
 import Banner from "../components/Banner";
 const THEME_STORAGE_KEY = "album-covers-theme";
 
@@ -20,7 +29,10 @@ const Settings = () => {
   const { session } = useAuth();
   const router = useRouter();
   const [response, setResponse] = useState<string | null>(null);
-  const [formValues, setFormValues] = useState<{email: string; password: string}>({
+  const [formValues, setFormValues] = useState<{
+    email: string;
+    password: string;
+  }>({
     email: "",
     password: "",
   });
@@ -63,10 +75,9 @@ const Settings = () => {
       applyTheme(savedTheme as Theme);
     }
     setFormValues((prev) => ({ ...prev, email: session?.user?.email || "" }));
-
   }, [session]);
 
-  const onUpDateProfile = async() => {
+  const onUpDateProfile = async () => {
     const response = await updateUser(formValues.email, formValues.password);
     if (response.error) {
       console.error(response.error);
@@ -75,9 +86,13 @@ const Settings = () => {
     setResponse("Profile updated successfully");
   };
 
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>, name: string, value: string) => {
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    name: string,
+    value: string
+  ) => {
     setFormValues((prev) => ({ ...prev, [name]: value }));
-  }
+  };
 
   useEffect(() => {
     if (response) {
@@ -171,13 +186,16 @@ const Settings = () => {
                   <h2>Account</h2>
                 </div>
                 <div className="settingsContent">
-                  <button className="dangerButton">Sign Out</button>
+                  <button className="dangerButton" onClick={async() => await logOutUser() && router.push('/login')}>Sign Out</button>
                   <button className="dangerButton">Delete Account</button>
                 </div>
               </section>
 
               <div className="formGroup">
-                <label><Mail size={24}/>Email Address</label>
+                <label>
+                  <Mail size={24} />
+                  Email Address
+                </label>
                 <input
                   type="email"
                   placeholder="Enter your email address"
@@ -186,16 +204,33 @@ const Settings = () => {
                   name="email"
                   onChange={(e) => handleFormChange(e, "email", e.target.value)}
                 />
-                <label><Lock size={24} />Password</label>
+                <label>
+                  <Lock size={24} />
+                  Password
+                </label>
                 <input
                   type={togglePassword ? "text" : "password"}
                   placeholder="Enter your new password"
                   className="settingsInput"
                   value={formValues.password}
                   name="password"
-                  onChange={(e) => handleFormChange(e, "password", e.target.value)}
+                  onChange={(e) =>
+                    handleFormChange(e, "password", e.target.value)
+                  }
                 />
-                {togglePassword ? <Eye size={24} className="togglePassword" onClick={() => setTogglePassword(false)}/> : <EyeClosed size={24} className="togglePassword" onClick={() => setTogglePassword(true)}/>}
+                {togglePassword ? (
+                  <Eye
+                    size={24}
+                    className="togglePassword"
+                    onClick={() => setTogglePassword(false)}
+                  />
+                ) : (
+                  <EyeClosed
+                    size={24}
+                    className="togglePassword"
+                    onClick={() => setTogglePassword(true)}
+                  />
+                )}
                 <button className="primaryButton" onClick={onUpDateProfile}>
                   Update Profile
                 </button>
@@ -222,7 +257,12 @@ const Settings = () => {
                 </header>
                 <p>Log in to get access to more features</p>
                 <div className="formGroup null">
-                  <button className="primaryButton" onClick={() => router.push('/login')}>Sign In</button>
+                  <button
+                    className="primaryButton"
+                    onClick={() => router.push("/login")}
+                  >
+                    Sign In
+                  </button>
                 </div>
               </div>
             </section>

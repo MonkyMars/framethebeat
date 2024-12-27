@@ -136,8 +136,8 @@ const Collection = () => {
     }
     showBanner(album, "success");
     const response = await saveAlbum(artist, album, session?.user?.id);
-    if (response.error) {
-      setError(response.error);
+    if (response.status !== 200) {
+      setError(response.message);
     }
   };
 

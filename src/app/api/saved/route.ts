@@ -64,8 +64,11 @@ export async function DELETE(req: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-
-    return NextResponse.json(data);
+    return NextResponse.json({
+      message: "Successfully deleted album",
+      status: 200,
+      data
+    });
   } catch (error) {
     return NextResponse.json(
       { message: `Internal Server Error: ${error}` },

@@ -1,3 +1,5 @@
+import { supabase } from "./supabase";
+
 export const fetchUserCollection = async (id: string) => {
   try {
     const response = await fetch(
@@ -31,7 +33,10 @@ export const saveAlbum = async (artist: string, album: string, user_id: string) 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    return {
+      message: "Album saved successfully",
+      status: response.status,
+    }
   } catch (error) {
     console.error("Error saving album:", error);
     throw error;
@@ -85,13 +90,13 @@ export const signupUser = async (email: string, password: string) => {
       body: JSON.stringify({ email, password }),
     });
     if (!response.ok) {
-     return {data: (`HTTP error! status: ${response.status}`), status: null};
+     return {data: (`HTTP error! status: ${response.status}`), status: 500};
     }
     const data = await response.json();
     return { data: data, status: data };
   } catch (error) {
     console.error("Error signing up user:", error);
-    return { data: error as Error, status: null };
+    return { data: error as Error, status: 500 };
   }
 };
 
@@ -119,25 +124,23 @@ export const logInUser = async (email: string, password: string) => {
     console.error("Error logging in:", error);
     return { 
       data: error as Error, 
-      status: null 
+      status: 500 
     };
   }
 };
 
 export const logOutUser = async () => {
   try {
-    const response = await fetch(`/api/logout`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const { error } = await supabase.auth.signOut();
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error) {
+      throw new Error(`HTTP error! status: ${error}`);
     }
 
-    return await response.json();
+    return {
+      message: "Logged out successfully",
+      status: 200,
+    }
   } catch (error) {
     console.error("Error logging out:", error);
     throw error;

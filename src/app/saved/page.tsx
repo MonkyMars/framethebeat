@@ -120,10 +120,10 @@ const Saved = () => {
   }, [collectionNames]);
 
   const handleRemove = async (id: number, artist: string, album: string) => {
-    setSavedAlbums(savedAlbums.filter((album) => album.id !== id));
     if (!session?.user.id) return;
+    setSavedAlbums(savedAlbums.filter((album) => album.id !== id));
     const response = await deleteAlbum(artist, album, session?.user.id);
-    if (response.error) {
+    if (response.status !== 200) {
       setError(response.error);
     }
   };
@@ -211,7 +211,7 @@ const Saved = () => {
           {filteredAlbums.map((album, index) => (
             <div key={album.id || index} className="savedCard">
               <Image
-                src={album.albumCover.src}
+                src={album.albumCover.src || "/placeholder.png"}
                 alt={album.albumCover.alt}
                 width={300}
                 height={300}
