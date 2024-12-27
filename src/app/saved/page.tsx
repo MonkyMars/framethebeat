@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import { deleteAlbum, fetchUserCollection } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 import Banner from "../components/Banner";
+import SharePopup from "../components/SharePopup";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -31,6 +32,7 @@ const Saved = () => {
   const [filterBy, setFilterBy] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string>("");
+  const [sharePopUp, setSharePopUp] = React.useState<{ artist: string; album: string } | null>(null);
   const [collectionNames, setCollectionNames] = useState<
     { artist: string; title: string; saves: number }[]
   >([]);
@@ -128,10 +130,6 @@ const Saved = () => {
     }
   };
 
-  const handleShare = (album: Album) => {
-    console.log("Sharing", album.title);
-  };
-
   const filteredAlbums = savedAlbums
     .filter((album) => {
       if (filterBy === "all") return true;
@@ -158,6 +156,13 @@ const Saved = () => {
       }, 5000);
     }
   }, [error]);
+
+  const onShare = (artist: string, album: string) => {
+    setSharePopUp({
+      artist: artist,
+      album: album,
+    })
+  };
 
   return (
     <>
@@ -222,7 +227,7 @@ const Saved = () => {
                 <p>{album.date}</p>
               </div>
               <div className="cardActions">
-                <button onClick={() => handleShare(album)}>
+                <button onClick={() => onShare(album.artist, album.title)}>
                   <Share2 size={20} />
                 </button>
                 <button
@@ -262,6 +267,7 @@ const Saved = () => {
       )}
       <Footer />
       {error && <Banner title="Error" subtitle={error} />}
+      {sharePopUp && <SharePopup artistName={sharePopUp.artist} albumName={sharePopUp.album} onClose={() => setSharePopUp(null)}/>}
     </>
   );
 };

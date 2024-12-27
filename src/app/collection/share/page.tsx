@@ -176,7 +176,7 @@ const SharePageContent = () => {
           </footer>
         </section>
         {error && <Banner title="Error" subtitle={error} />}
-        {sharePopUp && <SharePopup artistName={sharePopUp.artist} albumName={sharePopUp.album} />}
+        {sharePopUp && <SharePopup artistName={sharePopUp.artist} albumName={sharePopUp.album} onClose={() => setSharePopUp(null)} />}
       </main>
       <Footer />
     </>
