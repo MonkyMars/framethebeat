@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, Suspense } from "react";
 import { Heart, Share2 } from "lucide-react";
 import Image from "next/image";
 import Nav from "../../components/Nav";
@@ -76,7 +76,7 @@ const fetchUserInfo = async (user_id: string, album: string) => {
   return liked;
 };
 
-export default function SharePage() {
+const SharePageContent = () => {
   const searchParams = useSearchParams();
   const artistQuery = searchParams.get("artist");
   const albumQuery = searchParams.get("album");
@@ -121,7 +121,7 @@ export default function SharePage() {
     setLiked(!liked);
     if(!session?.user?.id) return;
     const user_id = session?.user?.id;
-    const response = liked ? await deleteAlbum(artist, album, user_id): await saveAlbum(artist, album, user_id);
+    const response: {status: number; message: string} = liked ? await deleteAlbum(artist, album, user_id): await saveAlbum(artist, album, user_id);
     if (response.status !== 200) {
       setError(response.message);
     }
@@ -131,7 +131,7 @@ export default function SharePage() {
     <>
       <Nav />
       <main className="mainContent share">
-        <section className="shareCard">
+          <section className="shareCard">
           <Image
             src={album.image.src || "/placeholder.png"}
             className="shareCard__image"
@@ -162,3 +162,13 @@ export default function SharePage() {
     </>
   );
 }
+
+const SharePage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SharePageContent />
+    </Suspense>
+  );
+}
+
+export default SharePage;

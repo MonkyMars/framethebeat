@@ -122,9 +122,9 @@ const Saved = () => {
   const handleRemove = async (id: number, artist: string, album: string) => {
     if (!session?.user.id) return;
     setSavedAlbums(savedAlbums.filter((album) => album.id !== id));
-    const response = await deleteAlbum(artist, album, session?.user.id);
+    const response: {status: number; message: string} = await deleteAlbum(artist, album, session?.user.id);
     if (response.status !== 200) {
-      setError(response.error);
+      setError(response.message);
     }
   };
 
