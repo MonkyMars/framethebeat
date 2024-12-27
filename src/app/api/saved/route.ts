@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
 import { supabase } from "../../utils/supabase";
 
-export async function HANDLER(req: Request) {
-  if (req.method === "GET") {
-    return GET(req);
-  }
-  if (req.method === "POST") {
-    return POST(req);
-  }
-  if (req.method === "DELETE") {
-    return DELETE(req);
-  }
-  return NextResponse.json({ error: "Method not allowed" }, { status: 405 });
-}
-
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
