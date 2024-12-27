@@ -16,7 +16,7 @@ const SharePopup: React.FC<SharePopupProps> = ({
   const [copied, setCopied] = useState(false);
 
   const shareUrl = `${window.location.origin}/share?artist=${artistName}&album=${albumName}`;
-  const text = `Check out ${albumName} by ${artistName}`;
+  const text = `Check out ${albumName} by ${artistName} on Frame The Beat!`;
 
   const shareLinks = [
     {
@@ -35,7 +35,7 @@ const SharePopup: React.FC<SharePopupProps> = ({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
+      await navigator.clipboard.writeText(`${text}\n${shareUrl}`);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
