@@ -30,9 +30,11 @@ export async function GET(req: Request) {
       .from("saved")
       .select("*")
       .eq("user_id", user_id);
+    
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+    
     return NextResponse.json(saved);
   } catch (error) {
     return NextResponse.json(
@@ -48,9 +50,11 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
       .from("saved")
       .insert([{ artist, album, user_id }]);
+    
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
+    
     return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
@@ -69,8 +73,6 @@ export async function DELETE(req: Request) {
       .eq("artist", artist)
       .eq("album", album)
       .eq("user_id", user_id);
-
-    console.log(artist, album, user_id, data);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
