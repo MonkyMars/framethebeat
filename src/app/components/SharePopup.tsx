@@ -15,7 +15,7 @@ const SharePopup: React.FC<SharePopupProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = `${window.location.origin}/collection/share?artist=${artistName}&album=${albumName}`;
+  const shareUrl = `${window.location.origin}/collection/share?artist=${encodeURIComponent(artistName)}&album=${encodeURIComponent(albumName)}`;
   const text = `Check out ${albumName} by ${artistName} on Frame The Beat!`;
 
   const shareLinks = [
