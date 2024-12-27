@@ -14,7 +14,7 @@ import {
   saveAlbum,
 } from "@/app/utils/database";
 import Banner from "@/app/components/Banner";
-
+import SharePopup from "@/app/components/SharePopup";
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -88,6 +88,7 @@ const SharePageContent = () => {
   const [liked, setLiked] = React.useState<boolean>(false);
   const [error, setError] = React.useState<string | null>(null);
   const { session } = useAuth();
+  const [sharePopUp, setSharePopUp] = React.useState<{ artist: string; album: string } | null>(null);
 
   useEffect(() => {
     if (error) {
@@ -136,6 +137,13 @@ const SharePageContent = () => {
     }
   };
 
+  const onShare = (artist: string, album: string) => {
+    setSharePopUp({
+      artist: artist,
+      album: album,
+    })
+  };
+
   return (
     <>
       <Nav />
@@ -157,7 +165,9 @@ const SharePageContent = () => {
             {album.wiki && <p>Released: {album.wiki.published}</p>}
           </main>
           <footer className="shareCard_footer">
-            <Share2 size={24} fill="var(--background)" />
+            <Share2 size={24} fill="var(--background)"
+            onClick={() => onShare(artistQuery, albumQuery)}
+            />
             <Heart
               size={24}
               fill={liked ? "var(--theme)" : "var(--background)"}
@@ -166,6 +176,7 @@ const SharePageContent = () => {
           </footer>
         </section>
         {error && <Banner title="Error" subtitle={error} />}
+        {sharePopUp && <SharePopup artistName={sharePopUp.artist} albumName={sharePopUp.album} />}
       </main>
       <Footer />
     </>
