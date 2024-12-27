@@ -47,7 +47,9 @@ const Settings = () => {
 
     if (newTheme === "light") {
       root.style.setProperty("--background", "#e3e3e3");
+      root.style.setProperty("--background-rgb", "227,227,227");
       root.style.setProperty("--foreground", "#171717");
+      root.style.setProperty("--foreground-rgb", "23,23,23");
       root.style.setProperty("--theme", "#2398f7");
       root.style.setProperty("--theme-rgb", "35, 152, 247");
     } else {

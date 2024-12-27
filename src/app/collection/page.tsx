@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import Banner from "../components/Banner";
-import { fetchCollection, saveAlbum, fetchUserCollection } from "../utils/database";
+import { fetchCollection, saveAlbum, fetchUserCollection, deleteAlbum } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
@@ -151,7 +151,7 @@ const Collection = () => {
     album: string,
   ) => {
     if (!session?.user?.id) {
-      showBanner("You must be logged in order to save albums", "error");
+      showBanner("You must be logged in order to save albums", "error", "error");
       return;
     }
     (e.target as SVGElement).style.fill = "var(--theme)";
@@ -171,22 +171,51 @@ const Collection = () => {
       const updatedCollection = [...prev, { artist, title: album }];
       return updatedCollection;
     });
-    showBanner(album, "success");
+    showBanner(album, "success", "save");
     const response = await saveAlbum(artist, album, session?.user?.id);
     if (response.status !== 200) {
       setError(response.message);
     }
   };
 
-  // const onRemove = async () => {
-  
-  // }
+  const onDelete = async (e: React.MouseEvent<SVGSVGElement>, artist: string, album: string) => {
+    if (!session?.user?.id) {
+      showBanner("You must be logged in order to save albums", "error", "error");
+      return;
+    }
+    (e.target as SVGElement).style.fill = "var(--background)";
+    const newLikesCount = (collectionNames?.find(
+      (item) => item.title === album
+    )?.saves ?? 0) - 1;
+    setCollectionNames((prev) => {
+      const updatedCollection = prev.map((item) => {
+        if (item.title === album) {
+          return { ...item, saves: newLikesCount };
+        }
+        return item;
+      });
+      return updatedCollection;
+    });
+    setUserCollectionNames((prev) => {
+      const updatedCollection = prev.filter((item) => item.title !== album);
+      return updatedCollection;
+    });
+    showBanner(album, "success", "delete");
+    const response = await deleteAlbum(artist, album, session?.user?.id);
+    if (response.status !== 200) {
+      setError(response.message);
+    }
+  }
 
-  const showBanner = (albumTitle: string, status: string): void => {
+  const showBanner = (albumTitle: string, status: string, action: string): void => {
     if (status === "error") {
       setTitle(albumTitle);
     }
-    setTitle(`${albumTitle} has been successfully saved.`);
+    if (status === "success" && action === "delete") {
+      setTitle(`${albumTitle} has been successfully deleted.`);
+    } else if (status === "success" && action === "save") {
+      setTitle(`${albumTitle} has been successfully saved.`);
+    }
     setTimeout(() => {
       setTitle("");
     }, 3000);
@@ -209,7 +238,7 @@ const Collection = () => {
               <CollectionCard
                 key={index}
                 {...album}
-                onHeartClick={(e) => onSave(e, album.artist, album.title)}
+                onHeartClick={(e) => userCollectionNames.find((item) => item.title === album.title) ? onDelete(e, album.artist, album.title) : onSave(e, album.artist, album.title)}
                 saves={
                   collectionNames.find((item) => item.title === album.title)
                     ?.saves || 0
