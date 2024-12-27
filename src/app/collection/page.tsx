@@ -7,7 +7,8 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import Banner from "../components/Banner";
-import { fetchCollection } from "../utils/database";
+import { fetchCollection, saveAlbum } from "../utils/database";
+import { useAuth } from "../utils/AuthContext";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -37,6 +38,7 @@ const isGif = (src?: string): boolean => {
 
 const Collection = () => {
   const [collection, setCollection] = useState<Album[]>([]);
+  const { session } = useAuth();
   const [collectionNames, setCollectionNames] = useState<
     { artist: string; title: string; saves: number }[]
   >([]);
@@ -55,7 +57,7 @@ const Collection = () => {
       setCollectionNames(mappedData);
     };
     getCollection();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const fetchSavedAlbums = async ({
@@ -81,7 +83,7 @@ const Collection = () => {
           albumArtist: model.artist,
           albumTitle: model.name,
           albumCover: {
-            src: model.image[3]["#text"].replace('http:', 'https:'),
+            src: model.image[3]["#text"].replace("http:", "https:"),
             alt: `${model.name} album cover`,
           },
           albumDate:
@@ -127,7 +129,23 @@ const Collection = () => {
     });
   }, [collectionNames]);
 
-  const showBanner = (albumTitle: string): void => {
+  const onSave = async (artist: string, album: string) => {
+    console.log(session);
+    if (!session?.user?.id) {
+      showBanner("You must be logged in order to save albums", "error");
+      return;
+    }
+    showBanner(album, "success");
+    const response = await saveAlbum(artist, album, session?.user?.id);
+    if (response.error) {
+      setError(response.error);
+    }
+  };
+
+  const showBanner = (albumTitle: string, status: string): void => {
+    if (status === "error") {
+      setTitle(albumTitle);
+    }
     setTitle(`${albumTitle} has been successfully saved.`);
     setTimeout(() => {
       setTitle("");
@@ -145,22 +163,31 @@ const Collection = () => {
           <h2>Our Collection</h2>
           <p>Here are all the albums we&apos;ve saved.</p>
         </div>
-        {title && <Banner title="Successfully saved" subtitle={title} />}
+        {title && (
+          <Banner
+            title={title.includes("succes") ? "Successfully saved" : "Error"}
+            subtitle={title}
+          />
+        )}
         <div className="collectionGrid">
-          {collection.length > 0 ? collection.map((album, index) => (
-            <CollectionCard
-              key={index}
-              {...album}
-              onHeartClick={showBanner}
-              saves={
-                collectionNames.find((item) => item.title === album.title)
-                  ?.saves || 0
-              }
-            />
-          )) :<div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p className="loading-text">Loading your collection...</p>
-        </div>}
+          {collection.length > 0 ? (
+            collection.map((album, index) => (
+              <CollectionCard
+                key={index}
+                {...album}
+                onHeartClick={() => onSave(album.artist, album.title)}
+                saves={
+                  collectionNames.find((item) => item.title === album.title)
+                    ?.saves || 0
+                }
+              />
+            ))
+          ) : (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p className="loading-text">Loading your collection...</p>
+            </div>
+          )}
         </div>
         {error && <Banner title="Error" subtitle={error} />}
       </main>

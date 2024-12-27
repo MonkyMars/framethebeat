@@ -1,11 +1,12 @@
 "use client";
-import { useState } from "react";
-import { ArrowRight, UserPlus, Mail, Lock, ShieldCheck } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, Mail, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import "./styles.scss";
 import { signupUser } from "../utils/database";
 import { createHash } from "crypto";
 import { useRouter } from "next/navigation";
+import Banner from "../components/Banner";
 
 const hashString = (data: string): string => {
   return createHash("sha256").update(data).digest("hex");
@@ -14,26 +15,41 @@ const hashString = (data: string): string => {
 const Register = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    username: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
+  const [error, setError] = useState<string | null>(null);
 
-  const handleInputChange = debounce((value, name) => {
+  const handleInputChange = (value: string, name: string): void => {
     setFormData((prev) => ({ ...prev, [name]: value }));
-  }, 30);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await signupUser(
-      formData.email,
-      hashString(formData.password)
-    );
-    if (response.status === 200) {
-      router.push("/");
+    try {
+      const response = await signupUser(
+        formData.email,
+        hashString(formData.password)
+      );
+      if (response.status.user.role === 'authenticated') {
+        router.push("/");
+      } else {
+        setError(response.data as string);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error as string);
     }
   };
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+    }
+  }, [error]);
 
   return (
     <main className="mainContent">
@@ -44,18 +60,6 @@ const Register = () => {
           <p>Join our community and discover amazing album covers</p>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="inputGroup">
-            <UserPlus size={20} />
-            <input
-              type="text"
-              placeholder="Username"
-              value={formData.username}
-              onChange={(e) => handleInputChange(e.target.value, "username")}
-              required
-              name="username"
-              autoComplete="username"
-            />
-          </div>
           <div className="inputGroup">
             <Mail size={20} />
             <input
@@ -101,19 +105,9 @@ const Register = () => {
           </p>
         </form>
       </div>
+      {error && <Banner title={"Log in failed"} subtitle={error} />}
     </main>
   );
-};
-
-const debounce = <T extends (...args: string[]) => void>(
-  func: T,
-  delay: number
-) => {
-  let timer: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>): void => {
-    clearTimeout(timer);
-    timer = setTimeout(() => func(...args), delay);
-  };
 };
 
 export default Register;

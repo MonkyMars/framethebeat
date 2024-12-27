@@ -1,11 +1,13 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Mail, Lock } from "lucide-react";
 import Link from "next/link";
 import "./styles.scss";
 import { logInUser } from "../utils/database";
 import { useRouter } from "next/navigation";
 import { createHash } from "crypto";
+import Banner from "../components/Banner";
+import { supabase } from "../utils/supabase";
 
 const hashString = (data: string): string => {
   return createHash("sha256").update(data).digest("hex");
@@ -13,19 +15,40 @@ const hashString = (data: string): string => {
 
 const Login = () => {
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await logInUser(formData.email, hashString(formData.password));
-    if (response.status === 200) {
-      router.push("/");
+    try {
+      const response = await logInUser(
+        formData.email, 
+        hashString(formData.password)
+      );
+      
+      if (response.status === 200 && response.data) {
+        await supabase.auth.setSession(response.data);
+        router.push("/saved");
+      } else {
+        setError(response.data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError(error as string);
     }
   };
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 5000
+      );
+    }
+  }, [error]);
 
   return (
     <main className="mainContent">
@@ -65,16 +88,6 @@ const Login = () => {
             />
           </div>
           <div className="checkboxContainer">
-            <label>
-              <input
-                type="checkbox"
-                checked={formData.rememberMe}
-                onChange={(e) =>
-                  setFormData({ ...formData, rememberMe: e.target.checked })
-                }
-              />
-              Remember me
-            </label>
             <Link href="/forgot-password">Forgot Password?</Link>
           </div>
           <div className="ctaButtonContainer">
@@ -88,6 +101,7 @@ const Login = () => {
           </p>
         </form>
       </div>
+      {error && <Banner title={"Log in failed"} subtitle={error} />}
     </main>
   );
 };

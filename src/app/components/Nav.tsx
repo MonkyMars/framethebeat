@@ -5,10 +5,14 @@ import { useState } from "react";
 import Aside from "./Aside";
 import SearchNav from "./SearchNav";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../utils/AuthContext";
+
 const Nav = () => {
     const [isAsideOpen, setIsAsideOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const router = useRouter();
+    const { session } = useAuth();
+
     return(
         <>
           <nav className={styles.Nav}>
@@ -25,11 +29,11 @@ const Nav = () => {
               <label onClick={() => router.push('/tours')}>Tours</label>
             </ul>
             <ul>
-              <span onClick={() => router.push('/login')}>Log in</span>
+              {!session ? <span onClick={() => router.push('/login')}>Log in</span> : <span onClick={() => router.push('/settings')}>Settings</span>}
             </ul>
           </nav>
           
-          <Aside isOpen={isAsideOpen} onClose={() => setIsAsideOpen(false)} />
+          <Aside isOpen={isAsideOpen} onClose={() => setIsAsideOpen(false)} user={session?.user.email} />
           <SearchNav isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
         </>
     )

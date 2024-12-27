@@ -3,8 +3,11 @@ import React, { useState, useEffect } from "react";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import "./styles.scss";
-import { Sun, Languages, User, Info } from "lucide-react";
-
+import { Sun, Languages, User, Info, Mail, Lock, Eye, EyeClosed } from "lucide-react";
+import { useAuth } from "../utils/AuthContext";
+import { useRouter } from "next/navigation";
+import { updateUser } from "../utils/database";
+import Banner from "../components/Banner";
 const THEME_STORAGE_KEY = "album-covers-theme";
 
 type Theme = "light" | "dark" | "system";
@@ -14,7 +17,14 @@ const Settings = () => {
   const [gridSize, setGridSize] = useState("medium");
   const [defaultSort, setDefaultSort] = useState("newest");
   const [animations, setAnimations] = useState(true);
-
+  const { session } = useAuth();
+  const router = useRouter();
+  const [response, setResponse] = useState<string | null>(null);
+  const [formValues, setFormValues] = useState<{email: string; password: string}>({
+    email: "",
+    password: "",
+  });
+  const [togglePassword, setTogglePassword] = useState<boolean>(false);
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
 
@@ -52,7 +62,30 @@ const Settings = () => {
       setTheme(savedTheme as Theme);
       applyTheme(savedTheme as Theme);
     }
-  }, []);
+    setFormValues((prev) => ({ ...prev, email: session?.user?.email || "" }));
+
+  }, [session]);
+
+  const onUpDateProfile = async() => {
+    const response = await updateUser(formValues.email, formValues.password);
+    if (response.error) {
+      console.error(response.error);
+      return;
+    }
+    setResponse("Profile updated successfully");
+  };
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>, name: string, value: string) => {
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  }
+
+  useEffect(() => {
+    if (response) {
+      setTimeout(() => {
+        setResponse(null);
+      }, 5000);
+    }
+  }, [response]);
 
   return (
     <>
@@ -130,16 +163,45 @@ const Settings = () => {
             </div>
           </section>
 
-          <section className="settingsCard">
-            <div className="cardHeader">
-              <User size={24} />
-              <h2>Account</h2>
-            </div>
-            <div className="settingsContent">
-              <button className="dangerButton">Sign Out</button>
-              <button className="dangerButton">Delete Account</button>
-            </div>
-          </section>
+          {session?.user && (
+            <>
+              <section className="settingsCard">
+                <div className="cardHeader">
+                  <User size={24} />
+                  <h2>Account</h2>
+                </div>
+                <div className="settingsContent">
+                  <button className="dangerButton">Sign Out</button>
+                  <button className="dangerButton">Delete Account</button>
+                </div>
+              </section>
+
+              <div className="formGroup">
+                <label><Mail size={24}/>Email Address</label>
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="settingsInput"
+                  value={formValues.email}
+                  name="email"
+                  onChange={(e) => handleFormChange(e, "email", e.target.value)}
+                />
+                <label><Lock size={24} />Password</label>
+                <input
+                  type={togglePassword ? "text" : "password"}
+                  placeholder="Enter your new password"
+                  className="settingsInput"
+                  value={formValues.password}
+                  name="password"
+                  onChange={(e) => handleFormChange(e, "password", e.target.value)}
+                />
+                {togglePassword ? <Eye size={24} className="togglePassword" onClick={() => setTogglePassword(false)}/> : <EyeClosed size={24} className="togglePassword" onClick={() => setTogglePassword(true)}/>}
+                <button className="primaryButton" onClick={onUpDateProfile}>
+                  Update Profile
+                </button>
+              </div>
+            </>
+          )}
 
           <section className="settingsCard">
             <div className="cardHeader">
@@ -152,25 +214,22 @@ const Settings = () => {
               <a href="#">Privacy Policy</a>
             </div>
           </section>
-          <div className="formGroup">
-            <label>Display Name</label>
-            <input
-              type="text"
-              placeholder="Enter your display name"
-              className="settingsInput"
-            />
-
-            <label>Email Address</label>
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              className="settingsInput"
-            />
-
-            <button className="primaryButton">Update Profile</button>
-          </div>
+          {!session?.user && (
+            <section className="settingsCard">
+              <div className="settingsContent">
+                <header className="cardHeader">
+                  <User size={24} /> <h2>Log in</h2>
+                </header>
+                <p>Log in to get access to more features</p>
+                <div className="formGroup null">
+                  <button className="primaryButton" onClick={() => router.push('/login')}>Sign In</button>
+                </div>
+              </div>
+            </section>
+          )}
         </div>
       </div>
+      {response && <Banner title={"Updated user"} subtitle={response} />}
       <Footer />
     </>
   );

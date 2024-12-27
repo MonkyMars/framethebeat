@@ -1,4 +1,4 @@
-export const fetchUserCollection = async (id: number) => {
+export const fetchUserCollection = async (id: string) => {
   try {
     const response = await fetch(
       `/api/saved?user_id=${encodeURIComponent(id)}`,
@@ -18,6 +18,44 @@ export const fetchUserCollection = async (id: number) => {
     throw error;
   }
 };
+
+export const saveAlbum = async (artist: string, album: string, user_id: string) => {
+  try {
+    const response = await fetch(`/api/saved`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ artist, album, user_id }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error saving album:", error);
+    throw error;
+  }
+}
+
+export const deleteAlbum = async (artist: string, album: string, user_id: string) => {
+  try {
+    const response = await fetch(`/api/saved`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ artist, album, user_id }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error deleting album:", error);
+    throw error;
+  }
+}
 
 export const fetchCollection = async () => {
   try {
@@ -47,18 +85,18 @@ export const signupUser = async (email: string, password: string) => {
       body: JSON.stringify({ email, password }),
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+     return {data: (`HTTP error! status: ${response.status}`), status: null};
     }
     const data = await response.json();
-    return { data: data, status: 200 };
+    return { data: data, status: data };
   } catch (error) {
     console.error("Error signing up user:", error);
-    return { data: error, status: 200 };
+    return { data: error as Error, status: null };
   }
 };
 
 export const logInUser = async (email: string, password: string) => {
-  try{
+  try {
     const response = await fetch(`/api/login`, {
       method: "POST",
       headers: {
@@ -66,13 +104,64 @@ export const logInUser = async (email: string, password: string) => {
       },
       body: JSON.stringify({ email, password }),
     });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+    }
+
+    return { 
+      data: data.session,
+      status: response.status 
+    };
+  } catch (error) {
+    console.error("Error logging in:", error);
+    return { 
+      data: error as Error, 
+      status: null 
+    };
+  }
+};
+
+export const logOutUser = async () => {
+  try {
+    const response = await fetch(`/api/logout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    const data = await response.json();
-    return { data: data, status: 200 };
+
+    return await response.json();
   } catch (error) {
-    console.error("Error signing up user:", error);
-    return { data: error, status: 200 };
+    console.error("Error logging out:", error);
+    throw error;
+  }
+};
+
+export const updateUser = async (email: string, password: string) => {
+  try {
+    const response = await fetch(`/api/user`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating user:", error);
+    throw error;
   }
 };

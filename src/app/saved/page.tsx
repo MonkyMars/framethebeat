@@ -6,7 +6,9 @@ import Image from "next/image";
 import { Heart, Share2 } from "lucide-react";
 import { Album } from "../utils/types";
 import Footer from "../components/Footer";
-import { fetchUserCollection } from "../utils/database";
+import { deleteAlbum, fetchUserCollection } from "../utils/database";
+import { useAuth } from "../utils/AuthContext";
+import Banner from "../components/Banner";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -25,22 +27,40 @@ interface API_RESPONSE {
 const Saved = () => {
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
+  const { session, loading } = useAuth();
   const [filterBy, setFilterBy] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [collectionNames, setCollectionNames] = useState<{artist: string; title: string; saves: number}[]>([]);
-   useEffect(() => {
-      const getCollection = async () => {
-        const data: {artist: string; album: string, saves: number}[] = await fetchUserCollection(1);
-        const mappedData = data.map(item => ({
-          artist: item.artist,
-          title: item.album,
-          saves: item.saves
-        }));
-        console.log(data);
-        setCollectionNames(mappedData);
-      };
-      getCollection();
-    }, []);
+  const [error, setError] = useState<string>("");
+  const [collectionNames, setCollectionNames] = useState<
+    { artist: string; title: string; saves: number }[]
+  >([]);
+  useEffect(() => {
+    if (loading) return;
+
+    if (!session) {
+      return;
+    }
+    console.log(session);
+    const getCollection = async () => {
+      if (!session?.user?.id) return;
+      const data: { artist: string; album: string; saves: number }[] =
+        await fetchUserCollection(session.user.id);
+      const mappedData = data.map((item) => ({
+        artist: item.artist,
+        title: item.album,
+        saves: item.saves,
+      }));
+      setCollectionNames(mappedData);
+    };
+    getCollection();
+  }, [session, loading]);
+  useEffect(() => {
+    const checkSession = async () => {
+      console.log("Logged in as:", session?.user.email);
+      return session;
+    };
+    checkSession();
+  }, [session]);
 
   useEffect(() => {
     const fetchSavedAlbums = async ({
@@ -66,7 +86,8 @@ const Saved = () => {
             alt: `${model.name} album cover`,
           },
           albumDate:
-            model.wiki?.published?.split(" ")[2].trim().slice(0, 4) || "unknown",
+            model.wiki?.published?.split(" ")[2].trim().slice(0, 4) ||
+            "unknown",
         };
         const returnData: Album[] = [
           {
@@ -92,7 +113,10 @@ const Saved = () => {
           return [...prev, ...newAlbums];
         });
       } catch (error) {
-        console.error(`Error fetching album data for ${title} by ${artist}:`, error);
+        console.error(
+          `Error fetching album data for ${title} by ${artist}:`,
+          error
+        );
       }
     };
     collectionNames.map((album) => {
@@ -103,8 +127,13 @@ const Saved = () => {
     });
   }, [collectionNames]);
 
-  const handleRemove = (id: number) => {
+  const handleRemove = async (id: number, artist: string, album: string) => {
     setSavedAlbums(savedAlbums.filter((album) => album.id !== id));
+    if (!session?.user.id) return;
+    const response = await deleteAlbum(artist, album, session?.user.id);
+    if (response.error) {
+      setError(response.error);
+    }
   };
 
   const handleShare = (album: Album) => {
@@ -122,18 +151,30 @@ const Saved = () => {
         album.artist.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
-      if (sortBy === "newest") return parseInt(b.date || "0") - parseInt(a.date || "0");
-      if (sortBy === "oldest") return parseInt(a.date || "0") - parseInt(b.date || "0");
+      if (sortBy === "newest")
+        return parseInt(b.date || "0") - parseInt(a.date || "0");
+      if (sortBy === "oldest")
+        return parseInt(a.date || "0") - parseInt(b.date || "0");
       if (sortBy === "title") return a.title.localeCompare(b.title);
       return a.artist.localeCompare(b.artist);
     });
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+    }
+  }, [error]);
 
   return (
     <>
       <Nav />
       <header className="header">
         <h2>Album covers you saved!</h2>
-        <p>Here you&apos;ll find the collection of your favorite album covers.</p>
+        <p>
+          Here you&apos;ll find the collection of your favorite album covers.
+        </p>
       </header>
 
       <div className="controlBar">
@@ -149,18 +190,18 @@ const Saved = () => {
             onChange={(e) => setFilterBy(e.target.value)}
           >
             <option value="all">All Years</option>
-          {Array.from(
-            new Set(
-              savedAlbums
-                .map((album) => album.date)
-                .filter((date) => date !== "unknown")
-                .sort((a, b) => parseInt(b || '0') - parseInt(a || '0'))
-            )
-          ).map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
+            {Array.from(
+              new Set(
+                savedAlbums
+                  .map((album) => album.date)
+                  .filter((date) => date !== "unknown")
+                  .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
+              )
+            ).map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
           </select>
         </div>
         <div className="search">
@@ -192,7 +233,11 @@ const Saved = () => {
                 <button onClick={() => handleShare(album)}>
                   <Share2 size={20} />
                 </button>
-                <button onClick={() => handleRemove(album.id)}>
+                <button
+                  onClick={() =>
+                    handleRemove(album.id, album.artist, album.title)
+                  }
+                >
                   <Heart size={20} className="heart" />
                 </button>
               </div>
@@ -201,14 +246,30 @@ const Saved = () => {
         </div>
       ) : (
         <div className="emptyState">
-          <h3>No saved albums yet</h3>
-          <p>Start building your collection by saving some album covers!</p>
-          <button onClick={() => (window.location.href = "/collection")}>
-            Explore Collection
-          </button>
+          {session?.user.id ? (
+            <>
+              <h3>No saved albums yet</h3>
+              <p>Start building your collection by saving some album covers!</p>
+              <button onClick={() => (window.location.href = "/collection")}>
+                Explore Collection
+              </button>
+            </>
+          ) : (
+            <>
+              <h3>Not logged in yet</h3>
+              <p>
+                Log in to start building your collection by saving some album
+                covers!
+              </p>
+              <button onClick={() => (window.location.href = "/login")}>
+                Log in!
+              </button>
+            </>
+          )}
         </div>
       )}
       <Footer />
+      {error && <Banner title="Error" subtitle={error} />}
     </>
   );
 };
