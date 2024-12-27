@@ -1,7 +1,9 @@
 "use client";
 import "../../../globals.css";
 import { ThemeProvider } from "../../../utils/theme-hook";
+import { AuthProvider } from "@/app/utils/AuthContext";
 import React from "react";
+import { Analytics } from "@vercel/analytics/next"
 
 export default function RootLayout({
   children,
@@ -10,7 +12,10 @@ export default function RootLayout({
 }) {
   return (
     <>
-      <ThemeProvider>{children}</ThemeProvider>
+      <Analytics/>
+      <AuthProvider>
+        <ThemeProvider>{children}</ThemeProvider>
+      </AuthProvider>
     </>
   );
 }

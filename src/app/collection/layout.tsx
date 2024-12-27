@@ -5,6 +5,7 @@ import React from "react";
 
 import Head from "next/head";
 import { AuthProvider } from "../utils/AuthContext";
+import { Analytics } from "@vercel/analytics/next";
 
 export default function RootLayout({
   children,
@@ -20,6 +21,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </Head>
+      <Analytics/>
       <AuthProvider>
          <ThemeProvider>{children}</ThemeProvider>
       </AuthProvider>

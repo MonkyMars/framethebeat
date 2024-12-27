@@ -2,6 +2,7 @@
 import "../globals.css";
 import { ThemeProvider } from "../utils/theme-hook";
 import { AuthProvider } from "../utils/AuthContext";
+import { Analytics } from "@vercel/analytics/next";
 
 import React from "react";
 
@@ -21,6 +22,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </Head>
+      <Analytics/>
       <AuthProvider>
         <ThemeProvider>{children}</ThemeProvider>
       </AuthProvider>
