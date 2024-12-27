@@ -31,7 +31,7 @@ const Login = () => {
       
       if (response.status === 200 && response.data) {
         await supabase.auth.setSession(response.data);
-        router.push("/saved");
+        router.push("/");
       } else {
         setError(response.data.message || "Login failed");
       }

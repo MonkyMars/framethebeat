@@ -40,7 +40,6 @@ const Saved = () => {
     if (!session) {
       return;
     }
-    console.log(session);
     const getCollection = async () => {
       if (!session?.user?.id) return;
       const data: { artist: string; album: string; saves: number }[] =
@@ -54,13 +53,6 @@ const Saved = () => {
     };
     getCollection();
   }, [session, loading]);
-  useEffect(() => {
-    const checkSession = async () => {
-      console.log("Logged in as:", session?.user.email);
-      return session;
-    };
-    checkSession();
-  }, [session]);
 
   useEffect(() => {
     const fetchSavedAlbums = async ({

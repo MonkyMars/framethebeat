@@ -130,7 +130,6 @@ const Collection = () => {
   }, [collectionNames]);
 
   const onSave = async (artist: string, album: string) => {
-    console.log(session);
     if (!session?.user?.id) {
       showBanner("You must be logged in order to save albums", "error");
       return;

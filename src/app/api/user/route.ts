@@ -19,7 +19,6 @@ import { supabase } from "../../utils/supabase";
 export async function PATCH(req: Request) {
   try {
     const { email, password } = await req.json();
-    console.log(await supabase.auth.getSession());
     const {
       data: { session },
     } = await supabase.auth.getSession();
