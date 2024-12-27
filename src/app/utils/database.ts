@@ -84,7 +84,38 @@ export const deleteAlbum = async (artist: string, album: string, user_id: string
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return await response.json();
+    const { data: existingRecord, error: fetchError } = await supabase
+    .from("collection")
+    .select("*")
+    .eq("album", album)
+    .eq("artist", artist)
+    .single();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch record: ${fetchError.message}`);
+  }
+  const data = await response.json();
+  const currentSaves = existingRecord?.saves || 0;
+  const { data: updateData, error: updateError } = await supabase
+    .from("collection")
+    .update([
+      {
+        album,
+        artist,
+        saves: currentSaves - 1
+      }
+    ]).eq("album", album);
+
+  if (updateError) {
+    throw new Error(`Failed to update saves: ${updateError.message}`);
+  }
+
+  return {
+    message: "Album saved successfully",
+    status: 200,
+    response: data,
+    updateData,
+  };
   } catch (error) {
     console.error("Error deleting album:", error);
     throw error;

@@ -8,7 +8,8 @@ import { useSearchParams } from "next/navigation";
 import { StaticImport } from "next/dist/shared/lib/get-img-props";
 import "../styles.scss";
 import { useAuth } from "@/app/utils/AuthContext";
-import { fetchUserCollection } from "@/app/utils/database";
+import { deleteAlbum, fetchUserCollection, saveAlbum } from "@/app/utils/database";
+import Banner from "@/app/components/Banner";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -67,10 +68,13 @@ async function fetchAlbum(
 
 const fetchUserInfo = async (user_id: string, album: string) => {
   const data = await fetchUserCollection(user_id);
-  const liked = data.find((item: {artist: string; album: string}) => item.album === album) ? true : false;
+  const liked = data.find(
+    (item: { artist: string; album: string }) => item.album === album
+  )
+    ? true
+    : false;
   return liked;
 };
-
 
 export default function SharePage() {
   const searchParams = useSearchParams();
@@ -78,7 +82,16 @@ export default function SharePage() {
   const albumQuery = searchParams.get("album");
   const [album, setAlbum] = React.useState<Album["album"] | null>(null);
   const [liked, setLiked] = React.useState<boolean>(false);
+  const [error, setError] = React.useState<string | null>(null);
   const { session } = useAuth();
+
+  useEffect(() => {
+    if (error) {
+      setTimeout(() => {
+        setError(null);
+      }, 5000);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (!artistQuery || !albumQuery) return;
@@ -93,7 +106,7 @@ export default function SharePage() {
       if (!session || !artistQuery || !albumQuery) return;
       const user_id = session.user.id;
       setLiked(await fetchUserInfo(user_id, albumQuery));
-    }
+    };
     fetchAlbumFunc();
     fetchUserInfoFunc();
   }, [artistQuery, albumQuery, session]);
@@ -104,6 +117,15 @@ export default function SharePage() {
   if (!album) {
     return null;
   }
+  const onHeart = async (artist: string, album: string, liked: boolean) => {
+    setLiked(!liked);
+    if(!session?.user?.id) return;
+    const user_id = session?.user?.id;
+    const response = liked ? await deleteAlbum(artist, album, user_id): await saveAlbum(artist, album, user_id);
+    if (response.status !== 200) {
+      setError(response.message);
+    }
+  };
 
   return (
     <>
@@ -127,9 +149,14 @@ export default function SharePage() {
           </main>
           <footer className="shareCard_footer">
             <Share2 size={24} fill="var(--background)" />
-            <Heart size={24} fill={liked ? "var(--theme)" : 'var(--background)'} />
+            <Heart
+              size={24}
+              fill={liked ? "var(--theme)" : "var(--background)"}
+              onClick={() => onHeart(artistQuery, albumQuery, liked)}
+            />
           </footer>
         </section>
+        {error && <Banner title="Error" subtitle={error} />}
       </main>
       <Footer />
     </>
