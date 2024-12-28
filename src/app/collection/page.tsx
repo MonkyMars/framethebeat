@@ -4,7 +4,8 @@ import Nav from "../components/Nav";
 import { Album } from "../utils/types";
 import "./styles.scss";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { Heart } from "lucide-react";
 import Banner from "../components/Banner";
 import {
@@ -42,6 +43,8 @@ const isGif = (src?: string): boolean => {
 };
 
 const Collection = () => {
+  const searchParams = useSearchParams();
+  
   const [collection, setCollection] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,6 +60,7 @@ const Collection = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
+    setSearchQuery(searchParams.get("q") || "");
     const getCollection = async () => {
       const data: { artist: string; album: string; saves: number }[] =
         await fetchCollection();
@@ -395,4 +399,12 @@ const CollectionCard = ({
   </div>
 );
 
-export default Collection;
+const CollectionPage = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Collection />
+    </Suspense>
+  );
+}
+
+export default CollectionPage;
