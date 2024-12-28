@@ -9,12 +9,8 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  webpack: (config, { dev, isServer }) => {
-    if (!dev && !isServer) {
-      config.devtool = false; 
-    } else {
-      config.devtool = false;
-    }
+  webpack: (config, { dev }) => {
+    config.devtool = dev ? 'source-map' : false;
     return config;
   },
   experimental: {
@@ -22,7 +18,6 @@ const nextConfig: NextConfig = {
       rules: {
         '*.svg': {
           loaders: ['@svgr/webpack'],
-          as: '*.ts',
         },
       },
     }
