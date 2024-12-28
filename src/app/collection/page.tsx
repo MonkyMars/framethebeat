@@ -7,7 +7,12 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import Banner from "../components/Banner";
-import { fetchCollection, saveAlbum, fetchUserCollection, deleteAlbum } from "../utils/database";
+import {
+  fetchCollection,
+  saveAlbum,
+  fetchUserCollection,
+  deleteAlbum,
+} from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 
 const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
@@ -38,7 +43,9 @@ const isGif = (src?: string): boolean => {
 
 const Collection = () => {
   const [collection, setCollection] = useState<Album[]>([]);
-
+  const [sortBy, setSortBy] = useState("newest");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterBy, setFilterBy] = useState("all");
   const { session } = useAuth();
   const [collectionNames, setCollectionNames] = useState<
     { artist: string; title: string; saves: number }[]
@@ -64,13 +71,14 @@ const Collection = () => {
       if (!session?.user?.id) {
         return;
       }
-      const data: { artist: string, album: string }[] = await fetchUserCollection(session.user.id);
+      const data: { artist: string; album: string }[] =
+        await fetchUserCollection(session.user.id);
       const mappedData = data.map((item) => ({
         artist: item.artist,
         title: item.album,
       }));
       setUserCollectionNames(mappedData);
-    }
+    };
     getCollection();
     getUserCollection();
   }, [session]);
@@ -148,16 +156,19 @@ const Collection = () => {
   const onSave = async (
     e: React.MouseEvent<SVGSVGElement>,
     artist: string,
-    album: string,
+    album: string
   ) => {
     if (!session?.user?.id) {
-      showBanner("You must be logged in order to save albums", "error", "error");
+      showBanner(
+        "You must be logged in order to save albums",
+        "error",
+        "error"
+      );
       return;
     }
     (e.target as SVGElement).style.fill = "var(--theme)";
-    const newLikesCount = (collectionNames?.find(
-      (item) => item.title === album
-    )?.saves ?? 0) + 1;
+    const newLikesCount =
+      (collectionNames?.find((item) => item.title === album)?.saves ?? 0) + 1;
     setCollectionNames((prev) => {
       const updatedCollection = prev.map((item) => {
         if (item.title === album) {
@@ -178,15 +189,22 @@ const Collection = () => {
     }
   };
 
-  const onDelete = async (e: React.MouseEvent<SVGSVGElement>, artist: string, album: string) => {
+  const onDelete = async (
+    e: React.MouseEvent<SVGSVGElement>,
+    artist: string,
+    album: string
+  ) => {
     if (!session?.user?.id) {
-      showBanner("You must be logged in order to save albums", "error", "error");
+      showBanner(
+        "You must be logged in order to save albums",
+        "error",
+        "error"
+      );
       return;
     }
     (e.target as SVGElement).style.fill = "var(--background)";
-    const newLikesCount = (collectionNames?.find(
-      (item) => item.title === album
-    )?.saves ?? 0) - 1;
+    const newLikesCount =
+      (collectionNames?.find((item) => item.title === album)?.saves ?? 0) - 1;
     setCollectionNames((prev) => {
       const updatedCollection = prev.map((item) => {
         if (item.title === album) {
@@ -205,9 +223,13 @@ const Collection = () => {
     if (response.status !== 200) {
       setError(response.message);
     }
-  }
+  };
 
-  const showBanner = (albumTitle: string, status: string, action: string): void => {
+  const showBanner = (
+    albumTitle: string,
+    status: string,
+    action: string
+  ): void => {
     if (status === "error") {
       setTitle(albumTitle);
     }
@@ -224,6 +246,25 @@ const Collection = () => {
     return <div>Loading...</div>;
   }
 
+  const filteredAlbums = collection
+    .filter((album) => {
+      if (filterBy === "all") return true;
+      return album.date === filterBy;
+    })
+    .filter(
+      (album) =>
+        album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        album.artist.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => {
+      if (sortBy === "newest")
+        return parseInt(b.date || "0") - parseInt(a.date || "0");
+      if (sortBy === "oldest")
+        return parseInt(a.date || "0") - parseInt(b.date || "0");
+      if (sortBy === "title") return a.title.localeCompare(b.title);
+      return a.artist.localeCompare(b.artist);
+    });
+
   return (
     <>
       <Nav />
@@ -232,35 +273,80 @@ const Collection = () => {
           <h2>Our Collection</h2>
           <p>Here are all the albums we&apos;ve saved.</p>
         </div>
+        <div className="controlBar">
+          <div className="filters">
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="title">By Title</option>
+              <option value="artist">By Artist</option>
+            </select>
+            <select
+              value={filterBy}
+              onChange={(e) => setFilterBy(e.target.value)}
+            >
+              <option value="all">All Years</option>
+              {Array.from(
+                new Set(
+                  collection
+                    .map((album) => album.date)
+                    .filter((date) => date !== "unknown")
+                    .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
+                )
+              ).map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="search">
+            <input
+              type="text"
+              placeholder="Search saved albums..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
         <div className="collectionGrid">
-          {collection.length > 0 ? (
-            collection.map((album, index) => (
+          {filteredAlbums.length > 0 &&
+            filteredAlbums.map((album, index) => (
               <CollectionCard
                 key={index}
                 {...album}
-                onHeartClick={(e) => userCollectionNames.find((item) => item.title === album.title) ? onDelete(e, album.artist, album.title) : onSave(e, album.artist, album.title)}
+                onHeartClick={(e) =>
+                  userCollectionNames.find((item) => item.title === album.title)
+                    ? onDelete(e, album.artist, album.title)
+                    : onSave(e, album.artist, album.title)
+                }
                 saves={
                   collectionNames.find((item) => item.title === album.title)
                     ?.saves || 0
                 }
-                saved={userCollectionNames.find((item) => item.title === album.title) ? true : false}
+                saved={
+                  userCollectionNames.find((item) => item.title === album.title)
+                    ? true
+                    : false
+                }
               />
-            ))
-          ) : (
+            ))}
+          {collection.length === 0 && filteredAlbums.length === 0 && (
             <div className="loading-container">
               <div className="loading-spinner"></div>
               <p className="loading-text">Loading your collection...</p>
             </div>
           )}
+          {filteredAlbums.length === 0 && collection.length > 0 && (
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p className="loading-text">No results found with search filters. Please try different filters.</p>
+            </div>
+          )}
         </div>
       </main>
       {error && <Banner title="Error" subtitle={error} />}
-      {title && (
-        <Banner
-          title={title}
-          subtitle={title}
-        />
-      )}
+      {title && <Banner title={title} subtitle={title} />}
       <Footer />
     </>
   );
@@ -299,7 +385,11 @@ const CollectionCard = ({
       <p className="date">{date}</p>
     </div>
     <div className="albumActions">
-      <Heart size={24} onClick={(e) => onHeartClick(e)} style={{fill: saved ? 'var(--theme)' : 'var(--background)'}}/>
+      <Heart
+        size={24}
+        onClick={(e) => onHeartClick(e)}
+        style={{ fill: saved ? "var(--theme)" : "var(--background)" }}
+      />
       <span>{saves}</span>
     </div>
   </div>
