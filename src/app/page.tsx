@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 import Cta from "./components/Cta";
 import Featured from "./components/Featured";
 import SearchComponent from "./components/Search";
-import Categories from "./components/Categories";
+// import Categories from "./components/Categories";
 import Nav from "./components/Nav";
 import Discover from "./components/Discover";
 
@@ -101,7 +101,7 @@ export default function Home() {
       </main>
       <Discover />
       <SearchComponent />
-      <Categories />
+      {/* <Categories /> */}
       <Featured AlbumCover={AlbumCover} />
       <Cta/>
       <Footer />
