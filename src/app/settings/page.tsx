@@ -12,11 +12,13 @@ import {
   Lock,
   Eye,
   EyeClosed,
+  X,
 } from "lucide-react";
 import { useAuth } from "../utils/AuthContext";
 import { useRouter } from "next/navigation";
-import { logOutUser, updateUser } from "../utils/database";
+import { logOutUser, updateUser, deleteUser } from "../utils/database";
 import Banner from "../components/Banner";
+
 const THEME_STORAGE_KEY = "album-covers-theme";
 
 type Theme = "light" | "dark" | "system";
@@ -29,6 +31,9 @@ const Settings = () => {
   const { session } = useAuth();
   const router = useRouter();
   const [response, setResponse] = useState<string | null>(null);
+  const [validateValue, setValidateValue] = useState<string>("");
+  const [validatePopup, setValidatePopup] = useState<boolean>(false);
+
   const [formValues, setFormValues] = useState<{
     email: string;
     password: string;
@@ -87,6 +92,28 @@ const Settings = () => {
     }
     setResponse("Profile updated successfully");
   };
+
+  const onDeleteAccount = async () => {
+    const user_id = session?.user.id;
+    if (!user_id) return;
+    const response = await deleteUser(user_id);
+    if (response.message) {
+      console.error(response.message);
+    }
+    setResponse("Account deleted successfully");
+    router.push('/login');
+  }
+
+  const validateOnDeleteUser = () => {
+    const email = session?.user.email;
+    if (!email) return;
+    if (validateValue === email) {
+      onDeleteAccount();
+      setValidatePopup(false);
+    } else {
+      setResponse("Values do not match");
+    }
+  }
 
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -189,7 +216,7 @@ const Settings = () => {
                 </div>
                 <div className="settingsContent">
                   <button className="dangerButton" onClick={async() => await logOutUser() && router.push('/login')}>Sign Out</button>
-                  <button className="dangerButton">Delete Account</button>
+                  <button className="dangerButton" onClick={() => setValidatePopup(true)}>Delete Account</button>
                 </div>
               </section>
 
@@ -271,8 +298,23 @@ const Settings = () => {
           )}
         </div>
       </div>
-      {response && <Banner title={"Updated user"} subtitle={response} />}
+      {response && <Banner title={response} subtitle={response} />}
       <Footer />
+      {validatePopup && (
+        <div className="validatePopup">
+          <header>
+            <h3>Confirm account deletion</h3>
+          </header>
+          <main>
+            <p>Are you sure you want to delete your account?</p>
+            <label>To confirm, type &apos;&apos;<b>{session?.user.email}</b>&apos;&apos; in the box below</label>
+            <input type="text" value={validateValue} onChange={(e) => setValidateValue(e.target.value)} />
+            <button onClick={() => validateOnDeleteUser()}>Delete account</button>
+            <button onClick={() => setValidatePopup(false)}>Cancel deletion</button>
+          </main>
+          <X size={24} onClick={() => setValidatePopup(false)} className="closeButton"/>
+        </div>
+      )}
     </>
   );
 };

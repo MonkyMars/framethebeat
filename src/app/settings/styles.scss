@@ -265,3 +265,97 @@ a {
   cursor: pointer;
   color: rgba(var(--theme-rgb), 0.5);
 }
+
+.validatePopup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--background);
+  border: 1px solid rgba(var(--theme-rgb), 0.2);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+
+  header {
+    margin-bottom: 1.5rem;
+    h3 {
+      color: #dc3545;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+  }
+  b {
+    color: rgba(var(--theme-rgb), 0.9);
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    p,
+    label {
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    input {
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid rgba(var(--theme-rgb), 0.2);
+      background: rgba(var(--background-rgb), 0.05);
+      color: var(--foreground);
+      &:focus {
+        outline: none;
+        border-color: rgba(var(--theme-rgb), 0.5);
+        box-shadow: 0 0 0 2px rgba(var(--theme-rgb), 0.1);
+      }
+    }
+
+    button {
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid rgba(var(--theme-rgb), 0.6);
+      &:first-of-type {
+        background: rgba(220, 53, 69, 0.2);
+        border: 2px solid rgba(220, 53, 69, 0.6);
+        color: rgb(255, 255, 255);
+        &:hover {
+          background: rgba(220, 53, 69, 0.2);
+          &:first-of-type {
+            background: rgba(220, 53, 69, 0.3);
+          }
+        }
+      }
+
+      &:last-of-type {
+        background: rgba(var(--theme-rgb), 0.1);
+        color: var(--theme);
+        &:hover {
+          background: rgba(var(--theme-rgb), 0.2);
+        }
+      }
+    }
+  }
+  .closeButton {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    cursor: pointer;
+    color: rgba(var(--theme-rgb), 0.6);
+    border-radius: 50%;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: rgba(var(--theme-rgb), 0.9);
+      background: rgba(var(--theme-rgb), 0.1);
+      transform: scale(1.1);
+    }
+  }
+}

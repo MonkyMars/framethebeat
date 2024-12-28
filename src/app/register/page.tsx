@@ -27,19 +27,24 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     try {
       const response = await signupUser(
         formData.email,
         hashString(formData.password)
       );
-      if (response.status.user.role === 'authenticated') {
-        router.push("/");
-      } else {
-        setError(response.data as string);
+      if (response.status !== 200) {
+        throw new Error(`Registration failed: ${JSON.stringify(response.status)}`);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError(error as string);
+      router.push(`/confirm-email`);
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError(err instanceof Error ? err.message : "Registration failed");
     }
   };
 
