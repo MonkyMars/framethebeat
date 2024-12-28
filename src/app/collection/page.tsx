@@ -60,7 +60,7 @@ const Collection = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    setSearchQuery(searchParams.get("q") || "");
+    
     const getCollection = async () => {
       const data: { artist: string; album: string; saves: number }[] =
         await fetchCollection();
@@ -86,6 +86,10 @@ const Collection = () => {
     getCollection();
     getUserCollection();
   }, [session]);
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get("q") || "");
+  }, [searchParams])
 
   useEffect(() => {
     const fetchSavedAlbums = async ({
