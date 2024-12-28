@@ -123,10 +123,9 @@
 }
 
 @media screen and (max-height: 690px) and (min-width: 575px) {
-  .desktop{
+  .desktop {
     transform: scale(0.6);
   }
-  
 }
 
 .mobile {
@@ -511,8 +510,7 @@
   }
 }
 
-
-.banner{
+.banner {
   position: fixed;
   bottom: 0;
   left: 0;
@@ -563,7 +561,7 @@
 }
 
 .notFoundContainer {
-  min-height: 100vh; 
+  min-height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -580,7 +578,11 @@
   font-size: 8rem;
   font-weight: 700;
   margin: 0;
-  background: linear-gradient(45deg, rgba(var(--theme-rgb), 0.3), rgba(var(--theme-rgb), 0.1));
+  background: linear-gradient(
+    45deg,
+    rgba(var(--theme-rgb), 0.3),
+    rgba(var(--theme-rgb), 0.1)
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -592,7 +594,7 @@
   font-weight: 600;
   margin: 0 0 2rem;
   color: var(--foreground);
-  
+
   &:hover {
     text-shadow: 0 4px 15px rgba(var(--theme-rgb), 0.3);
   }
@@ -684,7 +686,7 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   border-radius: 12px;
   animation: popIn 0.3s ease-out;
-  background-color: rgba(var(--theme-rgb), .2);
+  background-color: rgba(var(--theme-rgb), 0.2);
   color: var(--foreground);
   @keyframes popIn {
     from {
@@ -702,7 +704,6 @@
     border-radius: 12px;
     border: 1px solid rgba(var(--theme-rgb), 0.2);
     min-width: 300px;
-    
   }
 
   &__title {
@@ -713,16 +714,21 @@
     font-weight: 600;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: relative;
-    
+
     &::after {
-      content: '';
+      content: "";
       position: absolute;
       bottom: -0.5rem;
       left: 50%;
       transform: translateX(-50%);
       width: 50px;
       height: 2px;
-      background: linear-gradient(90deg, transparent, var(--theme), transparent);
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--theme),
+        transparent
+      );
     }
   }
 
@@ -750,7 +756,7 @@
     overflow: hidden;
     width: auto;
     &::before {
-      content: '';
+      content: "";
       position: absolute;
       top: 0;
       left: -100%;
@@ -787,7 +793,7 @@
       font-size: 0.95rem;
       font-weight: 500;
       white-space: nowrap;
-      padding: .5rem 0;
+      padding: 0.5rem 0;
       width: auto;
     }
 
@@ -801,8 +807,8 @@
 
   &__close {
     position: absolute;
-    top: .6rem;
-    right: .6rem;
+    top: 0.6rem;
+    right: 0.6rem;
     background: none;
     border: none;
     color: var(--theme);

@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import { ArrowRight, Mail, Lock, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import "./styles.scss";
-import { signupUser } from "../utils/database";
 import { createHash } from "crypto";
 import { useRouter } from "next/navigation";
 import Banner from "../components/Banner";
+import { supabase } from "../utils/supabase";
 
 const hashString = (data: string): string => {
   return createHash("sha256").update(data).digest("hex");
@@ -34,14 +34,18 @@ const Register = () => {
     }
 
     try {
-      const response = await signupUser(
-        formData.email,
-        hashString(formData.password)
-      );
-      if (response.status !== 200) {
-        throw new Error(`Registration failed: ${JSON.stringify(response.status)}`);
+      const hashedPassword = hashString(formData.password);
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: hashedPassword,
+      });
+      if (error) {
+        throw error;
       }
-      router.push(`/confirm-email`);
+      if(data?.user?.role === 'authenticated') {
+        router.push(`/confirm-email?email=${formData.email}&password=${hashedPassword}`);
+      };
+      return data;
     } catch (err) {
       console.error("Registration error:", err);
       setError(err instanceof Error ? err.message : "Registration failed");
@@ -110,7 +114,7 @@ const Register = () => {
           </p>
         </form>
       </div>
-      {error && <Banner title={"Log in failed"} subtitle={error} />}
+      {error && <Banner title={"Log in process failed"} subtitle={`${error.charAt(0).toUpperCase() + error.slice(1)}. Please try again later.`} />}
     </main>
   );
 };
