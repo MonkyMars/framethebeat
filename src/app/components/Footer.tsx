@@ -9,10 +9,10 @@ const Footer = () => {
       </p>
       <ul>
         <li>
-          <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/tp/privacy-policy">Privacy Policy</Link>
         </li>
         <li>
-          <Link href="/terms">Terms of Service</Link>
+          <Link href="/tp/terms-of-service">Terms of Service</Link>
         </li>
         <li>
           <Link href="https://github.com/MonkyMars/framethebeat/tree/master" target="_blank">Source code</Link>

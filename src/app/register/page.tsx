@@ -14,6 +14,7 @@ const hashString = (data: string): string => {
 
 const Register = () => {
   const router = useRouter();
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -27,7 +28,10 @@ const Register = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    if (!acceptedTerms) {
+      setError("Please accept the terms of service and privacy policy");
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -102,6 +106,14 @@ const Register = () => {
               }
               required
             />
+          </div>
+          <div className="termsContainer">
+            <input type="checkbox" checked={acceptedTerms} onChange={() => setAcceptedTerms(!acceptedTerms)}/>
+            <p className="terms">
+              By creating an account, you agree to our{" "}
+              <Link href="/tp/terms-of-service">Terms of Service</Link> and{" "}
+              <Link href="/tp/privacy-policy">Privacy Policy</Link>
+            </p>
           </div>
           <div className="ctaButtonContainer">
             <button type="submit">

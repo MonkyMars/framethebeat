@@ -5,7 +5,7 @@
     rgba(var(--theme-rgb), 0.1) 0%,
     rgba(var(--background-rgb), 0.05) 100%
   );
-  & h1{
+  & h1 {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -19,7 +19,7 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    &::first-letter{
+    &::first-letter {
       background: linear-gradient(
         165deg,
         var(--foreground),
@@ -27,11 +27,10 @@
       );
       background-clip: text;
     }
-    @media screen and (max-width: 768px), screen and (max-height: 650px){
-    display: none;
+    @media screen and (max-width: 768px), screen and (max-height: 650px) {
+      display: none;
+    }
   }
-  }
-  
 }
 
 .section {
@@ -39,7 +38,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: .5em;
+  padding: 0.5em;
   backdrop-filter: blur(16px);
   border-radius: 24px;
   border: 1px solid rgba(var(--theme-rgb), 0.18);
@@ -66,7 +65,7 @@
     text-align: center;
     h2 {
       font-size: 2.2rem;
-      margin: .6em;
+      margin: 0.6em;
       font-weight: 700;
       background: linear-gradient(
         165deg,
@@ -82,14 +81,14 @@
     p {
       color: rgba(var(--foreground-rgb), 0.7);
       font-size: 1.1rem;
-      margin: .7em;
+      margin: 0.7em;
     }
   }
 
   form {
     display: flex;
     flex-direction: column;
-    gap: .8em;
+    gap: 0.8em;
     width: 100%;
     max-width: 440px;
   }
@@ -152,7 +151,7 @@
 
     button {
       width: 100%;
-      padding: .7em 0;
+      padding: 0.7em 0;
       border-radius: 14px;
       background: linear-gradient(
         165deg,
@@ -245,6 +244,49 @@
     .ctaButtonContainer button {
       font-size: 1rem;
       padding: 0.9em 1.8em;
+    }
+  }
+}
+
+.termsContainer {
+  display: flex;
+  margin-top: .8em;
+  color: rgba(var(--foreground-rgb), 0.7);
+  font-size: 1rem;
+  gap: 1em;
+  a {
+    color: var(--theme);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 0.4em;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  input[type="checkbox"] {
+    appearance: none;
+    width: 1.2em;
+    height: 1.2em;
+    border: 2px solid rgba(var(--theme-rgb), 0.5);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: .7em;
+    margin-top: 0.2em;
+    &:checked {
+      background: var(--theme);
+      border-color: var(--theme);
+      &::after {
+        content: "✔";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(1.2);
+        color: var(--background);
+        font-size: 0.8em;
+      }
     }
   }
 }
