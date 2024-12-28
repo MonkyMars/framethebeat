@@ -1,4 +1,5 @@
 import styles from "../page.module.scss";
+import Link from "next/link";
 
 const Footer = () => {
   return (
@@ -8,13 +9,13 @@ const Footer = () => {
       </p>
       <ul>
         <li>
-          <a href="/privacy">Privacy Policy</a>
+          <Link href="/privacy">Privacy Policy</Link>
         </li>
         <li>
-          <a href="/terms">Terms of Service</a>
+          <Link href="/terms">Terms of Service</Link>
         </li>
         <li>
-          <a href="/contact">Contact</a>
+          <Link href="https://github.com/MonkyMars/framethebeat/tree/master" target="_blank">Source code</Link>
         </li>
       </ul>
     </footer>
