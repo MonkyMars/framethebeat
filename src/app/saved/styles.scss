@@ -158,11 +158,30 @@
         margin-bottom: 0.4em;
         color: var(--foreground);
       }
-
-      p {
-        font-size: 0.9rem;
-        color: rgba(var(--foreground-rgb), 0.7);
+      .artist {
+        margin: 0 0 0.25rem 0;
+        color: rgba(var(--foreground-rgb), 0.8);
       }
+  
+      .date {
+        margin: 0;
+        font-size: 0.9rem;
+        color: rgba(var(--foreground-rgb), 0.6);
+      }
+      .category {
+        margin: 0.5rem 0;
+        font-size: 0.95rem;
+        color: var(--theme);
+        text-align: center;
+        font-weight: 500;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        padding: 0.2em 0.8em;
+        border-radius: 4px;
+        background: rgba(var(--theme-rgb), 0.1);
+        display: inline-block;
+      }
+    
     }
 
     .cardActions {
@@ -183,6 +202,12 @@
         &:hover {
           transform: scale(1.1);
         }
+      }
+      .saves{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
       }
     }
   }

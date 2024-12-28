@@ -43,13 +43,12 @@ export const saveAlbum = async (
       .select("*")
       .eq("album", album)
       .eq("artist", artist)
-      .single();
 
     if (fetchError) {
       throw new Error(`Failed to fetch record: ${fetchError.message}`);
     }
 
-    const currentSaves = existingRecord?.saves || 0;
+    const currentSaves = existingRecord[0]?.saves || 0;
     const { data: updateData, error: updateError } = await supabase
       .from("collection")
       .update([
@@ -98,13 +97,12 @@ export const deleteAlbum = async (
       .select("*")
       .eq("album", album)
       .eq("artist", artist)
-      .single();
 
     if (fetchError) {
       throw new Error(`Failed to fetch record: ${fetchError.message}`);
     }
     const data = await response.json();
-    const currentSaves = existingRecord?.saves || 0;
+    const currentSaves = existingRecord[0]?.saves || 0;
     const { data: updateData, error: updateError } = await supabase
       .from("collection")
       .update([

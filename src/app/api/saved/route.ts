@@ -13,7 +13,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const { data: saved, error } = await supabase
+    const { data, error } = await supabase
       .from("saved")
       .select("*")
       .eq("user_id", user_id);
@@ -21,8 +21,8 @@ export async function GET(req: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    
-    return NextResponse.json(saved);
+
+    return NextResponse.json(data);
   } catch (error) {
     return NextResponse.json(
       { message: `Internal Server Error: ${error}` },
@@ -41,8 +41,11 @@ export async function POST(req: Request) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    
-    return NextResponse.json(data);
+    return NextResponse.json({
+      message: "Successfully saved album",
+      status: 200,
+      data
+    });
   } catch (error) {
     return NextResponse.json(
       { message: `Internal Server Error: ${error}` },
@@ -54,7 +57,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { artist, album, user_id } = await req.json();
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("saved")
       .delete()
       .eq("artist", artist)
@@ -67,7 +70,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({
       message: "Successfully deleted album",
       status: 200,
-      data
     });
   } catch (error) {
     return NextResponse.json(

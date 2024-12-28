@@ -6,9 +6,11 @@ import "./styles.scss";
 import Image from "next/image";
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { Heart } from "lucide-react";
+import { Heart, Share2 } from "lucide-react";
 import Banner from "../components/Banner";
-import { parseAlbumData } from "../utils/functions";
+import { getAlbumData, isGif, isHighPriority } from "../utils/functions";
+import SharePopup from "../components/SharePopup";
+import Link from "next/link";
 import {
   fetchCollection,
   saveAlbum,
@@ -17,38 +19,14 @@ import {
 } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface API_RESPONSE {
-  album: {
-    mbid: string;
-    artist: string;
-    name: string;
-    image: { "#text": string }[];
-    wiki?: {
-      content: string;
-      summary: string;
-      published: string;
-    };
-  };
-}
-
-const isHighPriority = (src?: string): boolean => {
-  if (!src || src.includes("placeholder")) return false;
-  const extension = src.split(".").pop()?.toLowerCase();
-  return extension !== "gif";
-};
-
-const isGif = (src?: string): boolean => {
-  const extension = src?.split(".").pop()?.toLowerCase();
-  return extension === "gif";
-};
-
 const Collection = () => {
   const searchParams = useSearchParams();
   const fetchedOnce = useRef(false);
-  
+  const [sharePopUp, setSharePopUp] = useState<{
+    artist: string;
+    album: string;
+  } | null>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const [collection, setCollection] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,30 +42,30 @@ const Collection = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
+    const getCollection = async () => {
+      const data: { artist: string; album: string; saves: number }[] =
+        await fetchCollection();
+      const mappedData = data.map((item) => ({
+        artist: item.artist,
+        title: item.album,
+        saves: item.saves,
+      }));
+      setCollectionNames(mappedData);
+    };
+    const getUserCollection = async () => {
+      if (!session?.user?.id) {
+        return;
+      }
+      const data: { artist: string; album: string }[] =
+        await fetchUserCollection(session.user.id);
+      const mappedData = data.map((item) => ({
+        artist: item.artist,
+        title: item.album,
+      }));
+      setUserCollectionNames(mappedData);
+    };
     if (!fetchedOnce.current) {
       fetchedOnce.current = true;
-      const getCollection = async () => {
-        const data: { artist: string; album: string; saves: number }[] =
-          await fetchCollection();
-        const mappedData = data.map((item) => ({
-          artist: item.artist,
-          title: item.album,
-          saves: item.saves,
-        }));
-        setCollectionNames(mappedData);
-      };
-      const getUserCollection = async () => {
-        if (!session?.user?.id) {
-          return;
-        }
-        const data: { artist: string; album: string }[] =
-          await fetchUserCollection(session.user.id);
-        const mappedData = data.map((item) => ({
-          artist: item.artist,
-          title: item.album,
-        }));
-        setUserCollectionNames(mappedData);
-      };
       getCollection();
       getUserCollection();
     }
@@ -95,7 +73,7 @@ const Collection = () => {
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "");
-  }, [searchParams])
+  }, [searchParams]);
 
   useEffect(() => {
     const fetchSavedAlbums = async ({
@@ -105,48 +83,28 @@ const Collection = () => {
       title: string;
       artist: string;
     }) => {
-      try {
-        const response = await fetch(
-          `${API_URL}/2.0/?method=album.getinfo&api_key=${API_KEY}&artist=${encodeURIComponent(
-            artist
-          )}&album=${encodeURIComponent(title)}&format=json`
-        );
-        const data = await response.json();
-        const { album: model } = data as API_RESPONSE;
-        if (!model) {
-          return;
-        }
-        const albumData = parseAlbumData(model);
-        const returnData: Album[] = [
-          {
-            id: albumData.id,
-            title: albumData.albumTitle,
-            artist: albumData.albumArtist,
-            date: albumData.albumDate,
-            albumCover: {
-              src: albumData.albumCover.src,
-              alt: albumData.albumCover.alt,
-            },
-          },
-        ];
-        setCollection((prev) => {
-          const newAlbums = returnData.filter(
+      const fetchedData = await getAlbumData(title, artist);
+      if (!fetchedData) return;
+      setCollection((prev) => {
+        const newAlbums = fetchedData
+          .filter(
             (newAlbum) =>
               !prev.some(
                 (existingAlbum) =>
-                  existingAlbum.title === newAlbum.title &&
-                  existingAlbum.artist === newAlbum.artist
+                  existingAlbum.title === newAlbum.albumTitle &&
+                  existingAlbum.artist === newAlbum.albumArtist
               )
-          );
-          return [...prev, ...newAlbums];
-        });
-      } catch (error) {
-        console.error(
-          `Error fetching album data for ${title} by ${artist}:`,
-          error
-        );
-        setError(`error: ${error}`);
-      }
+          )
+          .map((album) => ({
+            id: album.id,
+            title: album.albumTitle,
+            artist: album.albumArtist,
+            date: album.albumDate,
+            category: album.albumCategory,
+            albumCover: album.albumCover,
+          }));
+        return [...prev, ...newAlbums];
+      });
     };
     collectionNames?.map((album) => {
       fetchSavedAlbums({
@@ -169,27 +127,29 @@ const Collection = () => {
       );
       return;
     }
+    const response = await saveAlbum(artist, album, session?.user?.id);
+    if (response.status !== 200) {
+      setError(response.message);
+      return;
+    }
+    
     (e.target as SVGElement).style.fill = "var(--theme)";
     const newLikesCount =
       (collectionNames?.find((item) => item.title === album)?.saves ?? 0) + 1;
     setCollectionNames((prev) => {
-      const updatedCollection = prev.map((item) => {
-        if (item.title === album) {
-          return { ...item, saves: newLikesCount };
-        }
-        return item;
-      });
-      return updatedCollection;
+      const existingAlbum = prev.find((item) => item.title === album);
+      if (existingAlbum) {
+        return prev.map((item) =>
+          item.title === album ? { ...item, saves: newLikesCount } : item
+        );
+      }
+      return [...prev, { artist, title: album, saves: 1 }];
     });
     setUserCollectionNames((prev) => {
       const updatedCollection = [...prev, { artist, title: album }];
       return updatedCollection;
     });
     showBanner(album, "success", "save");
-    const response = await saveAlbum(artist, album, session?.user?.id);
-    if (response.status !== 200) {
-      setError(response.message);
-    }
   };
 
   const onDelete = async (
@@ -257,7 +217,8 @@ const Collection = () => {
     .filter(
       (album) =>
         album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        album.artist.toLowerCase().includes(searchQuery.toLowerCase())
+        album.artist.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        album.category?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
       if (sortBy === "newest")
@@ -267,6 +228,13 @@ const Collection = () => {
       if (sortBy === "title") return a.title.localeCompare(b.title);
       return a.artist.localeCompare(b.artist);
     });
+
+  const onShare = (artist: string, album: string) => {
+    setSharePopUp({
+      artist: artist,
+      album: album,
+    });
+  };
 
   return (
     <>
@@ -312,7 +280,7 @@ const Collection = () => {
             />
           </div>
         </div>
-        <div className="collectionGrid">
+        <div className="collectionGrid" ref={gridRef}>
           {filteredAlbums.length > 0 &&
             filteredAlbums.map((album, index) => (
               <CollectionCard
@@ -332,6 +300,7 @@ const Collection = () => {
                     ? true
                     : false
                 }
+                onShare={onShare}
               />
             ))}
           {collection.length === 0 && filteredAlbums.length === 0 && (
@@ -343,13 +312,39 @@ const Collection = () => {
           {filteredAlbums.length === 0 && collection.length > 0 && (
             <div className="loading-container">
               <div className="loading-spinner"></div>
-              <p className="loading-text">No results found with search filters. Please try different filters.</p>
+              <p className="loading-text">
+                No results found with search filters. Please try different
+                filters.
+              </p>
             </div>
           )}
+        </div>
+        <div className="endText">
+          <p>
+            You&apos;ve reached the end of our collection! Didn&apos;t find the
+            album you were looking for? Reach out to us!
+          </p>
+          <Link href="mailto:support@framethebeat.com">
+            Support@framethebeat.com
+          </Link>
+          <button
+            onClick={() =>
+              gridRef.current?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            Back to the top
+          </button>
         </div>
       </main>
       {error && <Banner title="Error" subtitle={error} />}
       {title && <Banner title={title} subtitle={title} />}
+      {sharePopUp && (
+        <SharePopup
+          artistName={sharePopUp.artist}
+          albumName={sharePopUp.album}
+          onClose={() => setSharePopUp(null)}
+        />
+      )}
       <Footer />
     </>
   );
@@ -357,6 +352,7 @@ const Collection = () => {
 
 type CollectionCardProps = Album & {
   onHeartClick: (e: React.MouseEvent<SVGSVGElement>) => void;
+  onShare: (artist: string, album: string) => void;
   saves: number;
   saved: boolean;
 };
@@ -365,11 +361,13 @@ const CollectionCard = ({
   id,
   title,
   date,
+  category,
   albumCover,
   artist,
   onHeartClick,
   saves,
   saved = false,
+  onShare,
 }: CollectionCardProps) => (
   <div className="collectionCard" key={id}>
     <div className="albumImage">
@@ -385,15 +383,25 @@ const CollectionCard = ({
     <div className="albumInfo">
       <h3>{title}</h3>
       <p className="artist">{artist}</p>
-      <p className="date">{date}</p>
+      {date !== "unknown" && <p className="date">{date}</p>}
+      {category && (
+        <p className="category">
+          {category.charAt(0).toLocaleUpperCase() + category.slice(1)}
+        </p>
+      )}
     </div>
     <div className="albumActions">
-      <Heart
-        size={24}
-        onClick={(e) => onHeartClick(e)}
-        style={{ fill: saved ? "var(--theme)" : "var(--background)" }}
-      />
-      <span>{saves}</span>
+      <button>
+        <Share2 size={24} onClick={() => onShare(artist, title)} />
+      </button>
+      <button className="saves">
+        <Heart
+          size={24}
+          onClick={(e) => onHeartClick(e)}
+          style={{ fill: saved ? "var(--theme)" : "var(--background)" }}
+        />
+        <span>{saves}</span>
+      </button>
     </div>
   </div>
 );
@@ -404,6 +412,6 @@ const CollectionPage = () => {
       <Collection />
     </Suspense>
   );
-}
+};
 
 export default CollectionPage;

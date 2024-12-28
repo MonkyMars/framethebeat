@@ -2,6 +2,7 @@ import React from "react";
 import Nav from "../../components/Nav";
 import Footer from "../../components/Footer";
 import "../styles.scss"
+import Link from "next/link";
 
 const TermsOfService = () => {
   return (
@@ -53,7 +54,7 @@ const TermsOfService = () => {
           <p>We may modify these Terms at any time. Continued use of our services after changes constitutes acceptance of the modified Terms.</p>
 
           <h2>9. Contact Us</h2>
-          <p>For questions about these Terms, please contact us at: <a href="mailto:reply@framethebeat.com">reply@framethebeat.com</a></p>
+          <p>For questions about these Terms, please contact us at: <Link href="mailto:support@framethebeat.com">support@framethebeat.com</Link></p>
         </div>
       </main>
       <Footer/>

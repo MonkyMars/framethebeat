@@ -6,24 +6,11 @@ import Image from "next/image";
 import { Heart, Share2 } from "lucide-react";
 import { Album } from "../utils/types";
 import Footer from "../components/Footer";
-import { deleteAlbum, fetchUserCollection } from "../utils/database";
+import { deleteAlbum, fetchUserCollection, fetchCollection } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 import Banner from "../components/Banner";
 import SharePopup from "../components/SharePopup";
-
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-interface API_RESPONSE {
-  album: {
-    artist: string;
-    name: string;
-    image: { "#text": string }[];
-    wiki?: {
-      published: string;
-    };
-  };
-}
+import { getAlbumData, isGif, isHighPriority } from "../utils/functions";
 
 const Saved = () => {
   const fetchedOnce = useRef(false);
@@ -35,29 +22,45 @@ const Saved = () => {
   const [error, setError] = useState<string>("");
   const [sharePopUp, setSharePopUp] = React.useState<{ artist: string; album: string } | null>(null);
   const [collectionNames, setCollectionNames] = useState<
-    { artist: string; title: string; saves: number }[]
-  >([]);
+  { artist: string; title: string; saves: number }[]
+>([]);
+const [userCollectionNames, setUserCollectionNames] = useState<
+  { artist: string; title: string }[]
+>([]);
   useEffect(() => {
     if (loading) return;
 
     if (!session) {
       return;
     }
-    const getCollection = async () => {
-      if (!session?.user?.id) return;
-      const data: { artist: string; album: string; saves: number }[] =
-        await fetchUserCollection(session.user.id);
-      const mappedData = data.map((item) => ({
-        artist: item.artist,
-        title: item.album,
-        saves: item.saves,
-      }));
-      setCollectionNames(mappedData);
-    };
-    if(!fetchedOnce.current) {
-      fetchedOnce.current = true;
-      getCollection();
-    }
+
+        const getCollection = async () => {
+          const data: { artist: string; album: string; saves: number }[] =
+            await fetchCollection();
+          const mappedData = data.map((item) => ({
+            artist: item.artist,
+            title: item.album,
+            saves: item.saves,
+          }));
+          setCollectionNames(mappedData);
+        };
+        const getUserCollection = async () => {
+          if (!session?.user?.id) {
+            return;
+          }
+          const data: { artist: string; album: string }[] =
+            await fetchUserCollection(session.user.id);
+          const mappedData = data.map((item) => ({
+            artist: item.artist,
+            title: item.album,
+          }));
+          setUserCollectionNames(mappedData);
+        };
+        if (!fetchedOnce.current) {
+          fetchedOnce.current = true;
+          getCollection();
+          getUserCollection();
+        }
   }, [session, loading]);
 
   useEffect(() => {
@@ -68,62 +71,34 @@ const Saved = () => {
       title: string;
       artist: string;
     }) => {
-      try {
-        const response = await fetch(
-          `${API_URL}/2.0/?method=album.getinfo&api_key=${API_KEY}&artist=${encodeURIComponent(
-            artist
-          )}&album=${encodeURIComponent(title)}&format=json`
-        );
-        const data = await response.json();
-        const { album: model } = data as API_RESPONSE;
-        const albumData = {
-          albumArtist: model.artist,
-          albumTitle: model.name,
-          albumCover: {
-            src: model.image[3]["#text"],
-            alt: `${model.name} album cover`,
-          },
-          albumDate:
-            model.wiki?.published?.split(" ")[2].trim().slice(0, 4) ||
-            "unknown",
-        };
-        const returnData: Album[] = [
-          {
-            id: Math.floor(Math.random() * 10000),
-            title: albumData.albumTitle,
-            artist: albumData.albumArtist,
-            date: albumData.albumDate,
-            albumCover: {
-              src: albumData.albumCover.src,
-              alt: albumData.albumCover.alt,
-            },
-          },
-        ];
-        setSavedAlbums((prev) => {
-          const newAlbums = returnData.filter(
+      const fetchedData = await getAlbumData(title, artist);
+      if (!fetchedData) return; 
+      setSavedAlbums((prev) => {
+          const newAlbums = fetchedData.filter(
             (newAlbum) =>
               !prev.some(
                 (existingAlbum) =>
-                  existingAlbum.title === newAlbum.title &&
-                  existingAlbum.artist === newAlbum.artist
+                  existingAlbum.title === newAlbum.albumTitle &&
+                  existingAlbum.artist === newAlbum.albumArtist
               )
-          );
+          ).map(album => ({
+            id: album.id,
+            title: album.albumTitle,
+            artist: album.albumArtist,
+            date: album.albumDate,
+            category: album.albumCategory,
+            albumCover: album.albumCover
+          }));
           return [...prev, ...newAlbums];
         });
-      } catch (error) {
-        console.error(
-          `Error fetching album data for ${title} by ${artist}:`,
-          error
-        );
-      }
     };
-    collectionNames.map((album) => {
+    userCollectionNames.map((album) => {
       fetchSavedAlbums({
         title: album.title,
         artist: album.artist,
       });
     });
-  }, [collectionNames]);
+  }, [userCollectionNames]);
 
   const handleRemove = async (id: number, artist: string, album: string) => {
     if (!session?.user.id) return;
@@ -218,31 +193,16 @@ const Saved = () => {
       {filteredAlbums.length > 0 ? (
         <div className="savedGrid">
           {filteredAlbums.map((album, index) => (
-            <div key={album.id || index} className="savedCard">
-              <Image
-                src={album.albumCover.src || "/placeholder.png"}
-                alt={album.albumCover.alt}
-                width={300}
-                height={300}
-              />
-              <div className="cardContent">
-                <h3>{album.title}</h3>
-                <p>{album.artist}</p>
-                <p>{album.date}</p>
-              </div>
-              <div className="cardActions">
-                <button onClick={() => onShare(album.artist, album.title)}>
-                  <Share2 size={20} />
-                </button>
-                <button
-                  onClick={() =>
-                    handleRemove(album.id, album.artist, album.title)
-                  }
-                >
-                  <Heart size={20} className="heart" />
-                </button>
-              </div>
-            </div>
+            <SavedCard
+              key={index}
+              album={album}
+              onShare={onShare}
+              onRemove={handleRemove}
+              saves={
+                collectionNames.find((item) => item.title === album.title)
+                  ?.saves || 0
+              }
+            />
           ))}
         </div>
       ) : (
@@ -273,6 +233,48 @@ const Saved = () => {
       {error && <Banner title="Error" subtitle={error} />}
       {sharePopUp && <SharePopup artistName={sharePopUp.artist} albumName={sharePopUp.album} onClose={() => setSharePopUp(null)}/>}
     </>
+  );
+};
+
+interface savedCardProps {
+  album: Album;
+  onShare: (artist: string, album: string) => void;
+  onRemove: (id: number, artist: string, album: string) => void;
+  saves?: number;
+}
+
+const SavedCard: React.FC<savedCardProps> = ({ album, onShare, onRemove, saves }) => {
+  return (
+    <div className="savedCard">
+      <Image
+        src={album.albumCover.src}
+        alt={album.albumCover.alt}
+        width={1500}
+        height={1500}
+        priority={isHighPriority(album.albumCover.src)}
+        unoptimized={isGif(album.albumCover.src)}
+
+      />
+      <div className="cardContent">
+        <h3>{album.title}</h3>
+        <p className="artist">{album.artist}</p>
+        {album.date !== "unknown" && <p className="date">{album.date}</p>}
+      {album.category && (
+        <p className="category">
+          {album.category.charAt(0).toLocaleUpperCase() + album.category.slice(1)}
+        </p>
+      )}
+      </div>
+      <div className="cardActions">
+        <button onClick={() => onShare(album.artist, album.title)}>
+          <Share2 size={20} />
+        </button>
+        <button onClick={() => onRemove(album.id, album.artist, album.title)}>
+          <Heart size={20} className="heart saves" />
+          <span>{saves}</span>
+        </button>
+      </div>
+    </div>
   );
 };
 

@@ -9,4 +9,5 @@ export interface Album {
     albumCover: AlbumCover;
     date?: string;
     id: number;
+    category?: string;
 }

@@ -2,6 +2,7 @@ import React from "react";
 import Nav from "../../components/Nav";
 import Footer from "../../components/Footer";
 import "../styles.scss"
+import Link from "next/link";
 
 const PrivacyPolicy = () => {
   return (
@@ -53,7 +54,7 @@ const PrivacyPolicy = () => {
           <p>We may update this policy occasionally. Significant changes will be notified via website announcement.</p>
 
           <h2>9. Contact Us</h2>
-          <p>For privacy-related inquiries, contact us at: <a href="mailto:reply@framethebeat.com">reply@framethebeat.com</a></p>
+          <p>For privacy-related inquiries, contact us at: <Link href="mailto:support@framethebeat.com">support@framethebeat.com</Link></p>
         </div>
       </main>
       <Footer/>
