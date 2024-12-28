@@ -12,18 +12,15 @@ import Nav from "./components/Nav";
 import Discover from "./components/Discover";
 
 export default function Home() {
-  const images = [
+  const images = React.useMemo(() => [
     "nothingbutthieves_moralpanic_fsei.jpg",
     "kanyewest_mybeautifuldarktwist_ehfh.jpg",
     "kendricklamar_goodkidmaadcity_4zxm.jpg",
     "twentyonepilots_scaledandicy_e2xt.jpg",
     "theweeknd_mydearmelancholy_albq.jpg",
     "tameimpala_currents_857m.jpg",
-  ];
-  const ImageRandomizer = () => {
-    const selectedImage = Math.floor(Math.random() * images.length);
-    return images[selectedImage];
-  };
+  ], []);
+  
   const [randomImage, setRandomImage] = React.useState<string>(images[0]);
   const AlbumCover = (index: number): Album => {
     const albumCovers: Album[] = [
@@ -72,8 +69,12 @@ export default function Home() {
   };
 
   React.useEffect(() => {
+    const ImageRandomizer = () => {
+    const selectedImage = Math.floor(Math.random() * images.length);
+    return images[selectedImage];
+  };
     setRandomImage(ImageRandomizer());
-  }, []);
+  }, [images]);
 
   return (
     <>
@@ -102,7 +103,7 @@ export default function Home() {
       <SearchComponent />
       <Categories />
       <Featured AlbumCover={AlbumCover} />
-      <Cta />
+      <Cta/>
       <Footer />
     </>
   );

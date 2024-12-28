@@ -17,13 +17,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Frame The Beat",
-  description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+  description:
+    "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
   icons: {
     icon: "/favicon.ico",
   },
   openGraph: {
     title: "Frame The Beat",
-    description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+    description:
+      "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
     url: "localhost:3000",
     images: [
       {
@@ -44,10 +46,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-            <Analytics/>
+        <Analytics />
         <AuthProvider>
-              <ThemeProvider>{children}</ThemeProvider>
-            </AuthProvider>
+          <ThemeProvider>{children}</ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );
