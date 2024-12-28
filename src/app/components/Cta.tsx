@@ -1,8 +1,11 @@
 import styles from "../page.module.scss";
 import { useAuth } from "../utils/AuthContext";
+import { useRouter } from "next/navigation";
 
 const Cta = () => {
   const { session } = useAuth();
+  const router = useRouter();
+
   return !session ? (
     <section className={styles.section}>
       <h2>Join the Community</h2>
@@ -10,8 +13,8 @@ const Cta = () => {
         Sign up now to save your favorite album covers and contribute your own!
       </p>
       <div className={styles.ctaButtonContainer}>
-        <button>Log In</button>
-        <button>Sign Up</button>
+        <button onClick={() => router.push('/login')}>Log In</button>
+        <button onClick={() => router.push('/register')}>Sign Up</button>
       </div>
     </section>
   ) : (
@@ -22,8 +25,8 @@ const Cta = () => {
         them with the world.
       </p>
       <div className={styles.ctaButtonContainer}>
-        <button>Settings</button>
-        <button>Saved album covers</button>
+        <button onClick={() => router.push('/settings')}>Settings</button>
+        <button onClick={() => router.push('/saved')}>Saved album covers</button>
       </div>
     </section>
   );
