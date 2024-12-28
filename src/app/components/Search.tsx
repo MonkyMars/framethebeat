@@ -17,7 +17,7 @@ const SearchComponent = () => {
       <h2>Search Album Covers</h2>
       <p></p>
       <div className={styles.search}>
-        <input type="text" placeholder="Search by album, artist, or genre" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
+        <input type="text" placeholder="Search by album or artist" value={searchValue} onChange={(e) => setSearchValue(e.target.value)} />
         <button onClick={handleSearch}>
           <ArrowRight size={24} />
         </button>
