@@ -4,10 +4,11 @@ import Nav from "../components/Nav";
 import { Album } from "../utils/types";
 import "./styles.scss";
 import Image from "next/image";
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Heart } from "lucide-react";
 import Banner from "../components/Banner";
+import { parseAlbumData } from "../utils/functions";
 import {
   fetchCollection,
   saveAlbum,
@@ -26,6 +27,8 @@ interface API_RESPONSE {
     name: string;
     image: { "#text": string }[];
     wiki?: {
+      content: string;
+      summary: string;
       published: string;
     };
   };
@@ -44,6 +47,7 @@ const isGif = (src?: string): boolean => {
 
 const Collection = () => {
   const searchParams = useSearchParams();
+  const fetchedOnce = useRef(false);
   
   const [collection, setCollection] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
@@ -60,31 +64,33 @@ const Collection = () => {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    
-    const getCollection = async () => {
-      const data: { artist: string; album: string; saves: number }[] =
-        await fetchCollection();
-      const mappedData = data.map((item) => ({
-        artist: item.artist,
-        title: item.album,
-        saves: item.saves,
-      }));
-      setCollectionNames(mappedData);
-    };
-    const getUserCollection = async () => {
-      if (!session?.user?.id) {
-        return;
-      }
-      const data: { artist: string; album: string }[] =
-        await fetchUserCollection(session.user.id);
-      const mappedData = data.map((item) => ({
-        artist: item.artist,
-        title: item.album,
-      }));
-      setUserCollectionNames(mappedData);
-    };
-    getCollection();
-    getUserCollection();
+    if (!fetchedOnce.current) {
+      fetchedOnce.current = true;
+      const getCollection = async () => {
+        const data: { artist: string; album: string; saves: number }[] =
+          await fetchCollection();
+        const mappedData = data.map((item) => ({
+          artist: item.artist,
+          title: item.album,
+          saves: item.saves,
+        }));
+        setCollectionNames(mappedData);
+      };
+      const getUserCollection = async () => {
+        if (!session?.user?.id) {
+          return;
+        }
+        const data: { artist: string; album: string }[] =
+          await fetchUserCollection(session.user.id);
+        const mappedData = data.map((item) => ({
+          artist: item.artist,
+          title: item.album,
+        }));
+        setUserCollectionNames(mappedData);
+      };
+      getCollection();
+      getUserCollection();
+    }
   }, [session]);
 
   useEffect(() => {
@@ -110,18 +116,7 @@ const Collection = () => {
         if (!model) {
           return;
         }
-        const albumData = {
-          id: parseInt(model.mbid),
-          albumArtist: model.artist,
-          albumTitle: model.name,
-          albumCover: {
-            src: model.image[3]["#text"].replace("http:", "https:"),
-            alt: `${model.name} album cover`,
-          },
-          albumDate:
-            model.wiki?.published?.split(" ")[2].trim().slice(0, 4) ||
-            "unknown",
-        };
+        const albumData = parseAlbumData(model);
         const returnData: Album[] = [
           {
             id: albumData.id,

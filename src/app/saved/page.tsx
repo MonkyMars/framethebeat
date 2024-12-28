@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Nav from "../components/Nav";
 import "./styles.scss";
 import Image from "next/image";
@@ -26,6 +26,7 @@ interface API_RESPONSE {
 }
 
 const Saved = () => {
+  const fetchedOnce = useRef(false);
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
   const { session, loading } = useAuth();
@@ -53,7 +54,10 @@ const Saved = () => {
       }));
       setCollectionNames(mappedData);
     };
-    getCollection();
+    if(!fetchedOnce.current) {
+      fetchedOnce.current = true;
+      getCollection();
+    }
   }, [session, loading]);
 
   useEffect(() => {
