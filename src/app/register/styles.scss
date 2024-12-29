@@ -276,7 +276,7 @@
     padding: .7em;
     margin-top: 0.2em;
     &:checked {
-      background: var(--theme);
+      background: var(--theme) !important;
       border-color: var(--theme);
       &::after {
         content: "✔";
