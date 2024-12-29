@@ -16,6 +16,7 @@ import {
   saveAlbum,
   fetchUserCollection,
   deleteAlbum,
+  verifyAlbumDeleted,
 } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 
@@ -43,76 +44,118 @@ const Collection = () => {
 
   useEffect(() => {
     const getCollection = async () => {
-      const data: { artist: string; album: string; saves: number }[] =
-        await fetchCollection();
-      const mappedData = data.map((item) => ({
-        artist: item.artist,
-        title: item.album,
-        saves: item.saves,
-      }));
+      const response = await fetchCollection();
+      const data = await response.json();
+      const mappedData = data.map(
+        (item: { artist: string; album: string; saves: string }) => ({
+          artist: item.artist,
+          title: item.album,
+          saves: item.saves,
+        })
+      );
       setCollectionNames(mappedData);
     };
+
     const getUserCollection = async () => {
       if (!session?.user?.id) {
         return;
       }
-      const data: { artist: string; album: string }[] =
-        await fetchUserCollection(session.user.id);
-      const mappedData = data.map((item) => ({
-        artist: item.artist,
-        title: item.album,
-      }));
+      const response = await fetchUserCollection(session.user.id);
+      const data = await response.json();
+      const mappedData = data.map(
+        (item: { artist: string; album: string }) => ({
+          artist: item.artist,
+          title: item.album,
+        })
+      );
       setUserCollectionNames(mappedData);
     };
+
     if (!fetchedOnce.current) {
       fetchedOnce.current = true;
-      getCollection();
-      getUserCollection();
+      Promise.all([getCollection(), getUserCollection()]);
     }
   }, [session]);
+
+  const processedAlbums = useRef(new Set());
+
+  useEffect(() => {
+    if (!collectionNames?.length) return;
+
+    const fetchSavedAlbums = async () => {
+      const newAlbums = collectionNames.filter(
+        (album) =>
+          !processedAlbums.current.has(`${album.artist}-${album.title}`)
+      );
+
+      if (newAlbums.length === 0) return;
+      const albumPromises = newAlbums.map(async (album) => {
+        processedAlbums.current.add(`${album.artist}-${album.title}`);
+
+        const fetchedData = await getAlbumData(album.title, album.artist);
+        if (!fetchedData) return null;
+
+        return fetchedData.map((album) => ({
+          id: album.id,
+          title: album.albumTitle,
+          artist: album.albumArtist,
+          date: album.albumDate,
+          category: album.albumCategory,
+          albumCover: album.albumCover,
+        }));
+      });
+
+      const results = await Promise.all(albumPromises);
+
+      setCollection((prev) => {
+        const newAlbums = results
+          .filter(Boolean)
+          .flat()
+          .filter((newAlbum) => {
+            if (!newAlbum?.title || !newAlbum?.artist) return false;
+            return !prev.some(
+              (existingAlbum) =>
+                existingAlbum.title === newAlbum.title &&
+                existingAlbum.artist === newAlbum.artist
+            );
+          })
+          .map(
+            (album): Album => ({
+              id: album!.id,
+              title: album!.title,
+              artist: album!.artist,
+              date: album!.date || "unknown",
+              category: album!.category || "unknown",
+              albumCover: album!.albumCover || {
+                src: "/placeholder.png",
+                alt: `${album!.title} by ${album!.artist}`,
+              },
+            })
+          );
+        return [...prev, ...newAlbums];
+      });
+    };
+
+    fetchSavedAlbums();
+  }, [collectionNames]);
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "");
   }, [searchParams]);
-
-  useEffect(() => {
-    const fetchSavedAlbums = async ({
-      title,
-      artist,
-    }: {
-      title: string;
+  interface SaveResponse {
+    message: string;
+    status: number;
+    response: {
       artist: string;
-    }) => {
-      const fetchedData = await getAlbumData(title, artist);
-      if (!fetchedData) return;
-      setCollection((prev) => {
-        const newAlbums = fetchedData
-          .filter(
-            (newAlbum) =>
-              !prev.some(
-                (existingAlbum) =>
-                  existingAlbum.title === newAlbum.albumTitle &&
-                  existingAlbum.artist === newAlbum.albumArtist
-              )
-          )
-          .map((album) => ({
-            id: album.id,
-            title: album.albumTitle,
-            artist: album.albumArtist,
-            date: album.albumDate,
-            category: album.albumCategory,
-            albumCover: album.albumCover,
-          }));
-        return [...prev, ...newAlbums];
-      });
+      album: string;
+      user_id: string;
     };
-    collectionNames?.map((album) => {
-      fetchSavedAlbums({
-        title: album.title,
-        artist: album.artist,
-      });
-    });
-  }, [collectionNames]);
+    updateData: {
+      album: string;
+      artist: string;
+      saves: number;
+    };
+  }
 
   const onSave = async (
     e: React.MouseEvent<SVGSVGElement>,
@@ -120,37 +163,70 @@ const Collection = () => {
     album: string
   ) => {
     if (!session?.user?.id) {
-      showBanner(
-        "You must be logged in order to save albums",
-        "error",
-        "error"
+      showBanner("You must be logged in to save albums", "error", "error");
+      return;
+    }
+
+    // Store original states for rollback
+    const originalCollectionNames = [...collectionNames];
+    const originalUserCollection = [...userCollectionNames];
+    const originalFillColor = (e.target as SVGElement).style.fill;
+
+    try {
+      // Optimistic UI updates
+      (e.target as SVGElement).style.fill = "var(--theme)";
+      setCollectionNames((prev) => {
+        const existingAlbum = prev.find((item) => item.title === album);
+        const newSaves = (existingAlbum?.saves ?? 0) + 1;
+
+        if (existingAlbum) {
+          return prev.map((item) =>
+            item.title === album ? { ...item, saves: newSaves } : item
+          );
+        }
+        return [...prev, { artist, title: album, saves: 1 }];
+      });
+
+      setUserCollectionNames((prev) => [...prev, { artist, title: album }]);
+
+      // API call
+      const response: SaveResponse = await saveAlbum(
+        artist,
+        album,
+        session.user.id
       );
-      return;
-    }
-    const response = await saveAlbum(artist, album, session?.user?.id);
-    if (response.status !== 200) {
-      setError(response.message);
-      return;
-    }
-    
-    (e.target as SVGElement).style.fill = "var(--theme)";
-    const newLikesCount =
-      (collectionNames?.find((item) => item.title === album)?.saves ?? 0) + 1;
-    setCollectionNames((prev) => {
-      const existingAlbum = prev.find((item) => item.title === album);
-      if (existingAlbum) {
-        return prev.map((item) =>
-          item.title === album ? { ...item, saves: newLikesCount } : item
-        );
+
+      if (response.status !== 200) {
+        throw new Error(response.message);
       }
-      return [...prev, { artist, title: album, saves: 1 }];
-    });
-    setUserCollectionNames((prev) => {
-      const updatedCollection = [...prev, { artist, title: album }];
-      return updatedCollection;
-    });
-    showBanner(album, "success", "save");
+
+      showBanner(`${album} saved successfully`, "success", "save");
+    } catch (error) {
+      // Rollback on failure
+      (e.target as SVGElement).style.fill = originalFillColor;
+      setCollectionNames(originalCollectionNames);
+      setUserCollectionNames(originalUserCollection);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save album";
+      showBanner(errorMessage, "error", "error");
+    }
   };
+
+  interface DeleteResponse {
+    message: string;
+    status: number;
+    response: {
+      artist: string;
+      album: string;
+      user_id: string;
+    };
+    updateData: {
+      album: string;
+      artist: string;
+      saves: number;
+    };
+  }
 
   const onDelete = async (
     e: React.MouseEvent<SVGSVGElement>,
@@ -158,33 +234,66 @@ const Collection = () => {
     album: string
   ) => {
     if (!session?.user?.id) {
-      showBanner(
-        "You must be logged in order to save albums",
-        "error",
-        "error"
-      );
+      showBanner("You must be logged in to remove albums", "error", "error");
       return;
     }
-    (e.target as SVGElement).style.fill = "var(--background)";
-    const newLikesCount =
-      (collectionNames?.find((item) => item.title === album)?.saves ?? 0) - 1;
-    setCollectionNames((prev) => {
-      const updatedCollection = prev.map((item) => {
-        if (item.title === album) {
-          return { ...item, saves: newLikesCount };
-        }
-        return item;
-      });
-      return updatedCollection;
-    });
-    setUserCollectionNames((prev) => {
-      const updatedCollection = prev.filter((item) => item.title !== album);
-      return updatedCollection;
-    });
-    showBanner(album, "success", "delete");
-    const response = await deleteAlbum(artist, album, session?.user?.id);
-    if (response.status !== 200) {
-      setError(response.message);
+
+    // Store original states for rollback
+    const originalFillColor = (e.target as SVGElement).style.fill;
+    const originalCollectionNames = [...collectionNames];
+    const originalUserCollection = [...userCollectionNames];
+
+    try {
+      (e.target as SVGElement).style.fill = "var(--background)";
+
+      // Update collection counts
+      const newSaves =
+        (collectionNames?.find((item) => item.title === album)?.saves ?? 0) - 1;
+
+      setCollectionNames((prev) =>
+        prev.map((item) =>
+          item.title === album ? { ...item, saves: newSaves } : item
+        )
+      );
+
+      // Remove from user collection
+      setUserCollectionNames((prev) =>
+        prev.filter((item) => item.title !== album)
+      );
+
+      // API call
+      const response: DeleteResponse = await deleteAlbum(
+        artist,
+        album,
+        session.user.id
+      );
+
+      if (response.status !== 200) {
+        throw new Error(response.message);
+      }
+
+      showBanner(`${album} removed successfully`, "success", "delete");
+
+      // Verify deletion success
+      const isStillInDB = await verifyAlbumDeleted(
+        artist,
+        album,
+        session.user.id
+      );
+      if (isStillInDB) {
+        throw new Error("Album deletion verification failed");
+      }
+    } catch (error) {
+      // Rollback on failure
+      (e.target as SVGElement).style.fill = originalFillColor;
+      setCollectionNames(originalCollectionNames);
+      setUserCollectionNames(originalUserCollection);
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to remove album";
+
+      showBanner(errorMessage, "error", "error");
+      setError(errorMessage);
     }
   };
 
@@ -217,7 +326,7 @@ const Collection = () => {
     .filter(
       (album) =>
         album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        album.artist.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        album.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
         album.category?.toLowerCase().includes(searchQuery.toLowerCase())
     )
     .sort((a, b) => {
@@ -384,7 +493,7 @@ const CollectionCard = ({
       <h3>{title}</h3>
       <p className="artist">{artist}</p>
       {date !== "unknown" && <p className="date">{date}</p>}
-      {category && (
+      {category && category.toLocaleLowerCase() !== "unknown" && (
         <p className="category">
           {category.charAt(0).toLocaleUpperCase() + category.slice(1)}
         </p>

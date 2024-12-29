@@ -60,7 +60,6 @@ const ConfirmEmail = () => {
       setError(error.message);
       return;
     }
-    console.log(data);
     if(data?.user?.role === 'authenticated') {
       setVerified(true);
     }

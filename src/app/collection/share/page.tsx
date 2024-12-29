@@ -71,7 +71,8 @@ async function fetchAlbum(
 }
 
 const fetchUserInfo = async (user_id: string, album: string) => {
-  const data = await fetchUserCollection(user_id);
+  const response = await fetchUserCollection(user_id);
+  const data = await response.json();
   const liked = data.find(
     (item: { artist: string; album: string }) => item.album === album
   )

@@ -3,10 +3,15 @@ import React, { useState, useEffect, useRef } from "react";
 import Nav from "../components/Nav";
 import "./styles.scss";
 import Image from "next/image";
+import { toast } from 'react-hot-toast';
 import { Heart, Share2 } from "lucide-react";
 import { Album } from "../utils/types";
 import Footer from "../components/Footer";
-import { deleteAlbum, fetchUserCollection, fetchCollection } from "../utils/database";
+import {
+  deleteAlbum,
+  fetchUserCollection,
+  fetchCollection,
+} from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 import Banner from "../components/Banner";
 import SharePopup from "../components/SharePopup";
@@ -20,13 +25,16 @@ const Saved = () => {
   const [filterBy, setFilterBy] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string>("");
-  const [sharePopUp, setSharePopUp] = React.useState<{ artist: string; album: string } | null>(null);
+  const [sharePopUp, setSharePopUp] = React.useState<{
+    artist: string;
+    album: string;
+  } | null>(null);
   const [collectionNames, setCollectionNames] = useState<
-  { artist: string; title: string; saves: number }[]
->([]);
-const [userCollectionNames, setUserCollectionNames] = useState<
-  { artist: string; title: string }[]
->([]);
+    { artist: string; title: string; saves: number }[]
+  >([]);
+  const [userCollectionNames, setUserCollectionNames] = useState<
+    { artist: string; title: string }[]
+  >([]);
   useEffect(() => {
     if (loading) return;
 
@@ -34,33 +42,37 @@ const [userCollectionNames, setUserCollectionNames] = useState<
       return;
     }
 
-        const getCollection = async () => {
-          const data: { artist: string; album: string; saves: number }[] =
-            await fetchCollection();
-          const mappedData = data.map((item) => ({
-            artist: item.artist,
-            title: item.album,
-            saves: item.saves,
-          }));
-          setCollectionNames(mappedData);
-        };
-        const getUserCollection = async () => {
-          if (!session?.user?.id) {
-            return;
-          }
-          const data: { artist: string; album: string }[] =
-            await fetchUserCollection(session.user.id);
-          const mappedData = data.map((item) => ({
-            artist: item.artist,
-            title: item.album,
-          }));
-          setUserCollectionNames(mappedData);
-        };
-        if (!fetchedOnce.current) {
-          fetchedOnce.current = true;
-          getCollection();
-          getUserCollection();
-        }
+    const getCollection = async () => {
+      const response = await fetchCollection();
+      const data = await response.json();
+      const mappedData = data.map(
+        (item: { artist: string; album: string; saves: number }) => ({
+          artist: item.artist,
+          title: item.album,
+          saves: item.saves,
+        })
+      );
+      setCollectionNames(mappedData);
+    };
+    const getUserCollection = async () => {
+      if (!session?.user?.id) {
+        return;
+      }
+      const response = await fetchUserCollection(session.user.id);
+      const data = await response.json();
+      const mappedData = data.map(
+        (item: { artist: string; album: string }) => ({
+          artist: item.artist,
+          title: item.album,
+        })
+      );
+      setUserCollectionNames(mappedData);
+    };
+    if (!fetchedOnce.current) {
+      fetchedOnce.current = true;
+      getCollection();
+      getUserCollection();
+    }
   }, [session, loading]);
 
   useEffect(() => {
@@ -72,25 +84,27 @@ const [userCollectionNames, setUserCollectionNames] = useState<
       artist: string;
     }) => {
       const fetchedData = await getAlbumData(title, artist);
-      if (!fetchedData) return; 
+      if (!fetchedData) return;
       setSavedAlbums((prev) => {
-          const newAlbums = fetchedData.filter(
+        const newAlbums = fetchedData
+          .filter(
             (newAlbum) =>
               !prev.some(
                 (existingAlbum) =>
                   existingAlbum.title === newAlbum.albumTitle &&
                   existingAlbum.artist === newAlbum.albumArtist
               )
-          ).map(album => ({
+          )
+          .map((album) => ({
             id: album.id,
             title: album.albumTitle,
             artist: album.albumArtist,
             date: album.albumDate,
             category: album.albumCategory,
-            albumCover: album.albumCover
+            albumCover: album.albumCover,
           }));
-          return [...prev, ...newAlbums];
-        });
+        return [...prev, ...newAlbums];
+      });
     };
     userCollectionNames.map((album) => {
       fetchSavedAlbums({
@@ -100,12 +114,47 @@ const [userCollectionNames, setUserCollectionNames] = useState<
     });
   }, [userCollectionNames]);
 
+  interface DeleteResponse {
+    message: string;
+    status: number;
+    response: {
+      artist: string;
+      album: string;
+      user_id: string;
+    };
+    updateData: {
+      album: string;
+      artist: string;
+      saves: number;
+    };
+  }
+  
   const handleRemove = async (id: number, artist: string, album: string) => {
-    if (!session?.user.id) return;
-    setSavedAlbums(savedAlbums.filter((album) => album.id !== id));
-    const response: {status: number; message: string} = await deleteAlbum(artist, album, session?.user.id);
-    if (response.status !== 200) {
-      setError(response.message);
+    if (!session?.user.id) {
+      toast.error('You must be logged in to remove albums');
+      return;
+    }
+    const originalAlbums = [...savedAlbums];
+    
+    try {
+      setSavedAlbums(prev => prev.filter(album => album.id !== id));
+  
+      const response: DeleteResponse = await deleteAlbum(
+        artist,
+        album,
+        session.user.id
+      );
+  
+      if (response.status === 200) {
+        toast.success('Album removed from your collection');
+      } else {
+        throw new Error(response.message);
+      }
+  
+    } catch (error) {
+      setSavedAlbums(originalAlbums);
+      setError(error instanceof Error ? error.message : 'Failed to remove album');
+      toast.error('Failed to remove album. Please try again.');
     }
   };
 
@@ -140,7 +189,7 @@ const [userCollectionNames, setUserCollectionNames] = useState<
     setSharePopUp({
       artist: artist,
       album: album,
-    })
+    });
   };
 
   return (
@@ -231,7 +280,13 @@ const [userCollectionNames, setUserCollectionNames] = useState<
       )}
       <Footer />
       {error && <Banner title="Error" subtitle={error} />}
-      {sharePopUp && <SharePopup artistName={sharePopUp.artist} albumName={sharePopUp.album} onClose={() => setSharePopUp(null)}/>}
+      {sharePopUp && (
+        <SharePopup
+          artistName={sharePopUp.artist}
+          albumName={sharePopUp.album}
+          onClose={() => setSharePopUp(null)}
+        />
+      )}
     </>
   );
 };
@@ -243,7 +298,12 @@ interface savedCardProps {
   saves?: number;
 }
 
-const SavedCard: React.FC<savedCardProps> = ({ album, onShare, onRemove, saves }) => {
+const SavedCard: React.FC<savedCardProps> = ({
+  album,
+  onShare,
+  onRemove,
+  saves,
+}) => {
   return (
     <div className="savedCard">
       <Image
@@ -253,17 +313,17 @@ const SavedCard: React.FC<savedCardProps> = ({ album, onShare, onRemove, saves }
         height={1500}
         priority={isHighPriority(album.albumCover.src)}
         unoptimized={isGif(album.albumCover.src)}
-
       />
       <div className="cardContent">
         <h3>{album.title}</h3>
         <p className="artist">{album.artist}</p>
         {album.date !== "unknown" && <p className="date">{album.date}</p>}
-      {album.category && (
-        <p className="category">
-          {album.category.charAt(0).toLocaleUpperCase() + album.category.slice(1)}
-        </p>
-      )}
+        {album.category && (
+          <p className="category">
+            {album.category.charAt(0).toLocaleUpperCase() +
+              album.category.slice(1)}
+          </p>
+        )}
       </div>
       <div className="cardActions">
         <button onClick={() => onShare(album.artist, album.title)}>

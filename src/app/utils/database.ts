@@ -1,78 +1,107 @@
 import { supabase } from "./supabase";
+import { NextResponse } from "next/server";
 
 export const fetchUserCollection = async (id: string) => {
   try {
-    const response = await fetch(
-      `/api/saved?user_id=${encodeURIComponent(id)}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (!id) {
+      return NextResponse.json(
+        { error: "User ID is required" },
+        { status: 400 }
+      );
     }
-    return await response.json();
+
+    const { data: collection, error } = await supabase
+      .from("saved")
+      .select("*")
+      .eq("user_id", id);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json(collection);
   } catch (error) {
-    console.error("Error fetching user collection:", error);
-    throw error;
+    return NextResponse.json(
+      { message: `Internal Server Error: ${error}` },
+      { status: 500 }
+    );
   }
 };
+
+export const fetchCollection = async () => {
+  try {
+    const { data: collection, error } = await supabase
+      .from("collection")
+      .select("*");
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+    return NextResponse.json(collection);
+  } catch (error) {
+    return NextResponse.json(
+      { message: `Internal Server Error: ${error}` },
+      { status: 500 }
+    );
+  }
+};
+
+interface SavedAlbum {
+  artist: string;
+  album: string;
+  user_id: string;
+}
+
+interface SaveAlbumResponse {
+  message: string;
+  status: number;
+  response: SavedAlbum;
+  updateData: {
+    album: string;
+    artist: string;
+    saves: number;
+  };
+}
 
 export const saveAlbum = async (
   artist: string,
   album: string,
   user_id: string
-) => {
+): Promise<SaveAlbumResponse> => {
+  if (!artist?.trim() || !album?.trim() || !user_id?.trim()) {
+    throw new Error("Invalid input parameters");
+  }
+
   try {
-    const response = await fetch(`/api/saved`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ artist, album, user_id }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    const { data: existingRecord, error: fetchError } = await supabase
-      .from("collection")
-      .select("*")
-      .eq("album", album)
-      .eq("artist", artist)
+    const { data: response, error } = await supabase.rpc(
+      "save_album_transaction",
+      {
+        p_artist: artist,
+        p_album: album,
+        p_user_id: user_id,
+      }
+    );
 
-    if (fetchError) {
-      throw new Error(`Failed to fetch record: ${fetchError.message}`);
-    }
-
-    const currentSaves = existingRecord[0]?.saves || 0;
-    const { data: updateData, error: updateError } = await supabase
-      .from("collection")
-      .update([
-        {
-          album,
-          artist,
-          saves: currentSaves + 1,
-        },
-      ])
-      .eq("album", album);
-
-    if (updateError) {
-      throw new Error(`Failed to update saves: ${updateError.message}`);
+    if (error) {
+      throw new Error(`Database operation failed: ${error.message}`);
     }
 
     return {
       message: "Album saved successfully",
       status: 200,
-      response: data,
-      updateData,
+      response: {
+        artist,
+        album,
+        user_id,
+      },
+      updateData: response,
     };
   } catch (error) {
-    console.error("Error updating saves:", error);
-    throw error;
+    if (error instanceof Error) {
+      console.error(`Album save failed: ${error.message}`);
+      throw new Error(`Failed to save album: ${error.message}`);
+    }
+    throw new Error("An unexpected error occurred");
   }
 };
 
@@ -81,119 +110,79 @@ export const deleteAlbum = async (
   album: string,
   user_id: string
 ) => {
+  if (!artist?.trim() || !album?.trim() || !user_id?.trim()) {
+    throw new Error("Invalid input parameters");
+  }
+
   try {
-    const response = await fetch(`/api/saved`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ artist, album, user_id }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const { data: existingRecord, error: fetchError } = await supabase
-      .from("collection")
-      .select("*")
-      .eq("album", album)
-      .eq("artist", artist)
+    const { data: response, error } = await supabase.rpc(
+      "delete_album_transaction",
+      {
+        p_artist: artist,
+        p_album: album,
+        p_user_id: user_id,
+      }
+    );
 
-    if (fetchError) {
-      throw new Error(`Failed to fetch record: ${fetchError.message}`);
-    }
-    const data = await response.json();
-    const currentSaves = existingRecord[0]?.saves || 0;
-    const { data: updateData, error: updateError } = await supabase
-      .from("collection")
-      .update([
-        {
-          album,
-          artist,
-          saves: currentSaves - 1,
-        },
-      ])
-      .eq("album", album);
-
-    if (updateError) {
-      throw new Error(`Failed to update saves: ${updateError.message}`);
+    if (error) {
+      throw new Error(`Database operation failed: ${error.message}`);
     }
 
     return {
-      message: "Album saved successfully",
+      message: "Album deleted successfully",
       status: 200,
-      response: data,
-      updateData,
+      response,
+      updateData: response,
     };
   } catch (error) {
-    console.error("Error deleting album:", error);
-    throw error;
-  }
-};
-
-export const fetchCollection = async () => {
-  try {
-    const response = await fetch(`/api/collection`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (error instanceof Error) {
+      console.error(`Album deletion failed: ${error.message}`);
+      throw new Error(`Failed to delete album: ${error.message}`);
     }
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching collection:", error);
-    throw error;
+    throw new Error("An unexpected error occurred");
   }
 };
 
 export const signupUser = async (email: string, password: string) => {
   try {
-    const response = await fetch(`/api/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
     });
-    if (!response.ok) {
-      return { data: `HTTP error! status: ${response.status}`, status: 500 };
+    if (error) {
+      return NextResponse.json(
+        { message: error.message },
+        { status: error.status }
+      );
     }
-    const data = await response.json();
-    return { data: data, status: data };
+    return NextResponse.json(data);
   } catch (error) {
-    console.error("Error signing up user:", error);
-    return { data: error as Error, status: 500 };
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 };
 
 export const logInUser = async (email: string, password: string) => {
   try {
-    const response = await fetch(`/api/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP error! status: ${response.status}`);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 401 });
     }
 
-    return {
-      data: data.session,
-      status: response.status,
-    };
+    return NextResponse.json({ session }, { status: 200 });
   } catch (error) {
-    console.error("Error logging in:", error);
-    return {
-      data: error as Error,
-      status: 500,
-    };
+    return NextResponse.json(
+      { error: `Internal server error: ${error}` },
+      { status: 500 }
+    );
   }
 };
 
@@ -239,24 +228,46 @@ export const updateUser = async (email: string, password: string) => {
 
 export const deleteUser = async (user_id: string) => {
   try {
-    const response = await fetch(`/api/user`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ user_id }),
-    });
+    const { data, error: SavedError } = await supabase
+      .from("saved")
+      .delete()
+      .eq("user_id", user_id);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const { error } = await supabase.auth.admin.deleteUser(user_id);
+
+    if (error || SavedError) {
+      return NextResponse.json(
+        { error: error?.message || SavedError?.message },
+        { status: 500 }
+      );
     }
-    await logOutUser();
-    return {
+
+    return NextResponse.json({
       message: "User deleted successfully",
       status: 200,
-    };
+      data,
+    });
   } catch (error) {
     console.error("Error deleting user:", error);
-    throw error;
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
+};
+
+export const verifyAlbumDeleted = async (
+  artist: string, 
+  album: string, 
+  userId: string
+): Promise<boolean> => {
+  const { data } = await supabase
+    .from('saved')
+    .select('*')
+    .eq('artist', artist)
+    .eq('album', album)
+    .eq('user_id', userId)
+    .single();
+    
+  return !!data;
 };
