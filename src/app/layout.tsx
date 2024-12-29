@@ -22,14 +22,13 @@ export const metadata: Metadata = {
   authors: [{ name: "Frame The Beat" }],
   creator: "Frame The Beat",
   publisher: "Frame The Beat",
+  metadataBase: new URL('https://www.framethebeat.com'),
   icons: {
     icon: "/favicon.ico",
     apple: "/favicon.ico",
     shortcut: "/favicon.ico",
   },
   manifest: "/manifest.json",
-  themeColor: "#d17e3b",
-  viewport: "width=device-width, initial-scale=1",
   openGraph: {
     title: "Frame The Beat",
     description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
@@ -81,6 +80,11 @@ export const metadata: Metadata = {
     },
   },
   category: "Music",
+};
+
+export const viewport = {
+  themeColor: "#d17e3b",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({
