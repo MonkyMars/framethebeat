@@ -97,8 +97,9 @@ const Settings = () => {
     const user_id = session?.user.id;
     if (!user_id) return;
     const response = await deleteUser(user_id);
-    if (response.message) {
-      console.error(response.message);
+    const data = await response.json();
+    if (data.message) {
+      console.error(data.message);
     }
     setResponse("Account deleted successfully");
     router.push('/login');

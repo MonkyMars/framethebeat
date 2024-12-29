@@ -29,11 +29,12 @@ const Login = () => {
         hashString(formData.password)
       );
       
-      if (response.status === 200 && response.data) {
-        await supabase.auth.setSession(response.data);
+      const responseData = await response.json();
+      if (response.status === 200 && responseData.session) {
+        await supabase.auth.setSession(responseData.session);
         router.push("/");
       } else {
-        setError(response.data.message || "Login failed");
+        setError(responseData.error || "Login failed");
       }
     } catch (error) {
       console.error("Login error:", error);
