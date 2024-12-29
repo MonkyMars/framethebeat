@@ -15,20 +15,20 @@ const SharePopup: React.FC<SharePopupProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  const shareUrl = `${window.location.origin}/collection/share?artist=${encodeURIComponent(artistName)}&album=${encodeURIComponent(albumName)}`;
+  const shareUrl = `${window.location.origin}/collection/share?artist=${encodeURIComponent(
+    artistName
+  )}&album=${encodeURIComponent(albumName)}`;
   const text = `Check out ${albumName} by ${artistName} on Frame The Beat!`;
 
   const shareLinks = [
     {
-      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        text
-      )}\n&url=${encodeURIComponent(shareUrl)}`,
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}\n&url=${encodeURIComponent(
+        shareUrl
+      )}`,
       platform: "Twitter",
     },
     {
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-        shareUrl
-      )}`,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
       platform: "Facebook",
     },
   ];
@@ -68,44 +68,41 @@ const SharePopup: React.FC<SharePopupProps> = ({
   };
 
   return (
-    <div className={styles.sharePopup}>
-      <div className={styles.sharePopup__content}>
-        <button
-          onClick={onClose}
-          className={styles.sharePopup__close}
-          aria-label="Close"
-        >
-          <X size={24} />
-        </button>
-        <h2 className={styles.sharePopup__title}>Share this album</h2>
-        <div className={styles.sharePopup__links}>
-          <button
-            onClick={handleCopyLink}
-            className={styles.sharePopup__button}
-          >
-            {copied ? <Check size={24} /> : <Copy size={24} />}
-            <span>{copied ? "Copied!" : "Copy link"}</span>
+    <div className={styles.sharePopupOverlay}>
+      <div className={styles.sharePopupContainer}>
+        <div className={styles.sharePopupHeader}>
+          <h2 className={styles.sharePopupTitle}>Share this album</h2>
+          <button onClick={onClose} className={styles.closeButton} aria-label="Close">
+            <X size={24} />
           </button>
-          {window.matchMedia("(pointer: coarse)").matches &&
-            document.location.protocol === "https:" && (
+        </div>
+        <div className={styles.sharePopupBody}>
+          <p>
+            <strong>{albumName}</strong> by <strong>{artistName}</strong>
+          </p>
+          <div className={styles.shareButtonsRow}>
+            <button onClick={handleCopyLink} className={styles.shareButton}>
+              {copied ? <Check size={24} /> : <Copy size={24} />}
+              <span>{copied ? "Copied!" : "Copy link"}</span>
+            </button>
+            {window.matchMedia("(pointer: coarse)").matches &&
+              document.location.protocol === "https:" && (
+                <button onClick={handleOSShare} className={styles.shareButton}>
+                  <Share2 size={24} />
+                  <span>Share via OS</span>
+                </button>
+            )}
+            {shareLinks.map((link, index) => (
               <button
-                onClick={handleOSShare}
-                className={styles.sharePopup__button}
+                key={index}
+                onClick={() => handleShare(link.url)}
+                className={styles.shareButton}
               >
                 <Share2 size={24} />
-                <span>Share via OS</span>
+                <span>Share on {link.platform}</span>
               </button>
-            )}
-          {shareLinks.map((link, index) => (
-            <button
-              key={index}
-              onClick={() => handleShare(link.url)}
-              className={styles.sharePopup__button}
-            >
-              <Share2 size={24} />
-              <span>Share on {link.platform}</span>
-            </button>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
