@@ -419,7 +419,7 @@ const Collection = () => {
           {collection.length === 0 && filteredAlbums.length === 0 && (
             <div className="loading-container">
               <div className="loading-spinner"></div>
-              <p className="loading-text">Loading your collection...</p>
+              <p className="loading-text">Loading our collection...</p>
             </div>
           )}
           {filteredAlbums.length === 0 && collection.length > 0 && (
