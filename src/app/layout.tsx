@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Frame The Beat",
     description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
-    url: "https://framethebeat.com",
+    url: "https://www.framethebeat.com",
     siteName: "Frame The Beat",
     locale: "en_US",
     type: "website",
@@ -74,10 +74,10 @@ export const metadata: Metadata = {
     yandex: "6a82b9bbc4f433a8",
   },
   alternates: {
-    canonical: "https://framethebeat.com",
+    canonical: "https://www.framethebeat.com",
     languages: {
-      "en-US": "https://framethebeat.com",
-      "es-ES": "https://framethebeat.com",
+      "en-US": "https://www.framethebeat.com",
+      "es-ES": "https://www.framethebeat.com",
     },
   },
   category: "Music",
