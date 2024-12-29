@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.framethebeat.com
+
+# Sitemaps
+Sitemap: https://www.framethebeat.com/sitemap.xml
