@@ -22,7 +22,6 @@ import { useAuth } from "../utils/AuthContext";
 
 const Collection = () => {
   const searchParams = useSearchParams();
-  const fetchedOnce = useRef(false);
   const [sharePopUp, setSharePopUp] = useState<{
     artist: string;
     album: string;
@@ -44,7 +43,7 @@ const Collection = () => {
 
   useEffect(() => {
     const getCollection = async () => {
-      const response = await fetchCollection();
+      const response = await fetchCollection(); 
       const data = await response.json();
       const mappedData = data.map(
         (item: { artist: string; album: string; saves: string }) => ({
@@ -53,9 +52,11 @@ const Collection = () => {
           saves: item.saves,
         })
       );
+      
       setCollectionNames(mappedData);
+      console.log(mappedData.find((item: { artist: string; title: string}) => item.title.toUpperCase() === "UTOPIA"));
     };
-
+  
     const getUserCollection = async () => {
       if (!session?.user?.id) {
         return;
@@ -70,12 +71,13 @@ const Collection = () => {
       );
       setUserCollectionNames(mappedData);
     };
-
-    if (!fetchedOnce.current) {
-      fetchedOnce.current = true;
-      Promise.all([getCollection(), getUserCollection()]);
-    }
-  }, [session]);
+  
+    const fetchData = async () => {
+      await Promise.all([getCollection(), getUserCollection()]);
+    };
+  
+    fetchData();
+  }, [session])
 
   const processedAlbums = useRef(new Set());
 
@@ -176,6 +178,8 @@ const Collection = () => {
       // Optimistic UI updates
       (e.target as SVGElement).style.fill = "var(--theme)";
       setCollectionNames((prev) => {
+        if (!album || !artist) return prev;
+        
         const existingAlbum = prev.find((item) => item.title === album);
         const newSaves = (existingAlbum?.saves ?? 0) + 1;
 

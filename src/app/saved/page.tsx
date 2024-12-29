@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Nav from "../components/Nav";
 import "./styles.scss";
 import Image from "next/image";
-import { toast } from 'react-hot-toast';
+import { toast } from "react-hot-toast";
 import { Heart, Share2 } from "lucide-react";
 import { Album } from "../utils/types";
 import Footer from "../components/Footer";
@@ -46,7 +46,7 @@ const Saved = () => {
       const response = await fetchCollection();
       const data = await response.json();
       const mappedData = data.map(
-        (item: { artist: string; album: string; saves: number }) => ({
+        (item: { artist: string; album: string; saves: string }) => ({
           artist: item.artist,
           title: item.album,
           saves: item.saves,
@@ -55,7 +55,7 @@ const Saved = () => {
       setCollectionNames(mappedData);
     };
     const getUserCollection = async () => {
-      if (!session?.user?.id) {
+      if (!session?.user?.id) { 
         return;
       }
       const response = await fetchUserCollection(session.user.id);
@@ -128,33 +128,34 @@ const Saved = () => {
       saves: number;
     };
   }
-  
+
   const handleRemove = async (id: number, artist: string, album: string) => {
     if (!session?.user.id) {
-      toast.error('You must be logged in to remove albums');
+      toast.error("You must be logged in to remove albums");
       return;
     }
     const originalAlbums = [...savedAlbums];
-    
+
     try {
-      setSavedAlbums(prev => prev.filter(album => album.id !== id));
-  
+      setSavedAlbums((prev) => prev.filter((album) => album.id !== id));
+
       const response: DeleteResponse = await deleteAlbum(
         artist,
         album,
         session.user.id
       );
-  
+
       if (response.status === 200) {
-        toast.success('Album removed from your collection');
+        toast.success("Album removed from your collection");
       } else {
         throw new Error(response.message);
       }
-  
     } catch (error) {
       setSavedAlbums(originalAlbums);
-      setError(error instanceof Error ? error.message : 'Failed to remove album');
-      toast.error('Failed to remove album. Please try again.');
+      setError(
+        error instanceof Error ? error.message : "Failed to remove album"
+      );
+      toast.error("Failed to remove album. Please try again.");
     }
   };
 
