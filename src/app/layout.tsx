@@ -17,25 +17,70 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Frame The Beat",
-  description:
-    "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+  description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+  keywords: "album covers, music art, album artwork, music database, cover art search, vinyl artwork",
+  authors: [{ name: "Frame The Beat" }],
+  creator: "Frame The Beat",
+  publisher: "Frame The Beat",
   icons: {
     icon: "/favicon.ico",
+    apple: "/favicon.ico",
+    shortcut: "/favicon.ico",
   },
+  manifest: "/manifest.json",
+  themeColor: "#d17e3b",
+  viewport: "width=device-width, initial-scale=1",
   openGraph: {
     title: "Frame The Beat",
-    description:
-      "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
-    url: "localhost:3000",
+    description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+    url: "https://framethebeat.com",
+    siteName: "Frame The Beat",
+    locale: "en_US",
+    type: "website",
     images: [
       {
         url: "/favicon.ico",
         width: 800,
         height: 600,
+        alt: "Frame The Beat Logo",
+      },
+      {
+        url: "/favicon.ico",
+        width: 1200,
+        height: 630,
+        alt: "Frame The Beat Preview",
       },
     ],
   },
-  robots: "index, follow",
+  twitter: {
+    card: "summary_large_image",
+    title: "Frame The Beat",
+    description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+    images: ["/favicon.ico"],
+    creator: "@framethebeat",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    yandex: "6a82b9bbc4f433a8",
+  },
+  alternates: {
+    canonical: "https://framethebeat.com",
+    languages: {
+      "en-US": "https://framethebeat.com",
+      "es-ES": "https://framethebeat.com",
+    },
+  },
+  category: "Music",
 };
 
 export default function RootLayout({
