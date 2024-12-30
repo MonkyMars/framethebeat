@@ -48,7 +48,7 @@ const Featured: React.FC<FeaturedProps> = ({ album, saves }) => {
                   <h3>{item.title}</h3>
                   <span>{item.release_date}</span>
                 </div>
-                <div className={styles.details}>
+                <div className={styles.additionals}>
                   <p>{item.artist}</p>
                   <div className={styles.saves}>
                     <Heart size={24} onClick={() => router.push(`/collection/share?artist=${encodeURIComponent(item.artist)}&album=${encodeURIComponent(item.title)}`)}/>

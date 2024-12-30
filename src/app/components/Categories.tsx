@@ -1,5 +1,6 @@
 import styles from "../page.module.scss";
 import { useRouter } from "next/navigation";
+import { knownGenres } from "../utils/functions";
 
 const Categories = () => {
     const router = useRouter();
@@ -7,18 +8,11 @@ const Categories = () => {
         <section className={styles.section}>
         <h2>Explore by Category</h2>
         <ul>
-          <li>
-            <span onClick={() => router.push('/collection?q=rock')}>Rock</span>
-          </li>
-          <li>
-            <span onClick={() => router.push('/collection?q=pop')}>Pop</span>
-          </li>
-          <li>
-            <span onClick={() => router.push('/collection?q=hip-hop')}>Hip-Hop</span>
-          </li>
-          <li>
-            <span onClick={() => router.push('/collection?q=soul')}>Soul</span>
-          </li>
+          {knownGenres.slice(0, 10).map((genre, index) => (
+            <li key={`genre-${genre}-${index}`} onClick={() => router.push(`/collection?q=${genre}`)}>
+              <span>{genre}</span>
+            </li>
+          ))}
         </ul>
       </section>
     )
