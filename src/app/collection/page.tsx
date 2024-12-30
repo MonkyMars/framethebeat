@@ -6,7 +6,7 @@ import "./styles.scss";
 import Image from "next/image";
 import { useEffect, useState, Suspense, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import { Heart, Share2 } from "lucide-react";
+import { Heart, Share2, X } from "lucide-react";
 import Banner from "../components/Banner";
 import {
   getAlbumData,
@@ -488,6 +488,12 @@ const Collection = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               disabled={collection.length === 0}
+            />
+            <X
+              size={24}
+              className="clear"
+              onClick={() => setSearchQuery("")}
+              style={{ display: searchQuery ? "block" : "none" }}
             />
           </div>
         </div>
