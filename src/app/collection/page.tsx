@@ -161,6 +161,7 @@ const Collection = () => {
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "");
   }, [searchParams]);
+  
   interface SaveResponse {
     message: string;
     status: number;
