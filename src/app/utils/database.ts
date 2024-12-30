@@ -37,7 +37,7 @@ export const fetchCollection = async () => {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    
+
     return NextResponse.json({ collection });
   } catch (error) {
     return NextResponse.json(
@@ -258,17 +258,41 @@ export const deleteUser = async (user_id: string) => {
 };
 
 export const verifyAlbumDeleted = async (
-  artist: string, 
-  album: string, 
+  artist: string,
+  album: string,
   userId: string
 ): Promise<boolean> => {
   const { data } = await supabase
-    .from('saved')
-    .select('*')
-    .eq('artist', artist)
-    .eq('album', album)
-    .eq('user_id', userId)
+    .from("saved")
+    .select("*")
+    .eq("artist", artist)
+    .eq("album", album)
+    .eq("user_id", userId)
     .single();
-    
+
   return !!data;
+};
+
+export const fetchMostSavedAlbums = async (limit: number) => {
+  try {
+    const { data: collection, error } = await supabase
+      .from("collection")
+      .select("*")
+      .order("saves", { ascending: false })
+      .limit(limit);
+    if (error) {
+      return NextResponse.json({ error: error?.message }, { status: 500 });
+    }
+    return NextResponse.json({
+      message: "Most saved albums fetched successfully",
+      status: 200,
+      collection,
+    });
+  } catch (error) {
+    console.error("Error fetching most saved albums:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 };

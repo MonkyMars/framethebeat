@@ -1,21 +1,23 @@
 import styles from "../page.module.scss";
+import { useRouter } from "next/navigation";
 
 const Categories = () => {
+    const router = useRouter();
     return(
         <section className={styles.section}>
         <h2>Explore by Category</h2>
         <ul>
           <li>
-            <span>Rock</span>
+            <span onClick={() => router.push('/collection?q=rock')}>Rock</span>
           </li>
           <li>
-            <span>Pop</span>
+            <span onClick={() => router.push('/collection?q=pop')}>Pop</span>
           </li>
           <li>
-            <span>Hip-Hop</span>
+            <span onClick={() => router.push('/collection?q=hip-hop')}>Hip-Hop</span>
           </li>
           <li>
-            <span>Classics</span>
+            <span onClick={() => router.push('/collection?q=soul')}>Soul</span>
           </li>
         </ul>
       </section>

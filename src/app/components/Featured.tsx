@@ -1,47 +1,66 @@
-"use client"
-import styles from "../page.module.scss";
-import Image from "next/image";
+"use client";
 import React from "react";
-import { Album } from "@/app/utils/types";
-
+import { Album } from "../utils/types";
+import Image from "next/image";
+import { isGif, isHighPriority } from "../utils/functions";
+import styles from "../page.module.scss";
+import { Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 interface FeaturedProps {
-    AlbumCover: (index: number) => Album;
+  album: Album[];
+  saves: { artist: string; album: string; saves: number }[] | null;
 }
 
-const Featured: React.FC<FeaturedProps> = ({AlbumCover}) => {
-    return(
-        <section className={styles.section}>
-        <h2>Featured Covers</h2>
-        <div className={styles.featuredGrid}>
-          {[0, 1, 2, 3].map((index) => {
-            const album = AlbumCover(index);
-            if (!album) {
-              return (
-                <div key={index} className={styles.featuredCover}>
-                  <p>Album not found</p>
-                </div>
-              );
-            }
+const Featured: React.FC<FeaturedProps> = ({ album, saves }) => {
+  const router = useRouter();
+  if (!album || album.length === 0) {
+    return null;
+  }
 
-            return (
+  const getSaveCount = (title: string, artist: string): number => {
+    if (!saves) return 0;
+    const albumSaves = saves.find(
+      (save) => 
+        save.album.toLowerCase() === title.toLowerCase() && 
+        save.artist.toLowerCase() === artist.toLowerCase()
+    );
+    return albumSaves?.saves || 0;
+  };
+
+  return (
+    <section className={styles.section}>
+      <h2>Most Popular Albums</h2>
+      <div className={styles.featuredGrid}>
+        {album.map(
+          (item, index) =>
+            item &&
+            item.albumCover && (
               <div key={index} className={styles.featuredCover}>
                 <Image
-                  src={`/albumcovers/${album.albumCover.src}`}
-                  width={2000}
-                  height={2000}
-                  alt={album.albumCover.alt}
+                  src={item.albumCover.src || "/placeholder.png"}
+                  alt={item.albumCover.alt}
+                  width={1500}
+                  height={1500}
+                  priority={isHighPriority(item.albumCover.src)}
+                  unoptimized={isGif(item.albumCover.src)}
                 />
-                <h3>{album.title}</h3>
                 <div className={styles.details}>
-                  <p>{album.artist}</p>
-                  <p>{album.release_date}</p>
+                  <h3>{item.title}</h3>
+                  <span>{item.release_date}</span>
+                </div>
+                <div className={styles.details}>
+                  <p>{item.artist}</p>
+                  <div className={styles.saves}>
+                    <Heart size={24} onClick={() => router.push(`/collection/share?artist=${encodeURIComponent(item.artist)}&album=${encodeURIComponent(item.title)}`)}/>
+                    <span>{getSaveCount(item.title, item.artist)}</span>
+                  </div>
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </section>
-    )
-}
+            )
+        )}
+      </div>
+    </section>
+  );
+};
 
 export default Featured;

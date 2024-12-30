@@ -161,7 +161,7 @@ const Collection = () => {
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "");
   }, [searchParams]);
-  
+
   interface SaveResponse {
     message: string;
     status: number;
@@ -252,11 +252,23 @@ const Collection = () => {
         return matchesYear && matchesGenre;
       })
       .filter((album) => {
-        const searchTerm = searchQuery.toLowerCase().replace('.', '').replace(' ', '').trim();
+        const searchTerm = searchQuery
+          .toLowerCase()
+          .replace(".", "")
+          .replace(" ", "")
+          .trim();
         return (
-          album.title.toLowerCase().replace('.', '').replace(' ', '').includes(searchTerm) ||
-          album.artist.toLowerCase().replace('.', '').replace(' ', '').includes(searchTerm) ||
-          album.category?.toLowerCase().includes(searchTerm) || 
+          album.title
+            .toLowerCase()
+            .replace(".", "")
+            .replace(" ", "")
+            .includes(searchTerm) ||
+          album.artist
+            .toLowerCase()
+            .replace(".", "")
+            .replace(" ", "")
+            .includes(searchTerm) ||
+          album.category?.toLowerCase().includes(searchTerm) ||
           album.release_date.toString().includes(searchTerm)
         );
       })

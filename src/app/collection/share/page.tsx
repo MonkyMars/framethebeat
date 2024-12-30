@@ -163,7 +163,6 @@ const SharePageContent = () => {
           </header>
           <main className="shareCard__content">
             <h2 className="shareCard__artist">{album.artist}</h2>
-            {album.wiki && <p>Released: {album.wiki.published}</p>}
           </main>
           <footer className="shareCard_footer">
             <Share2 size={24} fill="var(--background)"

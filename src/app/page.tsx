@@ -10,71 +10,75 @@ import SearchComponent from "./components/Search";
 import Categories from "./components/Categories";
 import Nav from "./components/Nav";
 import Discover from "./components/Discover";
+import { fetchMostSavedAlbums } from "./utils/database";
+import { getAlbumData } from "./utils/functions";
 
 export default function Home() {
-  const images = React.useMemo(() => [
-    "nothingbutthieves_moralpanic_fsei.jpg",
-    "kanyewest_mybeautifuldarktwist_ehfh.jpg",
-    "kendricklamar_goodkidmaadcity_4zxm.jpg",
-    "twentyonepilots_scaledandicy_e2xt.jpg",
-    "theweeknd_mydearmelancholy_albq.jpg",
-    "tameimpala_currents_857m.jpg",
-  ], []);
-  
-  const [randomImage, setRandomImage] = React.useState<string>(images[0]);
-  const AlbumCover = (index: number): Album => {
-    const albumCovers: Album[] = [
-      {
-        id: 1,
-        title: "Moral Panic",
-        artist: "Nothing But Thieves",
-        albumCover: {
-          src: "nothingbutthieves_moralpanic_fsei.jpg",
-          alt: "Moral Panic album cover",
-        },
-        release_date: "2020",
-      },
-      {
-        id: 2,
-        title: "My Beautiful Dark Twisted Fantasy",
-        artist: "Kanye West",
-        albumCover: {
-          src: "kanyewest_mybeautifuldarktwist_ehfh.jpg",
-          alt: "My Beautiful Dark Twisted Fantasy album cover",
-        },
-        release_date: "2010",
-      },
-      {
-        id: 3,
-        title: "Good Kid, M.A.A.D City",
-        artist: "Kendrick Lamar",
-        albumCover: {
-          src: "kendricklamar_goodkidmaadcity_4zxm.jpg",
-          alt: "Good Kid, M.A.A.D City album cover",
-        },
-        release_date: "2012",
-      },
-      {
-        id: 4,
-        title: "Scaled and Icy",
-        artist: "Twenty One Pilots",
-        albumCover: {
-          src: "twentyonepilots_scaledandicy_e2xt.jpg",
-          alt: "Scaled and Icy album cover",
-        },
-        release_date: "2021",
-      },
-    ];
-    return albumCovers[index];
-  };
+  const images = React.useMemo(
+    () => [
+      "nothingbutthieves_moralpanic_fsei.jpg",
+      "kanyewest_mybeautifuldarktwist_ehfh.jpg",
+      "kendricklamar_goodkidmaadcity_4zxm.jpg",
+      "twentyonepilots_scaledandicy_e2xt.jpg",
+      "theweeknd_mydearmelancholy_albq.jpg",
+      "tameimpala_currents_857m.jpg",
+    ],
+    []
+  );
 
+  const [randomImage, setRandomImage] = React.useState<string>(images[0]);
+  const [mostSavedAlbums, setMostSavedAlbums] = React.useState<Album[]>([]);
+  const [mostAlbumSaves, setMostAlbumSaves] = React.useState<{ artist: string; album: string; saves: number}[] | null>(null);
   React.useEffect(() => {
     const ImageRandomizer = () => {
-    const selectedImage = Math.floor(Math.random() * images.length);
-    return images[selectedImage];
-  };
+      const selectedImage = Math.floor(Math.random() * images.length);
+      return images[selectedImage];
+    };
     setRandomImage(ImageRandomizer());
   }, [images]);
+
+const getMostSavedAlbums = async () => {
+  try {
+    const data = await fetchMostSavedAlbums(4);
+    if (!data) return;
+
+    const { collection } = await data.json();
+    if (!collection || !Array.isArray(collection)) return;
+    const mappedData = collection.map((album) => ({
+      album: album.album,
+      artist: album.artist,
+      saves: album.saves,
+    }));
+    setMostAlbumSaves(mappedData);
+    const albumPromises = collection.map(async (album) => {
+      const albumDetails = await getAlbumData(album.album, album.artist);
+      if (!albumDetails?.[0]) return null;
+
+      return {
+        id: albumDetails[0].id,
+        title: album.album,
+        artist: album.artist,
+        release_date: album.release_date,
+        category: albumDetails[0].albumCategory,
+        albumCover: {
+          src: albumDetails[0].albumCover.src || "/placeholder.png",
+          alt: `${album.album} by ${album.artist}`,
+        },
+        saves: album.saves,
+      };
+    });
+
+    const albums = await Promise.all(albumPromises);
+    setMostSavedAlbums(albums.filter((album) => album !== null));
+  } catch (error) {
+    console.error('Error fetching most saved albums:', error);
+    setMostSavedAlbums([]);
+  }
+};
+
+  React.useEffect(() => {
+    getMostSavedAlbums();
+  }, []);
 
   return (
     <>
@@ -102,8 +106,8 @@ export default function Home() {
       <Discover />
       <SearchComponent />
       <Categories />
-      <Featured AlbumCover={AlbumCover} />
-      <Cta/>
+      <Featured album={mostSavedAlbums} saves={mostAlbumSaves} />
+      <Cta />
       <Footer />
     </>
   );
