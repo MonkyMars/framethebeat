@@ -251,11 +251,12 @@ const Collection = () => {
         return matchesYear && matchesGenre;
       })
       .filter((album) => {
-        const searchTerm = searchQuery.toLowerCase();
+        const searchTerm = searchQuery.toLowerCase().replace('.', '').replace(' ', '').trim();
         return (
-          album.title.toLowerCase().includes(searchTerm) ||
-          album.artist.toLowerCase().includes(searchTerm) ||
-          album.category?.toLowerCase().includes(searchTerm)
+          album.title.toLowerCase().replace('.', '').replace(' ', '').includes(searchTerm) ||
+          album.artist.toLowerCase().replace('.', '').replace(' ', '').includes(searchTerm) ||
+          album.category?.toLowerCase().includes(searchTerm) || 
+          album.release_date.toString().includes(searchTerm)
         );
       })
       .sort((a, b) => {
