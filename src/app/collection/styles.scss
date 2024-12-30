@@ -290,6 +290,11 @@
         border-color: var(--theme);
         box-shadow: 0 0 10px rgba(var(--theme-rgb), 0.2);
       }
+      &:disabled{
+        background: rgba(var(--theme-rgb), 0.1);
+        color: rgba(var(--foreground-rgb), 0.5);
+        cursor: not-allowed;
+      }
     }
   }
 
@@ -313,7 +318,11 @@
       @media (max-width: 768px) {
         width: 100%;
       }
-
+      &:disabled{
+        background: rgba(var(--theme-rgb), 0.1);
+        color: rgba(var(--foreground-rgb), 0.5);
+        cursor: not-allowed;
+      }
       &:focus {
         outline: none;
         border-color: var(--theme);
@@ -401,5 +410,37 @@
   @media (max-width: 768px) {
     width: 90%;
     margin: 1.5em auto;
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+
+  button {
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(var(--theme-rgb), 0.3);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      background: rgba(var(--theme-rgb), 0.1);
+      border-color: rgba(var(--theme-rgb), 0.5);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    color: var(--foreground);
   }
 }

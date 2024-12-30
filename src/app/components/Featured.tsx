@@ -34,7 +34,7 @@ const Featured: React.FC<FeaturedProps> = ({AlbumCover}) => {
                 <h3>{album.title}</h3>
                 <div className={styles.details}>
                   <p>{album.artist}</p>
-                  <p>{album.date}</p>
+                  <p>{album.release_date}</p>
                 </div>
               </div>
             );

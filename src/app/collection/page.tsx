@@ -4,11 +4,16 @@ import Nav from "../components/Nav";
 import { Album } from "../utils/types";
 import "./styles.scss";
 import Image from "next/image";
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Heart, Share2 } from "lucide-react";
 import Banner from "../components/Banner";
-import { getAlbumData, isGif, isHighPriority } from "../utils/functions";
+import {
+  getAlbumData,
+  isGif,
+  isHighPriority,
+  knownGenres,
+} from "../utils/functions";
 import SharePopup from "../components/SharePopup";
 import Link from "next/link";
 import {
@@ -31,32 +36,45 @@ const Collection = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterBy, setFilterBy] = useState("all");
+  const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const { session } = useAuth();
   const [collectionNames, setCollectionNames] = useState<
-    { artist: string; title: string; saves: number }[]
+    { artist: string; title: string; saves: number; release_date: number }[]
   >([]);
   const [userCollectionNames, setUserCollectionNames] = useState<
     { artist: string; title: string }[]
   >([]);
   const [title, setTitle] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const ITEMS_PER_PAGE = 50;
+  const [displayedAlbums, setDisplayedAlbums] = useState<Album[]>([]);
 
   useEffect(() => {
     const getCollection = async () => {
-      const response = await fetchCollection(); 
-      const data = await response.json();
-      const mappedData = data.map(
-        (item: { artist: string; album: string; saves: string }) => ({
+      const response = await fetchCollection();
+      const { collection } = await response.json();
+      const mappedData = collection.map(
+        (
+          item: {
+            artist: string;
+            album: string;
+            saves: string;
+            release_date: number;
+          },
+          index: number
+        ) => ({
           artist: item.artist,
           title: item.album,
           saves: item.saves,
+          release_date: item.release_date,
+          key: index,
         })
       );
-      
       setCollectionNames(mappedData);
-      console.log(mappedData.find((item: { artist: string; title: string}) => item.title.toUpperCase() === "UTOPIA"));
     };
-  
+
     const getUserCollection = async () => {
       if (!session?.user?.id) {
         return;
@@ -71,13 +89,13 @@ const Collection = () => {
       );
       setUserCollectionNames(mappedData);
     };
-  
+
     const fetchData = async () => {
       await Promise.all([getCollection(), getUserCollection()]);
     };
-  
+
     fetchData();
-  }, [session])
+  }, [session]);
 
   const processedAlbums = useRef(new Set());
 
@@ -86,55 +104,54 @@ const Collection = () => {
 
     const fetchSavedAlbums = async () => {
       const newAlbums = collectionNames.filter(
-        (album) =>
-          !processedAlbums.current.has(`${album.artist}-${album.title}`)
+        (entry) =>
+          !processedAlbums.current.has(`${entry.artist}-${entry.title}`)
       );
 
       if (newAlbums.length === 0) return;
-      const albumPromises = newAlbums.map(async (album) => {
-        processedAlbums.current.add(`${album.artist}-${album.title}`);
 
-        const fetchedData = await getAlbumData(album.title, album.artist);
+      const albumPromises = newAlbums.map(async (entry) => {
+        processedAlbums.current.add(`${entry.artist}-${entry.title}`);
+
+        const fetchedData = await getAlbumData(entry.title, entry.artist);
         if (!fetchedData) return null;
 
-        return fetchedData.map((album) => ({
-          id: album.id,
-          title: album.albumTitle,
-          artist: album.albumArtist,
-          date: album.albumDate,
-          category: album.albumCategory,
-          albumCover: album.albumCover,
+        return fetchedData.map((albumData) => ({
+          id: albumData.id,
+          title: albumData.albumTitle,
+          artist: albumData.albumArtist,
+          category: albumData.albumCategory,
+          albumCover: albumData.albumCover,
+          release_date: entry.release_date,
         }));
       });
 
       const results = await Promise.all(albumPromises);
 
       setCollection((prev) => {
-        const newAlbums = results
+        const mergedAlbums = results
           .filter(Boolean)
           .flat()
-          .filter((newAlbum) => {
-            if (!newAlbum?.title || !newAlbum?.artist) return false;
+          .filter((item) => {
+            if (!item?.title || !item?.artist) return false;
             return !prev.some(
               (existingAlbum) =>
-                existingAlbum.title === newAlbum.title &&
-                existingAlbum.artist === newAlbum.artist
+                existingAlbum.title === item.title &&
+                existingAlbum.artist === item.artist
             );
           })
-          .map(
-            (album): Album => ({
-              id: album!.id,
-              title: album!.title,
-              artist: album!.artist,
-              date: album!.date || "unknown",
-              category: album!.category || "unknown",
-              albumCover: album!.albumCover || {
-                src: "/placeholder.png",
-                alt: `${album!.title} by ${album!.artist}`,
-              },
-            })
-          );
-        return [...prev, ...newAlbums];
+          .map((item) => ({
+            id: item!.id,
+            title: item!.title,
+            artist: item!.artist,
+            category: item!.category || "unknown",
+            albumCover: item!.albumCover || {
+              src: "/placeholder.png",
+              alt: `${item!.title} by ${item!.artist}`,
+            },
+            release_date: item!.release_date?.toString() || "",
+          }));
+        return [...prev, ...mergedAlbums];
       });
     };
 
@@ -179,7 +196,7 @@ const Collection = () => {
       (e.target as SVGElement).style.fill = "var(--theme)";
       setCollectionNames((prev) => {
         if (!album || !artist) return prev;
-        
+
         const existingAlbum = prev.find((item) => item.title === album);
         const newSaves = (existingAlbum?.saves ?? 0) + 1;
 
@@ -188,7 +205,7 @@ const Collection = () => {
             item.title === album ? { ...item, saves: newSaves } : item
           );
         }
-        return [...prev, { artist, title: album, saves: 1 }];
+        return [...prev, { artist, title: album, saves: 1, release_date: 0 }];
       });
 
       setUserCollectionNames((prev) => [...prev, { artist, title: album }]);
@@ -216,6 +233,61 @@ const Collection = () => {
       showBanner(errorMessage, "error", "error");
     }
   };
+
+  const filteredAlbums = useMemo(() => {
+    return collection
+      .filter((album) => {
+        if (filterBy === "all" && selectedGenre === "all") return true;
+        const matchesYear =
+          filterBy === "all" ||
+          collectionNames.some(
+            (name) =>
+              name.title === album.title &&
+              name.release_date.toString() === filterBy
+          );
+        const matchesGenre =
+          selectedGenre === "all" ||
+          album.category?.toLowerCase() === selectedGenre.toLowerCase();
+        return matchesYear && matchesGenre;
+      })
+      .filter((album) => {
+        const searchTerm = searchQuery.toLowerCase();
+        return (
+          album.title.toLowerCase().includes(searchTerm) ||
+          album.artist.toLowerCase().includes(searchTerm) ||
+          album.category?.toLowerCase().includes(searchTerm)
+        );
+      })
+      .sort((a, b) => {
+        if (sortBy === "newest" || sortBy === "oldest") {
+          const aDate = parseInt(a.release_date?.toString() || "0");
+          const bDate = parseInt(b.release_date?.toString() || "0");
+          return sortBy === "newest" ? bDate - aDate : aDate - bDate;
+        }
+        if (sortBy === "title") return a.title.localeCompare(b.title);
+        return a.artist.localeCompare(b.artist);
+      });
+  }, [
+    collection,
+    collectionNames,
+    filterBy,
+    selectedGenre,
+    searchQuery,
+    sortBy,
+  ]);
+
+  useEffect(() => {
+    const start = currentPage * ITEMS_PER_PAGE;
+    const paginatedAlbums = filteredAlbums.slice(start, start + ITEMS_PER_PAGE);
+    setDisplayedAlbums(paginatedAlbums);
+    setTotalPages(Math.ceil(filteredAlbums.length / ITEMS_PER_PAGE));
+  }, [currentPage, filteredAlbums]);
+
+  useEffect(() => {
+    if (searchQuery.length >= 3) {
+      setCurrentPage(0);
+    }
+  }, [searchQuery]);
 
   interface DeleteResponse {
     message: string;
@@ -322,31 +394,37 @@ const Collection = () => {
     return <div>Loading...</div>;
   }
 
-  const filteredAlbums = collection
-    .filter((album) => {
-      if (filterBy === "all") return true;
-      return album.date === filterBy;
-    })
-    .filter(
-      (album) =>
-        album.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        album.artist.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        album.category?.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-    .sort((a, b) => {
-      if (sortBy === "newest")
-        return parseInt(b.date || "0") - parseInt(a.date || "0");
-      if (sortBy === "oldest")
-        return parseInt(a.date || "0") - parseInt(b.date || "0");
-      if (sortBy === "title") return a.title.localeCompare(b.title);
-      return a.artist.localeCompare(b.artist);
-    });
-
   const onShare = (artist: string, album: string) => {
     setSharePopUp({
       artist: artist,
       album: album,
     });
+  };
+
+  const Pagination = () => {
+    const onPageNext = () => {
+      setCurrentPage((p) => Math.min(totalPages - 1, p + 1));
+      gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    const onPagePrev = () => {
+      setCurrentPage((p) => Math.max(0, p - 1));
+      gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    return (
+      <div className="pagination">
+        <button onClick={onPagePrev} disabled={currentPage === 0}>
+          Previous
+        </button>
+        <span>
+          Page {currentPage + 1} of {totalPages}
+        </span>
+        <button onClick={onPageNext} disabled={currentPage === totalPages - 1}>
+          Next
+        </button>
+      </div>
+    );
   };
 
   return (
@@ -359,7 +437,11 @@ const Collection = () => {
         </div>
         <div className="controlBar">
           <div className="filters">
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              disabled={collection.length === 0}
+            >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
               <option value="title">By Title</option>
@@ -368,18 +450,32 @@ const Collection = () => {
             <select
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value)}
+              disabled={collection.length === 0}
             >
               <option value="all">All Years</option>
               {Array.from(
                 new Set(
-                  collection
-                    .map((album) => album.date)
+                  collectionNames
+                    .map((album) => album.release_date.toString())
                     .filter((date) => date !== "unknown")
                     .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
                 )
-              ).map((year) => (
-                <option key={year} value={year}>
+              ).map((year, index) => (
+                <option key={index} value={year}>
                   {year}
+                </option>
+              ))}
+            </select>
+            <select
+              name="genre"
+              id="genre"
+              onChange={(e) => setSelectedGenre(e.target.value)}
+              disabled={collection.length === 0}
+            >
+              <option value="all">All Genres</option>
+              {knownGenres.map((genre, index) => (
+                <option key={`${genre}-${index}`} value={genre}>
+                  {genre.charAt(0).toUpperCase() + genre.slice(1)}
                 </option>
               ))}
             </select>
@@ -390,14 +486,15 @@ const Collection = () => {
               placeholder="Search saved albums..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              disabled={collection.length === 0}
             />
           </div>
         </div>
         <div className="collectionGrid" ref={gridRef}>
-          {filteredAlbums.length > 0 &&
-            filteredAlbums.map((album, index) => (
+          {displayedAlbums.length > 0 &&
+            displayedAlbums.map((album) => (
               <CollectionCard
-                key={index}
+                key={`${album.artist}-${album.title}-${album.id}`}
                 {...album}
                 onHeartClick={(e) =>
                   userCollectionNames.find((item) => item.title === album.title)
@@ -414,6 +511,7 @@ const Collection = () => {
                     : false
                 }
                 onShare={onShare}
+                releaseDate={album.release_date?.toString() || "unknown"}
               />
             ))}
           {collection.length === 0 && filteredAlbums.length === 0 && (
@@ -432,6 +530,7 @@ const Collection = () => {
             </div>
           )}
         </div>
+        {totalPages > 1 && <Pagination />}
         <div className="endText">
           <p>
             You&apos;ve reached the end of our collection! Didn&apos;t find the
@@ -468,12 +567,11 @@ type CollectionCardProps = Album & {
   onShare: (artist: string, album: string) => void;
   saves: number;
   saved: boolean;
+  releaseDate: string;
 };
 
 const CollectionCard = ({
-  id,
   title,
-  date,
   category,
   albumCover,
   artist,
@@ -481,8 +579,9 @@ const CollectionCard = ({
   saves,
   saved = false,
   onShare,
+  releaseDate,
 }: CollectionCardProps) => (
-  <div className="collectionCard" key={id}>
+  <div className="collectionCard">
     <div className="albumImage">
       <Image
         src={albumCover.src || "/placeholder.png"}
@@ -496,7 +595,7 @@ const CollectionCard = ({
     <div className="albumInfo">
       <h3>{title}</h3>
       <p className="artist">{artist}</p>
-      {date !== "unknown" && <p className="date">{date}</p>}
+      {releaseDate && <p className="date">{releaseDate}</p>}
       {category && category.toLocaleLowerCase() !== "unknown" && (
         <p className="category">
           {category.charAt(0).toLocaleUpperCase() + category.slice(1)}

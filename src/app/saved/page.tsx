@@ -36,17 +36,13 @@ const Saved = () => {
     { artist: string; title: string }[]
   >([]);
   useEffect(() => {
-    if (loading) return;
-
-    if (!session) {
-      return;
-    }
+    if (loading || !session) return;
 
     const getCollection = async () => {
       const response = await fetchCollection();
-      const data = await response.json();
-      const mappedData = data.map(
-        (item: { artist: string; album: string; saves: string }) => ({
+      const { collection } = await response.json();
+      const mappedData = collection.map(
+        (item: { artist: string; album: string; saves: number }) => ({
           artist: item.artist,
           title: item.album,
           saves: item.saves,
@@ -55,7 +51,7 @@ const Saved = () => {
       setCollectionNames(mappedData);
     };
     const getUserCollection = async () => {
-      if (!session?.user?.id) { 
+      if (!session?.user?.id) {
         return;
       }
       const response = await fetchUserCollection(session.user.id);
@@ -95,14 +91,22 @@ const Saved = () => {
                   existingAlbum.artist === newAlbum.albumArtist
               )
           )
-          .map((album) => ({
-            id: album.id,
-            title: album.albumTitle,
-            artist: album.albumArtist,
-            date: album.albumDate,
-            category: album.albumCategory,
-            albumCover: album.albumCover,
-          }));
+          .map((album) => {
+            const matchingCollection = collectionNames.find(
+              (item) =>
+                item.title.toLowerCase() === album.albumTitle.toLowerCase() &&
+                item.artist.toLowerCase() === album.albumArtist.toLowerCase()
+            );
+            return {
+              id: album.id,
+              title: album.albumTitle,
+              artist: album.albumArtist,
+              release_date: album.albumDate,
+              category: album.albumCategory,
+              albumCover: album.albumCover,
+              saves: matchingCollection?.saves || 0,
+            };
+          });
         return [...prev, ...newAlbums];
       });
     };
@@ -112,7 +116,7 @@ const Saved = () => {
         artist: album.artist,
       });
     });
-  }, [userCollectionNames]);
+  }, [userCollectionNames, collectionNames]);
 
   interface DeleteResponse {
     message: string;
@@ -162,7 +166,7 @@ const Saved = () => {
   const filteredAlbums = savedAlbums
     .filter((album) => {
       if (filterBy === "all") return true;
-      return album.date === filterBy;
+      return album.release_date === filterBy;
     })
     .filter(
       (album) =>
@@ -171,9 +175,13 @@ const Saved = () => {
     )
     .sort((a, b) => {
       if (sortBy === "newest")
-        return parseInt(b.date || "0") - parseInt(a.date || "0");
+        return (
+          parseInt(b.release_date || "0") - parseInt(a.release_date || "0")
+        );
       if (sortBy === "oldest")
-        return parseInt(a.date || "0") - parseInt(b.date || "0");
+        return (
+          parseInt(a.release_date || "0") - parseInt(b.release_date || "0")
+        );
       if (sortBy === "title") return a.title.localeCompare(b.title);
       return a.artist.localeCompare(b.artist);
     });
@@ -219,7 +227,7 @@ const Saved = () => {
             {Array.from(
               new Set(
                 savedAlbums
-                  .map((album) => album.date)
+                  .map((album) => album.release_date)
                   .filter((date) => date !== "unknown")
                   .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
               )
@@ -245,13 +253,9 @@ const Saved = () => {
           {filteredAlbums.map((album, index) => (
             <SavedCard
               key={index}
-              album={album}
+              album={album as Album & { saves: number }}
               onShare={onShare}
               onRemove={handleRemove}
-              saves={
-                collectionNames.find((item) => item.title === album.title)
-                  ?.saves || 0
-              }
             />
           ))}
         </div>
@@ -293,18 +297,12 @@ const Saved = () => {
 };
 
 interface savedCardProps {
-  album: Album;
+  album: Album & { saves: number };
   onShare: (artist: string, album: string) => void;
   onRemove: (id: number, artist: string, album: string) => void;
-  saves?: number;
 }
 
-const SavedCard: React.FC<savedCardProps> = ({
-  album,
-  onShare,
-  onRemove,
-  saves,
-}) => {
+const SavedCard: React.FC<savedCardProps> = ({ album, onShare, onRemove }) => {
   return (
     <div className="savedCard">
       <Image
@@ -318,7 +316,9 @@ const SavedCard: React.FC<savedCardProps> = ({
       <div className="cardContent">
         <h3>{album.title}</h3>
         <p className="artist">{album.artist}</p>
-        {album.date !== "unknown" && <p className="date">{album.date}</p>}
+        {album.release_date !== "unknown" && (
+          <p className="date">{album.release_date}</p>
+        )}
         {album.category && (
           <p className="category">
             {album.category.charAt(0).toLocaleUpperCase() +
@@ -332,7 +332,7 @@ const SavedCard: React.FC<savedCardProps> = ({
         </button>
         <button onClick={() => onRemove(album.id, album.artist, album.title)}>
           <Heart size={20} className="heart saves" />
-          <span>{saves}</span>
+          <span>{album.saves}</span>
         </button>
       </div>
     </div>

@@ -7,7 +7,7 @@ import Footer from "./components/Footer";
 import Cta from "./components/Cta";
 import Featured from "./components/Featured";
 import SearchComponent from "./components/Search";
-// import Categories from "./components/Categories";
+import Categories from "./components/Categories";
 import Nav from "./components/Nav";
 import Discover from "./components/Discover";
 
@@ -32,7 +32,7 @@ export default function Home() {
           src: "nothingbutthieves_moralpanic_fsei.jpg",
           alt: "Moral Panic album cover",
         },
-        date: "2020",
+        release_date: "2020",
       },
       {
         id: 2,
@@ -42,7 +42,7 @@ export default function Home() {
           src: "kanyewest_mybeautifuldarktwist_ehfh.jpg",
           alt: "My Beautiful Dark Twisted Fantasy album cover",
         },
-        date: "2010",
+        release_date: "2010",
       },
       {
         id: 3,
@@ -52,7 +52,7 @@ export default function Home() {
           src: "kendricklamar_goodkidmaadcity_4zxm.jpg",
           alt: "Good Kid, M.A.A.D City album cover",
         },
-        date: "2012",
+        release_date: "2012",
       },
       {
         id: 4,
@@ -62,7 +62,7 @@ export default function Home() {
           src: "twentyonepilots_scaledandicy_e2xt.jpg",
           alt: "Scaled and Icy album cover",
         },
-        date: "2021",
+        release_date: "2021",
       },
     ];
     return albumCovers[index];
@@ -101,7 +101,7 @@ export default function Home() {
       </main>
       <Discover />
       <SearchComponent />
-      {/* <Categories /> */}
+      <Categories />
       <Featured AlbumCover={AlbumCover} />
       <Cta/>
       <Footer />

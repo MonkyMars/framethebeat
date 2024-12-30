@@ -7,7 +7,7 @@ export interface Album {
     title: string;
     artist: string;
     albumCover: AlbumCover;
-    date?: string;
+    release_date: string;
     id: number;
     category?: string;
 }

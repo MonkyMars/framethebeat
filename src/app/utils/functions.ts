@@ -8,11 +8,6 @@ interface API_RESPONSE {
     name: string;
     image: { "#text": string }[];
     tags: { tag: { name: string }[] };
-    wiki?: {
-      content: string;
-      summary: string;
-      published: string;
-    };
   };
 }
 
@@ -21,11 +16,11 @@ interface ReturnAlbumData {
   albumArtist: string;
   albumTitle: string;
   albumCategory?: string;
+  albumDate: string;
   albumCover: {
     src: string;
     alt: string;
   };
-  albumDate: string;
 }
 
 interface AlbumDataModel {
@@ -34,14 +29,9 @@ interface AlbumDataModel {
   name: string;
   image: { "#text": string }[];
   tags?: { tag?: { name: string }[]};
-  wiki?: {
-    content: string;
-    summary: string;
-    published: string;
-  };
 }
 
-const knownGenres: string[] = [
+export const knownGenres: string[] = [
   "rock", "pop", "alternative", "alternative rock","indie", "electronic", "metal", 
   "hip-hop", "jazz", "classical", "punk", "rap", "folk", "soul",
   "hard rock", "soft rock", "progressive rock", "psychedelic rock", 
@@ -98,52 +88,8 @@ const knownGenres: string[] = [
   "post-hardcore", "emocore", "nu-punk", "rnb", "soul jazz", "dance", "synthpop", "canadian"
 ];
 
-export const getAlbumReleaseDate = (text: string): string | undefined => {
-  const dateRegexes = [
-    /(?:released (?:on|through|via|by) )([A-Za-z]+ \d{1,2}, \d{4})/, // "Month DD, YYYY"
-    /(?:released (?:on|through|via|by) )(\d{1,2} [A-Za-z]+ \d{4})/, // "DD Month YYYY"
-    /(?:released (?:on|through|via|by) )[A-Za-z]+ (\d{1,2} [A-Za-z]+ \d{4})/, // "Friday DD Month YYYY"
-    /(?:released (?:on|through|via|by) )(\d{1,2}-\d{1,2}-\d{4})/, // "DD-MM-YYYY"
-    /(?:released (?:on|through|via|by) )(\d{4}-\d{1,2}-\d{1,2})/, // "YYYY-MM-DD"
-    /(?:released (?:on|through|via|by) )(\d{1,2}\/\d{1,2}\/\d{4})/, // "DD/MM/YYYY"
-    /(?:released (?:on|through|via|by) )(\d{4}\/\d{1,2}\/\d{1,2})/, // "YYYY/MM/DD"
-    /(?:released (?:on|through|via|by) )([A-Za-z]+ \d{4})/, // "Month YYYY"
-    /released.*?([A-Za-z]+ \d{1,2}, \d{4})/, // Fallback for any text between "released" and date
-    /released.*?(\d{1,2} [A-Za-z]+ \d{4})/, // Fallback for any text between "released" and date
-    /(?:released )(\d{4})/, // Just the year
-    /(?:released in )(\d{4})/, // "released in YYYY"
-    /(?:released during )(\d{4})/, // "released during YYYY"
-    /(?:released \()(\d{4})/, // "released (YYYY"
-  ];
-
-  for (const regex of dateRegexes) {
-    const match = text.match(regex);
-    if (match) {
-      try {
-        if (match[1].length === 4 && !isNaN(Number(match[1]))) {
-          return match[1];
-        }
-        return new Date(match[1]).getFullYear().toString();
-      } catch {
-        const yearMatch = match[1].match(/\d{4}/);
-        if (yearMatch) {
-          return yearMatch[0];
-        }
-      }
-    }
-  }
-
-  return undefined;
-};
-
-
 
 export const parseAlbumData = (model: AlbumDataModel): ReturnAlbumData => {
-  const releaseDate = 
-    model.wiki ? getAlbumReleaseDate(model?.wiki?.content) || 
-    getAlbumReleaseDate(model?.wiki?.summary) || 
-    model.wiki.published.split(" ")[2].replace(',', '') : "unknown";
-
     const getCategory = (tags: AlbumDataModel["tags"]) => {
       if (!tags?.tag) return undefined;
       if (Array.isArray(tags.tag) && tags.tag.length === 1) {
@@ -159,11 +105,11 @@ export const parseAlbumData = (model: AlbumDataModel): ReturnAlbumData => {
     albumArtist: model.artist,
     albumTitle: model.name,
     albumCategory: Category,
+    albumDate: model.tags?.tag?.[0]?.name || "",
     albumCover: {
       src: model.image[5]["#text"].replace("http:", "https:"),
       alt: `${model.name} album cover`,
     },
-    albumDate: releaseDate,
   };
 };
 
@@ -186,8 +132,8 @@ export const getAlbumData = async (album: string, artist: string): Promise<Retur
               id: albumData.id,
               albumTitle: albumData.albumTitle,
               albumArtist: albumData.albumArtist,
-              albumDate: albumData.albumDate,
               albumCategory: albumData.albumCategory,
+              albumDate: albumData.albumDate,
               albumCover: {
                 src: albumData.albumCover.src,
                 alt: albumData.albumCover.alt,

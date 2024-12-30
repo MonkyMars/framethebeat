@@ -37,7 +37,8 @@ export const fetchCollection = async () => {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
-    return NextResponse.json(collection);
+    
+    return NextResponse.json({ collection });
   } catch (error) {
     return NextResponse.json(
       { message: `Internal Server Error: ${error}` },
