@@ -91,6 +91,7 @@ const getMostSavedAlbums = async () => {
             width={2000}
             height={2000}
             alt="album cover"
+            priority
           />
         </div>
         <div className={styles.desktop}>
