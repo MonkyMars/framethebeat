@@ -26,6 +26,21 @@ export default function Home() {
     []
   );
 
+  
+  const PreloadImages = () => {
+    React.useEffect(() => {
+      images.forEach((image) => {
+        const link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = `/albumcovers/${image}`;
+        document.head.appendChild(link);
+      });
+    }, []);
+  
+    return null
+  };
+
   const [randomImage, setRandomImage] = React.useState<string>(images[0]);
   const [mostSavedAlbums, setMostSavedAlbums] = React.useState<Album[]>([]);
   const [mostAlbumSaves, setMostAlbumSaves] = React.useState<{ artist: string; album: string; saves: number}[] | null>(null);
@@ -83,6 +98,7 @@ const getMostSavedAlbums = async () => {
   return (
     <>
       <Nav />
+      <PreloadImages />
       <main className={styles.mainContent}>
         <div className={styles.mobile}>
           <h1>Frame The Beat</h1>
@@ -101,6 +117,7 @@ const getMostSavedAlbums = async () => {
             width={2000}
             height={2000}
             alt="album cover"
+            priority
           />
         </div>
       </main>
