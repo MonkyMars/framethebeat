@@ -48,7 +48,7 @@ const Collection = () => {
   const [error, setError] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const ITEMS_PER_PAGE = 50;
+  const [ITEMS_PER_PAGE, setITEMS_PER_PAGE] = useState(50);
   const [displayedAlbums, setDisplayedAlbums] = useState<Album[]>([]);
 
   useEffect(() => {
@@ -62,6 +62,7 @@ const Collection = () => {
             album: string;
             saves: string;
             release_date: number;
+            genre: string;
           },
           index: number
         ) => ({
@@ -69,6 +70,7 @@ const Collection = () => {
           title: item.album,
           saves: item.saves,
           release_date: item.release_date,
+          genre: item.genre,
           key: index,
         })
       );
@@ -295,7 +297,7 @@ const Collection = () => {
     const paginatedAlbums = filteredAlbums.slice(start, start + ITEMS_PER_PAGE);
     setDisplayedAlbums(paginatedAlbums);
     setTotalPages(Math.ceil(filteredAlbums.length / ITEMS_PER_PAGE));
-  }, [currentPage, filteredAlbums]);
+  }, [currentPage, filteredAlbums, ITEMS_PER_PAGE]);
 
   useEffect(() => {
     if (searchQuery.length >= 3) {
@@ -437,6 +439,13 @@ const Collection = () => {
         <button onClick={onPageNext} disabled={currentPage === totalPages - 1}>
           Next
         </button>
+        <select name="pages" id="pages" value={ITEMS_PER_PAGE} onChange={(e) => setITEMS_PER_PAGE(parseInt(e.target.value))}>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="200">200</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+        </select>
       </div>
     );
   };
@@ -550,7 +559,7 @@ const Collection = () => {
             </div>
           )}
         </div>
-        {totalPages > 1 && <Pagination />}
+        <Pagination />
         <div className="endText">
           <p>
             You&apos;ve reached the end of our collection! Didn&apos;t find the

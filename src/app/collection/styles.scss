@@ -452,7 +452,29 @@
       cursor: not-allowed;
     }
   }
+  select{
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(var(--theme-rgb), 0.3);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--foreground);
+    cursor: pointer;
+    transition: all 0.3s ease;
 
+    &:hover:not(:disabled) {
+      background: rgba(var(--theme-rgb), 0.1);
+      border-color: rgba(var(--theme-rgb), 0.5);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    option{
+    background: var(--background);
+    color: var(--foreground);
+  }
+  }
   span {
     color: var(--foreground);
   }
