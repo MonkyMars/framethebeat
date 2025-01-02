@@ -182,7 +182,7 @@
   border: 1px solid rgba(var(--theme-rgb), 0.2);
   overflow: hidden;
   transition: all 0.3s ease;
-  max-width: 400px;
+  width: clamp(280px, 90vw, 400px);
   box-shadow: 0 8px 20px rgba(var(--theme-rgb), 0.15);
 
   &:hover {

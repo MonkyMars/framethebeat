@@ -314,7 +314,7 @@ export const getAlbumData = (
       console.error(`No data found for album cover for ${album} by ${artist}`);
       return '/placeholder.png';
     }
-    console.log(`Fetched album data for ${album} by ${artist}:`, data);
+    
     return data.publicUrl;
   } catch (error) {
     console.error(

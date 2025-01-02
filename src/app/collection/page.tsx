@@ -49,7 +49,6 @@ const Collection = () => {
   const [filterBy, setFilterBy] = useState("all");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const { session } = useAuth();
-  const [collectionNames, setCollectionNames] = useState<Album[]>([]);
   const [userCollectionNames, setUserCollectionNames] = useState<
     { artist: string; title: string }[]
   >([]);
@@ -287,7 +286,7 @@ const Collection = () => {
 
     // Store original states for rollback
     const originalFillColor = (e.target as SVGElement).style.fill;
-    const originalCollectionNames = [...collectionNames];
+    const originalCollection = [...collection];
     const originalUserCollection = [...userCollectionNames];
 
     try {
@@ -295,9 +294,9 @@ const Collection = () => {
 
       // Update collection counts
       const newSaves =
-        (collectionNames?.find((item) => item.album === album)?.saves ?? 0) - 1;
+        (collection?.find((item) => item.album === album)?.saves ?? 0) - 1;
 
-      setCollectionNames((prev) =>
+      setCollection((prev) =>
         prev.map((item) =>
           item.album === album ? { ...item, saves: newSaves } : item
         )
@@ -333,7 +332,7 @@ const Collection = () => {
     } catch (error) {
       // Rollback on failure
       (e.target as SVGElement).style.fill = originalFillColor;
-      setCollectionNames(originalCollectionNames);
+      setCollection(originalCollection);
       setUserCollectionNames(originalUserCollection);
 
       const errorMessage =
@@ -573,7 +572,7 @@ const CollectionCard = ({
   <div className="collectionCard">
     <div className="albumImage">
       <Image
-        src={albumCover.src || "/placeholder.png"}
+        src={albumCover.src ?? "/placeholder.png"}
         alt={albumCover.alt || "Album cover"}
         width={1500}
         height={1500}

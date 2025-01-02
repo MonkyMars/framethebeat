@@ -5,7 +5,6 @@ import "./styles.scss";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Heart, Share2 } from "lucide-react";
-import { Album } from "../utils/types";
 import Footer from "../components/Footer";
 import {
   deleteAlbum,
@@ -22,6 +21,19 @@ import {
   knownGenres,
 } from "../utils/functions";
 
+interface Album {
+  artist: string;
+  album: string;
+  saves: number;
+  release_date: number;
+  genre: string;
+  albumCover: {
+    src: string;
+    alt: string;
+  };
+}
+
+
 const Saved = () => {
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
@@ -34,103 +46,49 @@ const Saved = () => {
     artist: string;
     album: string;
   } | null>(null);
-  const [collectionNames, setCollectionNames] = useState<
-    { artist: string; title: string; saves: number; release_date: number }[]
-  >([]);
-  const [userCollectionNames, setUserCollectionNames] = useState<
-    { artist: string; title: string }[]
-  >([]);
-
+  const [collection, setCollection] = useState<Album[]>([]);
+  
   useEffect(() => {
-    const getCollection = async () => {
-      const response = await fetchCollection();
-      const { collection } = await response.json();
-      const mappedData = collection.map(
-        (
-          item: {
-            artist: string;
-            album: string;
-            saves: string;
-            release_date: number;
-          },
-          index: number
-        ) => ({
+      const fetchData = async () => {
+        if (!session?.user?.id) return;
+        const [collectionResp, userResp] = await Promise.all([
+          fetchCollection(),
+          fetchUserCollection(session.user.id),
+        ]);
+        const { collection } = await collectionResp.json();
+        const userData = await userResp.json();
+    
+        const mappedCollection = collection.map((item: Album) => ({
           artist: item.artist,
-          title: item.album,
+          album: item.album,
           saves: item.saves,
           release_date: item.release_date,
-          key: index,
-        })
-      );
-      setCollectionNames(mappedData);
-    };
-
-    const getUserCollection = async () => {
-      if (!session?.user?.id) {
-        return;
-      }
-      const response = await fetchUserCollection(session.user.id);
-      const data = await response.json();
-      const mappedData = data.map(
-        (item: { artist: string; album: string }) => ({
-          artist: item.artist,
-          title: item.album,
-        })
-      );
-      setUserCollectionNames(mappedData);
-    };
-
-    const fetchData = async () => {
-      await Promise.all([getCollection(), getUserCollection()]);
-    };
-
-    fetchData();
-  }, [session]);
-
-  useEffect(() => {
-    if (!session?.user) return;
-
-    const fetchSavedAlbums = async (title: string, artist: string) => {
-      const fetchedData = await getAlbumData(title, artist);
-      if (!fetchedData) return;
-      setSavedAlbums((prev) => {
-        const newAlbums = fetchedData
-          .filter(
-            (newAlbum) =>
-              !prev.some(
-                (existingAlbum) =>
-                  existingAlbum.title === newAlbum.albumTitle &&
-                  existingAlbum.artist === newAlbum.albumArtist
-              )
+          genre: item.genre,
+          albumCover: {
+            src: getAlbumData(item.album, item.artist),
+            alt: `${item.album} by ${item.artist}`,
+          },
+        }));
+    
+        const userCollectionItems = userData.map(
+          (item: { artist: string; album: string }) => ({
+            artist: item.artist,
+            album: item.album,
+          })
+        );
+    
+        const userCollectionOnly = mappedCollection.filter((album: Album) =>
+          userCollectionItems.some(
+            (u: { artist: string; album: string }) => u.artist === album.artist && u.album === album.album
           )
-          .map((albumData) => {
-            const matchingCollection = collectionNames.find(
-              (item) =>
-                item.title.toLowerCase() ===
-                  albumData.albumTitle.toLowerCase() &&
-                item.artist.toLowerCase() ===
-                  albumData.albumArtist.toLowerCase()
-            );
-            return {
-              id: albumData.id,
-              title: matchingCollection?.title ?? albumData.albumTitle,
-              artist: matchingCollection?.artist ?? albumData.albumArtist,
-              release_date: String(
-                matchingCollection?.release_date ?? albumData.albumDate
-              ),
-              category: albumData.albumCategory,
-              albumCover: albumData.albumCover,
-              saves: matchingCollection?.saves ?? 0,
-            };
-          });
-        return [...prev, ...newAlbums];
-      });
-    };
-
-    userCollectionNames.forEach((album) => {
-      fetchSavedAlbums(album.title, album.artist);
-    });
-  }, [userCollectionNames, collectionNames, session]);
+        );
+    
+        setCollection(mappedCollection);
+        setSavedAlbums(userCollectionOnly);
+      };
+  
+      fetchData();
+    }, [session]);
 
   interface DeleteResponse {
     message: string;
@@ -147,7 +105,7 @@ const Saved = () => {
     };
   }
 
-  const handleRemove = async (id: number, artist: string, album: string) => {
+  const handleRemove = async (artist: string, album: string) => {
     if (!session?.user?.id) {
       toast.error("You must be logged in to remove albums");
       return;
@@ -155,7 +113,7 @@ const Saved = () => {
     const originalAlbums = [...savedAlbums];
 
     try {
-      setSavedAlbums((prev) => prev.filter((item) => item.id !== id));
+      setSavedAlbums((prev) => prev.filter((item) => item.album !== album));
       const response: DeleteResponse = await deleteAlbum(
         artist,
         album,
@@ -172,61 +130,55 @@ const Saved = () => {
       toast.error("Failed to remove album. Please try again.");
     }
   };
-
   const filteredAlbums = useMemo(() => {
     return savedAlbums
       .filter((album) => {
+        if (!album?.album || !album?.artist) return false;
         if (filterBy === "all" && selectedGenre === "all") return true;
+
         const matchesYear =
-          filterBy === "all" ||
-          collectionNames.some(
-            (name) =>
-              name.title === album.title &&
-              name.release_date.toString() === filterBy
-          );
+          filterBy === "all" || String(album.release_date) === filterBy;
+
         const matchesGenre =
           selectedGenre === "all" ||
-          album.category?.toLowerCase() === selectedGenre.toLowerCase();
+          (album.genre &&
+            album.genre.toLowerCase() === selectedGenre.toLowerCase());
+
         return matchesYear && matchesGenre;
       })
       .filter((album) => {
+        if (!album?.album || !album?.artist) return false;
+
         const searchTerm = searchQuery
           .toLowerCase()
-          .replace(".", "")
-          .replace(" ", "")
+          .replace(/[. ]/g, "")
           .trim();
+        const albumName = album.album.toLowerCase().replace(/[. ]/g, "");
+        const artistName = album.artist.toLowerCase().replace(/[. ]/g, "");
+        const genreName = album.genre?.toLowerCase() || "";
+        const releaseYear = String(album.release_date || "");
+
         return (
-          album.title
-            .toLowerCase()
-            .replace(".", "")
-            .replace(" ", "")
-            .includes(searchTerm) ||
-          album.artist
-            .toLowerCase()
-            .replace(".", "")
-            .replace(" ", "")
-            .includes(searchTerm) ||
-          album.category?.toLowerCase().includes(searchTerm) ||
-          album.release_date.toString().includes(searchTerm)
+          albumName.includes(searchTerm) ||
+          artistName.includes(searchTerm) ||
+          genreName.includes(searchTerm) ||
+          releaseYear.includes(searchTerm)
         );
       })
       .sort((a, b) => {
+        if (!a?.album || !b?.album) return 0;
+
         if (sortBy === "newest" || sortBy === "oldest") {
-          const aDate = parseInt(a.release_date?.toString() || "0");
-          const bDate = parseInt(b.release_date?.toString() || "0");
+          const aDate = Number(a.release_date) || 0;
+          const bDate = Number(b.release_date) || 0;
           return sortBy === "newest" ? bDate - aDate : aDate - bDate;
         }
-        if (sortBy === "title") return a.title.localeCompare(b.title);
-        return a.artist.localeCompare(b.artist);
+
+        return sortBy === "title"
+          ? a.album.localeCompare(b.album)
+          : a.artist.localeCompare(b.artist);
       });
-  }, [
-    savedAlbums,
-    collectionNames,
-    filterBy,
-    selectedGenre,
-    searchQuery,
-    sortBy,
-  ]);
+  }, [filterBy, selectedGenre, searchQuery, sortBy, savedAlbums]);
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => setError(""), 5000);
@@ -270,8 +222,8 @@ const Saved = () => {
               new Set(
                 savedAlbums
                   .map((album) => album.release_date)
-                  .filter((date) => date !== "unknown")
-                  .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
+                  .filter((date): date is number => date !== undefined && date !== null)
+                  .sort((a, b) => parseInt(b.toString() || "0") - parseInt(a.toString() || "0"))
               )
             ).map((year) => (
               <option key={year} value={year}>
@@ -314,7 +266,7 @@ const Saved = () => {
               onShare={onShare}
               onRemove={handleRemove}
               saves={
-                collectionNames.find((item) => item.title === album.title)
+                collection.find((item) => item.album === album.album)
                   ?.saves || 0
               }
               release_date={album.release_date?.toString() || "unknown"}
@@ -361,7 +313,7 @@ const Saved = () => {
 interface SavedCardProps {
   album: Album;
   onShare: (artist: string, album: string) => void;
-  onRemove: (id: number, artist: string, album: string) => void;
+  onRemove: (artist: string, album: string) => void;
   saves: number;
   release_date: string;
 }
@@ -378,22 +330,22 @@ const SavedCard: React.FC<SavedCardProps> = ({ album, onShare, onRemove, saves, 
         unoptimized={isGif(album.albumCover.src)}
       />
       <div className="cardContent">
-        <h3>{album.title}</h3>
+        <h3>{album.album}</h3>
         <p className="artist">{album.artist}</p>
         {release_date !== "unknown" && (
           <p className="date">{release_date}</p>
         )}
-        {album.category && (
+        {album.genre && (
           <p className="category">
-            {album.category.charAt(0).toUpperCase() + album.category.slice(1)}
+            {album.genre.charAt(0).toUpperCase() + album.genre.slice(1)}
           </p>
         )}
       </div>
       <div className="cardActions">
-        <button onClick={() => onShare(album.artist, album.title)}>
+        <button onClick={() => onShare(album.artist, album.album)}>
           <Share2 size={20} />
         </button>
-        <button onClick={() => onRemove(album.id, album.artist, album.title)}>
+        <button onClick={() => onRemove(album.artist, album.album)}>
           <Heart size={20} className="heart saves" />
           <span>{saves}</span>
         </button>

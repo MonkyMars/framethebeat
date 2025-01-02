@@ -35,7 +35,7 @@ const SharePopup: React.FC<SharePopupProps> = ({
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(`${text}\n${shareUrl}`);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
