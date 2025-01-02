@@ -1,56 +1,4 @@
 import { supabase } from "./supabase";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-async function convertBlobToWebP(blob: Blob): Promise<Blob> {
-  const img = document.createElement("img");
-
-  const objectUrl = URL.createObjectURL(blob);
-
-  const imageLoaded = new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve();
-    img.onerror = () => reject(new Error("Failed to load image"));
-  });
-
-  // Set image source
-  img.src = objectUrl;
-
-  // Wait for image to load
-  await imageLoaded;
-
-  // Create canvas
-  const canvas = document.createElement("canvas");
-  canvas.width = img.naturalWidth;
-  canvas.height = img.naturalHeight;
-
-  // Draw image on canvas
-  const ctx = canvas.getContext("2d");
-  ctx?.drawImage(img, 0, 0);
-
-  // Clean up object URL
-  URL.revokeObjectURL(objectUrl);
-
-  // Convert to WebP
-  return new Promise<Blob>((resolve) => {
-    canvas.toBlob(
-      (webpBlob) => {
-        resolve(webpBlob as Blob);
-      },
-      "image/webp",
-      0.8
-    ); // Quality set to 0.8, adjust as needed
-  });
-}
-
-interface API_RESPONSE {
-  album: {
-    mbid: string;
-    artist: string;
-    name: string;
-    image: { "#text": string }[];
-    tags: { tag: { name: string }[] };
-  };
-}
 
 interface ReturnAlbumData {
   id: number;
@@ -355,75 +303,25 @@ export const parseAlbumData = (model: AlbumDataModel): ReturnAlbumData => {
   };
 };
 
-export const getAlbumData = async (
+export const getAlbumData = (
   album: string,
   artist: string
-): Promise<ReturnAlbumData[] | undefined> => {
+): string => {
   try {
-    const response = await fetch(
-      `${API_URL}/2.0/?method=album.getinfo&api_key=${API_KEY}&artist=${encodeURIComponent(
-        artist
-      )}&album=${encodeURIComponent(album)}&format=json`
-    );
-    const data = await response.json();
-    const { album: model } = data as API_RESPONSE;
-    if (!model) {
-      return;
+    const filename = `${album}-${artist}`.replace(/[^a-zA-Z0-9-_\.]/g, '_');
+    const { data } = supabase.storage.from("albumcovers").getPublicUrl(`images/${filename}`);
+    if(!data) {
+      console.error(`No data found for album cover for ${album} by ${artist}`);
+      return '/placeholder.png';
     }
-    const albumData = parseAlbumData(model);
-    const fileSrc = albumData.albumCover.src;
-    const file = await fetch(fileSrc);
-    const blob = await file.blob();
-    const webpBlob = await convertBlobToWebP(blob);
-    const arrayBuffer = await webpBlob.arrayBuffer();
-
-    const sanitizedFileName =
-      `${albumData.albumTitle}-${albumData.albumArtist}`.replace(
-        /[^a-zA-Z0-9-_\.]/g,
-        "_"
-      );
-      if(sanitizedFileName && arrayBuffer){
-        console.log("sanitizedFileName", sanitizedFileName)
-      }
-    // const { error } = await supabase.storage
-    //   .from("albumcovers")
-    //   .upload(`images/${sanitizedFileName}`, arrayBuffer, {
-    //     contentType: "image/webp",
-    //     upsert: false,
-    //   });
-
-    // if (error) {
-    //   console.error("Error uploading album cover to storage:", error);
-    // }
-
-    const genre = albumData.albumCategory;
-    const { error: insertError } = await supabase.from("collection").update({
-      genre: genre,
-    }).eq("album", albumData.albumTitle);
-
-    if (insertError) {
-      console.error("Error inserting album data:", insertError);
-    }
-
-    const returnData: ReturnAlbumData[] = [
-      {
-        id: albumData.id,
-        albumTitle: albumData.albumTitle,
-        albumArtist: albumData.albumArtist,
-        albumCategory: albumData.albumCategory,
-        albumDate: albumData.albumDate,
-        albumCover: {
-          src: albumData.albumCover.src,
-          alt: albumData.albumCover.alt,
-        },
-      },
-    ];
-    return returnData;
+    console.log(`Fetched album data for ${album} by ${artist}:`, data);
+    return data.publicUrl;
   } catch (error) {
     console.error(
       `Error fetching album data for ${album} by ${artist}:`,
       error
     );
+    return "/placeholder.png";
   }
 };
 

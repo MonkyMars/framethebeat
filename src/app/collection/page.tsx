@@ -1,7 +1,6 @@
 "use client";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import { Album } from "../utils/types";
 import "./styles.scss";
 import Image from "next/image";
 import { useEffect, useState, Suspense, useRef, useMemo } from "react";
@@ -25,6 +24,18 @@ import {
 } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 
+interface Album {
+  artist: string;
+  album: string;
+  saves: number;
+  release_date: number;
+  genre: string;
+  albumCover: {
+    src: string;
+    alt: string;
+  };
+}
+
 const Collection = () => {
   const searchParams = useSearchParams();
   const [sharePopUp, setSharePopUp] = useState<{
@@ -38,9 +49,7 @@ const Collection = () => {
   const [filterBy, setFilterBy] = useState("all");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const { session } = useAuth();
-  const [collectionNames, setCollectionNames] = useState<
-    { artist: string; title: string; saves: number; release_date: number }[]
-  >([]);
+  const [collectionNames, setCollectionNames] = useState<Album[]>([]);
   const [userCollectionNames, setUserCollectionNames] = useState<
     { artist: string; title: string }[]
   >([]);
@@ -55,26 +64,24 @@ const Collection = () => {
     const getCollection = async () => {
       const response = await fetchCollection();
       const { collection } = await response.json();
-      const mappedData = collection.map(
-        (
-          item: {
-            artist: string;
-            album: string;
-            saves: string;
-            release_date: number;
-            genre: string;
-          },
-          index: number
-        ) => ({
-          artist: item.artist,
-          title: item.album,
-          saves: item.saves,
-          release_date: item.release_date,
-          genre: item.genre,
-          key: index,
-        })
-      );
-      setCollectionNames(mappedData);
+      const mappedData = collection.map((item: Album) => {
+        if (!item?.artist || !item?.album) {
+          console.error('Invalid album data:', item);
+          return null;
+        }
+        return{
+        artist: item.artist,
+        album: item.album,
+        saves: item.saves,
+        release_date: item.release_date,
+        genre: item.genre,
+        albumCover: {
+          src: getAlbumData(item.album, item.artist),
+          alt: `${item.album} by ${item.artist}`,
+        },
+      };
+      }).filter(Boolean)
+      setCollection(mappedData);
     };
 
     const getUserCollection = async () => {
@@ -98,67 +105,6 @@ const Collection = () => {
 
     fetchData();
   }, [session]);
-
-  const processedAlbums = useRef(new Set());
-
-  useEffect(() => {
-    if (!collectionNames?.length) return;
-
-    const fetchSavedAlbums = async () => {
-      const newAlbums = collectionNames.filter(
-        (entry) =>
-          !processedAlbums.current.has(`${entry.artist}-${entry.title}`)
-      );
-
-      if (newAlbums.length === 0) return;
-
-      const albumPromises = newAlbums.map(async (entry) => {
-        processedAlbums.current.add(`${entry.artist}-${entry.title}`);
-
-        const fetchedData = await getAlbumData(entry.title, entry.artist);
-        if (!fetchedData) return null;
-
-        return fetchedData.map((albumData) => ({
-          id: albumData.id,
-          title: albumData.albumTitle,
-          artist: albumData.albumArtist,
-          category: albumData.albumCategory,
-          albumCover: albumData.albumCover,
-          release_date: entry.release_date,
-        }));
-      });
-
-      const results = await Promise.all(albumPromises);
-
-      setCollection((prev) => {
-        const mergedAlbums = results
-          .filter(Boolean)
-          .flat()
-          .filter((item) => {
-            if (!item?.title || !item?.artist) return false;
-            return !prev.some(
-              (existingAlbum) =>
-                existingAlbum.title === item.title &&
-                existingAlbum.artist === item.artist
-            );
-          })
-          .map((item) => ({
-            id: item!.id,
-            title: item!.title,
-            artist: item!.artist,
-            category: item!.category || "unknown",
-            albumCover: item!.albumCover || {
-              src: "/placeholder.png",
-              alt: `${item!.title} by ${item!.artist}`,
-            },
-            release_date: item!.release_date?.toString() || "",
-          }));
-        return [...prev, ...mergedAlbums];
-      });
-    };
-
-    fetchSavedAlbums();
-  }, [collectionNames]);
 
   useEffect(() => {
     setSearchQuery(searchParams.get("q") || "");
@@ -190,25 +136,39 @@ const Collection = () => {
     }
 
     // Store original states for rollback
-    const originalCollectionNames = [...collectionNames];
+    const originalCollection = [...collection];
     const originalUserCollection = [...userCollectionNames];
     const originalFillColor = (e.target as SVGElement).style.fill;
 
     try {
       // Optimistic UI updates
       (e.target as SVGElement).style.fill = "var(--theme)";
-      setCollectionNames((prev) => {
+      const albumData = getAlbumData(album, artist);
+      setCollection((prev) => {
         if (!album || !artist) return prev;
 
-        const existingAlbum = prev.find((item) => item.title === album);
+        const existingAlbum = prev.find((item) => item.album === album);
         const newSaves = (existingAlbum?.saves ?? 0) + 1;
 
         if (existingAlbum) {
           return prev.map((item) =>
-            item.title === album ? { ...item, saves: newSaves } : item
+            item.album === album ? { ...item, saves: newSaves } : item
           );
         }
-        return [...prev, { artist, title: album, saves: 1, release_date: 0 }];
+        return [
+          ...prev,
+          {
+            artist,
+            album,
+            saves: 1,
+            release_date: 0,
+            genre: "unknown",
+            albumCover: {
+              src: albumData ?? "/placeholder.png",
+              alt: `${album} by ${artist}`,
+            },
+          },
+        ];
       });
 
       setUserCollectionNames((prev) => [...prev, { artist, title: album }]);
@@ -228,7 +188,7 @@ const Collection = () => {
     } catch (error) {
       // Rollback on failure
       (e.target as SVGElement).style.fill = originalFillColor;
-      setCollectionNames(originalCollectionNames);
+      setCollection(originalCollection);
       setUserCollectionNames(originalUserCollection);
 
       const errorMessage =
@@ -240,57 +200,52 @@ const Collection = () => {
   const filteredAlbums = useMemo(() => {
     return collection
       .filter((album) => {
+        if (!album?.album || !album?.artist) return false;
         if (filterBy === "all" && selectedGenre === "all") return true;
+
         const matchesYear =
-          filterBy === "all" ||
-          collectionNames.some(
-            (name) =>
-              name.title === album.title &&
-              name.release_date.toString() === filterBy
-          );
+          filterBy === "all" || String(album.release_date) === filterBy;
+
         const matchesGenre =
           selectedGenre === "all" ||
-          album.category?.toLowerCase() === selectedGenre.toLowerCase();
+          (album.genre &&
+            album.genre.toLowerCase() === selectedGenre.toLowerCase());
+
         return matchesYear && matchesGenre;
       })
       .filter((album) => {
+        if (!album?.album || !album?.artist) return false;
+
         const searchTerm = searchQuery
           .toLowerCase()
-          .replace(".", "")
-          .replace(" ", "")
+          .replace(/[. ]/g, "")
           .trim();
+        const albumName = album.album.toLowerCase().replace(/[. ]/g, "");
+        const artistName = album.artist.toLowerCase().replace(/[. ]/g, "");
+        const genreName = album.genre?.toLowerCase() || "";
+        const releaseYear = String(album.release_date || "");
+
         return (
-          album.title
-            .toLowerCase()
-            .replace(".", "")
-            .replace(" ", "")
-            .includes(searchTerm) ||
-          album.artist
-            .toLowerCase()
-            .replace(".", "")
-            .replace(" ", "")
-            .includes(searchTerm) ||
-          album.category?.toLowerCase().includes(searchTerm) ||
-          album.release_date.toString().includes(searchTerm)
+          albumName.includes(searchTerm) ||
+          artistName.includes(searchTerm) ||
+          genreName.includes(searchTerm) ||
+          releaseYear.includes(searchTerm)
         );
       })
       .sort((a, b) => {
+        if (!a?.album || !b?.album) return 0;
+
         if (sortBy === "newest" || sortBy === "oldest") {
-          const aDate = parseInt(a.release_date?.toString() || "0");
-          const bDate = parseInt(b.release_date?.toString() || "0");
+          const aDate = Number(a.release_date) || 0;
+          const bDate = Number(b.release_date) || 0;
           return sortBy === "newest" ? bDate - aDate : aDate - bDate;
         }
-        if (sortBy === "title") return a.title.localeCompare(b.title);
-        return a.artist.localeCompare(b.artist);
+
+        return sortBy === "title"
+          ? a.album.localeCompare(b.album)
+          : a.artist.localeCompare(b.artist);
       });
-  }, [
-    collection,
-    collectionNames,
-    filterBy,
-    selectedGenre,
-    searchQuery,
-    sortBy,
-  ]);
+  }, [collection, filterBy, selectedGenre, searchQuery, sortBy]);
 
   useEffect(() => {
     const start = currentPage * ITEMS_PER_PAGE;
@@ -340,11 +295,11 @@ const Collection = () => {
 
       // Update collection counts
       const newSaves =
-        (collectionNames?.find((item) => item.title === album)?.saves ?? 0) - 1;
+        (collectionNames?.find((item) => item.album === album)?.saves ?? 0) - 1;
 
       setCollectionNames((prev) =>
         prev.map((item) =>
-          item.title === album ? { ...item, saves: newSaves } : item
+          item.album === album ? { ...item, saves: newSaves } : item
         )
       );
 
@@ -406,7 +361,7 @@ const Collection = () => {
       setTitle("");
     }, 3000);
   };
-  if (!collectionNames || !collection) {
+  if (!collection) {
     return <div>Loading...</div>;
   }
 
@@ -439,7 +394,12 @@ const Collection = () => {
         <button onClick={onPageNext} disabled={currentPage === totalPages - 1}>
           Next
         </button>
-        <select name="pages" id="pages" value={ITEMS_PER_PAGE} onChange={(e) => setITEMS_PER_PAGE(parseInt(e.target.value))}>
+        <select
+          name="pages"
+          id="pages"
+          value={ITEMS_PER_PAGE}
+          onChange={(e) => setITEMS_PER_PAGE(parseInt(e.target.value))}
+        >
           <option value="50">50</option>
           <option value="100">100</option>
           <option value="200">200</option>
@@ -478,7 +438,7 @@ const Collection = () => {
               <option value="all">All Years</option>
               {Array.from(
                 new Set(
-                  collectionNames
+                  collection
                     .map((album) => album.release_date.toString())
                     .filter((date) => date !== "unknown")
                     .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
@@ -521,21 +481,21 @@ const Collection = () => {
         </div>
         <div className="collectionGrid" ref={gridRef}>
           {displayedAlbums.length > 0 &&
-            displayedAlbums.map((album) => (
+            displayedAlbums.map((album, index) => (
               <CollectionCard
-                key={`${album.artist}-${album.title}-${album.id}`}
+                key={`${album.artist}-${album.album}-${index}`}
                 {...album}
                 onHeartClick={(e) =>
-                  userCollectionNames.find((item) => item.title === album.title)
-                    ? onDelete(e, album.artist, album.title)
-                    : onSave(e, album.artist, album.title)
+                  userCollectionNames.find((item) => item.title === album.album)
+                    ? onDelete(e, album.artist, album.album)
+                    : onSave(e, album.artist, album.album)
                 }
                 saves={
-                  collectionNames.find((item) => item.title === album.title)
+                  collection.find((item) => item.album === album.album)
                     ?.saves || 0
                 }
                 saved={
-                  userCollectionNames.find((item) => item.title === album.title)
+                  userCollectionNames.find((item) => item.title === album.album)
                     ? true
                     : false
                 }
@@ -600,8 +560,8 @@ type CollectionCardProps = Album & {
 };
 
 const CollectionCard = ({
-  title,
-  category,
+  album,
+  genre,
   albumCover,
   artist,
   onHeartClick,
@@ -622,18 +582,18 @@ const CollectionCard = ({
       />
     </div>
     <div className="albumInfo">
-      <h3>{title}</h3>
+      <h3>{album}</h3>
       <p className="artist">{artist}</p>
       {releaseDate && <p className="date">{releaseDate}</p>}
-      {category && category.toLocaleLowerCase() !== "unknown" && (
+      {genre && genre.toLocaleLowerCase() !== "unknown" && (
         <p className="category">
-          {category.charAt(0).toLocaleUpperCase() + category.slice(1)}
+          {genre.charAt(0).toLocaleUpperCase() + genre.slice(1)}
         </p>
       )}
     </div>
     <div className="albumActions">
       <button>
-        <Share2 size={24} onClick={() => onShare(artist, title)} />
+        <Share2 size={24} onClick={() => onShare(artist, album)} />
       </button>
       <button className="saves">
         <Heart
