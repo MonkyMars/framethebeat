@@ -6,6 +6,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'zapqcxbffugqvfiiilci.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lastfm.freetls.fastly.net'
       }
     ]
   },
