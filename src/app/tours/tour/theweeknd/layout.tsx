@@ -1,5 +1,5 @@
 "use client";
-import "../globals.css";
+import "../../../globals.css";
 import { ThemeProvider } from "../../../utils/theme-hook";
 import React from "react";
 import { AuthProvider } from "../../../utils/AuthContext";
