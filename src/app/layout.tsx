@@ -4,6 +4,8 @@ import "./globals.css";
 import { AuthProvider } from "./utils/AuthContext";
 import { ThemeProvider } from "./utils/theme-hook";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,12 +19,14 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Frame The Beat",
-  description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
-  keywords: "album covers, music art, album artwork, music database, cover art search, vinyl artwork",
+  description:
+    "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+  keywords:
+    "album covers, music art, album artwork, music database, cover art search, vinyl artwork",
   authors: [{ name: "Frame The Beat" }],
   creator: "Frame The Beat",
   publisher: "Frame The Beat",
-  metadataBase: new URL('https://www.framethebeat.com'),
+  metadataBase: new URL("https://www.framethebeat.com"),
   icons: {
     icon: "/favicon.ico",
     apple: "/favicon.ico",
@@ -31,7 +35,8 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     title: "Frame The Beat",
-    description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+    description:
+      "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
     url: "https://www.framethebeat.com",
     siteName: "Frame The Beat",
     locale: "en_US",
@@ -54,7 +59,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Frame The Beat",
-    description: "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+    description:
+      "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
     images: ["/favicon.ico"],
     creator: "@framethebeat",
   },
@@ -95,7 +101,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-SBYGVJEEPC"
+        />
+        <Script id="google-analytics">
+          {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SBYGVJEEPC');
+  `}
+        </Script>
         <Analytics />
+        <SpeedInsights />
         <AuthProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </AuthProvider>

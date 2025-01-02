@@ -1,10 +1,11 @@
 "use client";
-import "../../../globals.css";
+import "../globals.css";
 import { ThemeProvider } from "../../../utils/theme-hook";
-import { AuthProvider } from "@/app/utils/AuthContext";
 import React from "react";
-import { Analytics } from "@vercel/analytics/next"
-
+import { AuthProvider } from "../../../utils/AuthContext";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 export default function RootLayout({
   children,
 }: {
@@ -12,7 +13,21 @@ export default function RootLayout({
 }) {
   return (
     <>
-      <Analytics/>
+      <Script
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
+      />
+      <Script id="google-analytics">
+        {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
+  `}
+      </Script>
+
+      <Analytics />
+      <SpeedInsights />
       <AuthProvider>
         <ThemeProvider>{children}</ThemeProvider>
       </AuthProvider>

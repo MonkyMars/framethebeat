@@ -1,11 +1,11 @@
 "use client";
 import "../globals.css";
 import { ThemeProvider } from "../utils/theme-hook";
+import React from "react";
 import { AuthProvider } from "../utils/AuthContext";
 import { Analytics } from "@vercel/analytics/next";
-
-import React from "react";
-
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import Script from "next/script";
 import Head from "next/head";
 
 export default function RootLayout({
@@ -14,18 +14,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
-      <Head>
+    <><Head>
         <link
           rel="preconnect"
-          href="https://lastfm.freetls.fastly.net"
+          href="https://zapqcxbffugqvfiiilci.supabase.co"
           crossOrigin="anonymous"
         />
       </Head>
-      <Analytics/>
+      <Script
+        async
+        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}`}
+      />
+      <Script id="google-analytics">
+        {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){window.dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
+  `}
+      </Script>
+
+      <Analytics />
+      <SpeedInsights />
       <AuthProvider>
         <ThemeProvider>{children}</ThemeProvider>
       </AuthProvider>
     </>
   );
 }
+
