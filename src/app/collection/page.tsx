@@ -9,7 +9,6 @@ import { Heart, Share2, X } from "lucide-react";
 import Banner from "../components/Banner";
 import {
   getAlbumData,
-  isGif,
   isHighPriority,
   knownGenres,
 } from "../utils/functions";
@@ -574,10 +573,11 @@ const CollectionCard = ({
       <Image
         src={albumCover.src ?? "/placeholder.png"}
         alt={albumCover.alt || "Album cover"}
-        width={1500}
-        height={1500}
+        objectFit="cover"
+        width={300}
+        height={300}   
         priority={isHighPriority(albumCover.src)}
-        unoptimized={isGif(albumCover.src)}
+        unoptimized={true}
       />
     </div>
     <div className="albumInfo">
