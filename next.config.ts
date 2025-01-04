@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: "upgrade-insecure-requests"
           },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, immutable'
+          }
         ],
       },
     ]

@@ -1,6 +1,7 @@
 import styles from "../page.module.scss";
 import { X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 interface AsideProps {
   isOpen: boolean;
   user: string | undefined;
@@ -8,7 +9,6 @@ interface AsideProps {
 }
 
 const Aside = ({ isOpen, onClose, user }: AsideProps) => {
-  const router = useRouter();
   return (
     <aside className={`${styles.aside} ${isOpen ? styles.open : ""}`}>
       <button onClick={onClose} className={styles.closeButton}>
@@ -16,25 +16,24 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
       </button>
       <nav>
         <ul>
-          <li onClick={() => router.push("/")}>Home</li>
-          <li onClick={() => router.push("/collection")}>Collection</li>
-          <li onClick={() => router.push("/saved")}>Saved</li>
-          {user && <li onClick={() => router.push("/settings")}>Settings</li>}
-          <li onClick={() => router.push("/tours")}>Tours</li>
+            <Link href="/" prefetch={true}>Home</Link>
+            <Link href="/collection" prefetch={true}>Collection</Link>
+            <Link href="/saved" prefetch={true}>Saved</Link>
+            {user && <Link href="/settings" prefetch={true}>Settings</Link>}
+            <Link href="/tours" prefetch={true}>Tours</Link>
         </ul>
         <ul>
-          {!user ? (
+            {!user ? (
             <>
-              <span onClick={() => router.push("/login")}>Log in</span>
-              <span onClick={() => router.push("/register")}>Sign up</span>
+              <Link href="/login" prefetch={true}>Log in</Link>
+              <Link href="/register" prefetch={true}>Sign up</Link>
             </>
-          ) : (
+            ) : (
             <>
              <span>Logged in as: {user}</span>
-             <span onClick={() => router.push("/settings")}>Settings</span>
+             <Link href="/settings" prefetch={true}>Settings</Link>
             </>
-           
-          )}
+            )}
         </ul>
       </nav>
     </aside>
