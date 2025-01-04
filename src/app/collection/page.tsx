@@ -416,6 +416,7 @@ const Collection = () => {
         <div className="header">
           <h2>Our Collection</h2>
           <p>Here are all the albums we&apos;ve saved.</p>
+          {collection && <p>Browse between {collection.length} albums!</p>}
         </div>
         <div className="controlBar">
           <div className="filters">
