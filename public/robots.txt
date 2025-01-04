@@ -7,3 +7,4 @@ Host: https://www.framethebeat.com
 
 # Sitemaps
 Sitemap: https://www.framethebeat.com/sitemap.xml
+Sitemap: https://www.framethebeat.com/server-sitemap.xml
