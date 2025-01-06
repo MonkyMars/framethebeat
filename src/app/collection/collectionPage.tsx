@@ -219,8 +219,8 @@ const Collection = () => {
           .replace(/[. ]/g, "")
           .replace(`'`, '')
           .trim();
-        const albumName = album.album.toLowerCase().replace(/[. ]/g, "");
-        const artistName = album.artist.toLowerCase().replace(/[. ]/g, "");
+        const albumName = album.album.toLowerCase().replace(/[. ]/g, "").replace(`'`, '');
+        const artistName = album.artist.toLowerCase().replace(/[. ]/g, "").replace(`'`, ';
         const genreName = album.genre?.toLowerCase() || "";
         const releaseYear = String(album.release_date || "");
 
