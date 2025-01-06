@@ -217,6 +217,7 @@ const Collection = () => {
         const searchTerm = searchQuery
           .toLowerCase()
           .replace(/[. ]/g, "")
+          .replace(`'`, '')
           .trim();
         const albumName = album.album.toLowerCase().replace(/[. ]/g, "");
         const artistName = album.artist.toLowerCase().replace(/[. ]/g, "");
