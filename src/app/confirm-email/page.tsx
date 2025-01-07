@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../utils/supabase";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import "./styles.scss";
 import { useSearchParams } from "next/navigation";
 import { Settings, Home } from "lucide-react";
 const ConfirmEmail = () => {

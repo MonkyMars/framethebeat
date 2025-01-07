@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Mail, Lock } from "lucide-react";
 import Link from "next/link";
-import "./styles.scss";
+//";
 import { logInUser } from "../utils/database";
 import { useRouter } from "next/navigation";
 import { createHash } from "crypto";

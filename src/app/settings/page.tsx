@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
-import "./styles.scss";
+//";
 import {
   Sun,
   Languages,

@@ -2,11 +2,12 @@
 import "../globals.css";
 import { ThemeProvider } from "../utils/theme-hook";
 import React from "react";
-import Script from "next/script";
-import Head from "next/head";
 import { AuthProvider } from "../utils/AuthContext";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+// import Script from "next/script";
+// import Head from "next/head";
+
+// import { Analytics } from "@vercel/analytics/next";
+// import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
@@ -15,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <>
-      <Head>
+      {/* <Head>
         <link
           rel="preconnect"
           href="https://zapqcxbffugqvfiiilci.supabase.co"
@@ -36,7 +37,7 @@ export default function RootLayout({
       </Script>
 
       <Analytics />
-      <SpeedInsights />
+      <SpeedInsights /> */}
       <AuthProvider>
         <ThemeProvider>{children}</ThemeProvider>
       </AuthProvider>

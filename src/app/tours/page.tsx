@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import "./styles.scss";
+//";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import Image from "next/image";

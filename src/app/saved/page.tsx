@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import Nav from "../components/Nav";
-import "./styles.scss";
+//";
 import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { Heart, Share2 } from "lucide-react";

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useState, Suspense, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { Heart, Share2, X } from "lucide-react";
+import "../globals.css";
 import Banner from "../components/Banner";
 import {
   getAlbumData,
@@ -593,7 +594,7 @@ const CollectionCard = ({
         layout="fill"
         priority={isHighPriority(albumCover.src)}
         unoptimized={true}
-        className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out"
+        className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out brightness-105"
       />
     </div>
     <div className="flex flex-col items-center gap-2">
