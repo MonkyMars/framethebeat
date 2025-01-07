@@ -1,10 +1,10 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { AuthProvider } from "./utils/AuthContext";
 import { ThemeProvider } from "./utils/theme-hook";
 import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next"
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import Script from "next/script";
 import Head from "next/head";
 const geistSans = Geist({

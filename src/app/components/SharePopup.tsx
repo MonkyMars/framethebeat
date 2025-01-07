@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Copy, Share2, Check, X } from "lucide-react";
-import styles from "../page.module.scss";
+import styles from "./SharePopup.module.scss";
 
 interface SharePopupProps {
   albumName: string;
