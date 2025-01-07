@@ -1,7 +1,6 @@
 "use client";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import "./styles.scss";
 import Image from "next/image";
 import { useEffect, useState, Suspense, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
@@ -382,14 +381,22 @@ const Collection = () => {
     };
 
     return (
-      <div className="pagination">
-        <button onClick={onPagePrev} disabled={currentPage === 0}>
+      <div className="pagination flex justify-center items-center gap-4 my-8">
+        <button
+          onClick={onPagePrev}
+          disabled={currentPage === 0}
+          className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded bg-transparent text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:bg-[rgba(var(--theme-rgb),0.1)] hover:border-[rgba(var(--theme-rgb),0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Previous
         </button>
-        <span>
+        <span className="text-foreground">
           Page {currentPage + 1} of {totalPages}
         </span>
-        <button onClick={onPageNext} disabled={currentPage === totalPages - 1}>
+        <button
+          onClick={onPageNext}
+          disabled={currentPage === totalPages - 1}
+          className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded bg-transparent text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:bg-[rgba(var(--theme-rgb),0.1)] hover:border-[rgba(var(--theme-rgb),0.5)] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Next
         </button>
         <select
@@ -397,6 +404,7 @@ const Collection = () => {
           id="pages"
           value={ITEMS_PER_PAGE}
           onChange={(e) => setITEMS_PER_PAGE(parseInt(e.target.value))}
+          className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded bg-transparent text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:bg-[rgba(var(--theme-rgb),0.1)] hover:border-[rgba(var(--theme-rgb),0.5)]"
         >
           <option value="50">50</option>
           <option value="100">100</option>
@@ -411,18 +419,21 @@ const Collection = () => {
   return (
     <>
       <Nav />
-      <main className="mainContent">
-        <div className="header">
-          <h2>Our Collection</h2>
-          <p>Here are all the albums we&apos;ve saved.</p>
-          {collection && <p>Browse between {collection.length} albums!</p>}
+      <main className="mainContent p-8 w-full">
+        <div className="header flex flex-col items-center gap-4 p-8">
+          <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-[var(--foreground)] via-[var(--foreground)] to-[var(--foreground)] shadow-white">
+            Our Collection
+          </h2>
+          <p className="text-center text-lg">Here are all the albums we&apos;ve saved.</p>
+          {collection && <p className="text-center text-lg">Browse between {collection.length} albums!</p>}
         </div>
-        <div className="controlBar">
-          <div className="filters">
+        <div className="controlBar flex justify-between items-center p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
+          <div className="filters flex gap-4">
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
               disabled={collection.length === 0}
+              className="px-4 py-3 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
             >
               <option value="newest">Newest First</option>
               <option value="oldest">Oldest First</option>
@@ -433,6 +444,7 @@ const Collection = () => {
               value={filterBy}
               onChange={(e) => setFilterBy(e.target.value)}
               disabled={collection.length === 0}
+              className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
             >
               <option value="all">All Years</option>
               {Array.from(
@@ -453,6 +465,7 @@ const Collection = () => {
               id="genre"
               onChange={(e) => setSelectedGenre(e.target.value)}
               disabled={collection.length === 0}
+              className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
             >
               <option value="all">All Genres</option>
               {knownGenres.map((genre, index) => (
@@ -462,23 +475,24 @@ const Collection = () => {
               ))}
             </select>
           </div>
-          <div className="search">
+          <div className="search flex items-center gap-2">
             <input
               type="text"
               placeholder="Search saved albums..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               disabled={collection.length === 0}
+              className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
             />
             <X
               size={24}
-              className="clear"
+              className="clear cursor-pointer"
               onClick={() => setSearchQuery("")}
               style={{ display: searchQuery ? "block" : "none" }}
             />
           </div>
         </div>
-        <div className="collectionGrid" ref={gridRef}>
+        <div className="collectionGrid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8" ref={gridRef}>
           {displayedAlbums.length > 0 &&
             displayedAlbums.map((album, index) => (
               <CollectionCard
@@ -503,15 +517,15 @@ const Collection = () => {
               />
             ))}
           {collection.length === 0 && filteredAlbums.length === 0 && (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p className="loading-text">Loading our collection...</p>
+            <div className="loading-container flex flex-col items-center justify-center gap-4">
+              <div className="loading-spinner animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--theme)]"></div>
+              <p className="loading-text text-lg">Loading our collection...</p>
             </div>
           )}
           {filteredAlbums.length === 0 && collection.length > 0 && (
-            <div className="loading-container">
-              <div className="loading-spinner"></div>
-              <p className="loading-text">
+            <div className="loading-container flex flex-col items-center justify-center gap-4">
+              <div className="loading-spinner animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--theme)]"></div>
+              <p className="loading-text text-lg">
                 No results found with search filters. Please try different
                 filters.
               </p>
@@ -519,18 +533,19 @@ const Collection = () => {
           )}
         </div>
         <Pagination />
-        <div className="endText">
-          <p>
+        <div className="endText flex flex-col items-center gap-4 mt-8">
+          <p className="text-center">
             You&apos;ve reached the end of our collection! Didn&apos;t find the
             album you were looking for? Reach out to us!
           </p>
-          <Link href="mailto:support@framethebeat.com">
+          <Link href="mailto:support@framethebeat.com" className="text-[var(--theme)] underline">
             Support@framethebeat.com
           </Link>
           <button
             onClick={() =>
               gridRef.current?.scrollIntoView({ behavior: "smooth" })
             }
+            className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded bg-transparent text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:bg-[rgba(var(--theme-rgb),0.1)] hover:border-[rgba(var(--theme-rgb),0.5)]"
           >
             Back to the top
           </button>
@@ -569,37 +584,37 @@ const CollectionCard = ({
   onShare,
   releaseDate,
 }: CollectionCardProps) => (
-  <div className="collectionCard">
-    <div className="albumImage">
+  <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] hover:scale-102 transition-all duration-300 ease-in-out">
+    <div className="w-full h-64 relative">
       <Image
         src={albumCover.src ?? "/placeholder.png"}
         alt={albumCover.alt || "Album cover"}
         objectFit="cover"
-        width={300}
-        height={300}   
+        layout="fill"
         priority={isHighPriority(albumCover.src)}
         unoptimized={true}
+        className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out"
       />
     </div>
-    <div className="albumInfo">
-      <h3>{album}</h3>
-      <p className="artist">{artist}</p>
-      {releaseDate && <p className="date">{releaseDate}</p>}
+    <div className="flex flex-col items-center gap-2">
+      <h3 className="text-lg font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">{album}</h3>
+      <p className="text-md text-[rgba(var(--theme-rgb),0.7)]">{artist}</p>
+      {releaseDate && <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">{releaseDate}</p>}
       {genre && genre.toLocaleLowerCase() !== "unknown" && (
-        <p className="category">
+        <p className="text-xs font-medium tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
           {genre.charAt(0).toLocaleUpperCase() + genre.slice(1)}
         </p>
       )}
     </div>
-    <div className="albumActions">
-      <button>
+    <div className="flex gap-4">
+      <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
         <Share2 size={24} onClick={() => onShare(artist, album)} />
       </button>
-      <button className="saves">
+      <button className="flex items-center gap-2 p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
         <Heart
           size={24}
           onClick={(e) => onHeartClick(e)}
-          style={{ fill: saved ? "var(--theme)" : "var(--background)" }}
+          className={`cursor-pointer text-theme ${saved ? "text-theme fill-theme" : ""}`}	
         />
         <span>{saves}</span>
       </button>
