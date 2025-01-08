@@ -7,11 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { Heart, Share2, X } from "lucide-react";
 import "../globals.css";
 import Banner from "../components/Banner";
-import {
-  getAlbumData,
-  isHighPriority,
-  knownGenres,
-} from "../utils/functions";
+import { getAlbumData, isHighPriority, knownGenres } from "../utils/functions";
 import SharePopup from "../components/SharePopup";
 import Link from "next/link";
 import {
@@ -37,7 +33,10 @@ interface Album {
 
 const Collection = () => {
   const searchParams = useSearchParams();
-  const [sharePopUp, setSharePopUp] = useState<{ artist: string; album: string } | null>(null);
+  const [sharePopUp, setSharePopUp] = useState<{
+    artist: string;
+    album: string;
+  } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [collection, setCollection] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
@@ -60,23 +59,25 @@ const Collection = () => {
     const getCollection = async () => {
       const response = await fetchCollection();
       const { collection } = await response.json();
-      const mappedData = collection.map((item: Album) => {
-        if (!item?.artist || !item?.album) {
-          console.error('Invalid album data:', item);
-          return null;
-        }
-        return{
-        artist: item.artist,
-        album: item.album,
-        saves: item.saves,
-        release_date: item.release_date,
-        genre: item.genre,
-        albumCover: {
-          src: getAlbumData(item.album, item.artist),
-          alt: `${item.album} by ${item.artist}`,
-        },
-      };
-      }).filter(Boolean)
+      const mappedData = collection
+        .map((item: Album) => {
+          if (!item?.artist || !item?.album) {
+            console.error("Invalid album data:", item);
+            return null;
+          }
+          return {
+            artist: item.artist,
+            album: item.album,
+            saves: item.saves,
+            release_date: item.release_date,
+            genre: item.genre,
+            albumCover: {
+              src: getAlbumData(item.album, item.artist),
+              alt: `${item.album} by ${item.artist}`,
+            },
+          };
+        })
+        .filter(Boolean);
       setCollection(mappedData);
     };
 
@@ -425,8 +426,14 @@ const Collection = () => {
           <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-[var(--foreground)] via-[var(--foreground)] to-[var(--foreground)] shadow-white">
             Our Collection
           </h2>
-          <p className="text-center text-lg">Here are all the albums we&apos;ve saved.</p>
-          {collection && <p className="text-center text-lg">Browse between {collection.length} albums!</p>}
+          <p className="text-center text-lg">
+            Here are all the albums we&apos;ve saved.
+          </p>
+          {collection && (
+            <p className="text-center text-lg">
+              Browse between {collection.length} albums!
+            </p>
+          )}
         </div>
         <div className="controlBar flex justify-between items-center p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
           <div className="filters flex gap-4">
@@ -493,7 +500,10 @@ const Collection = () => {
             />
           </div>
         </div>
-        <div className="collectionGrid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8" ref={gridRef}>
+        <div
+          className="collectionGrid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"
+          ref={gridRef}
+        >
           {displayedAlbums.length > 0 &&
             displayedAlbums.map((album, index) => (
               <CollectionCard
@@ -539,7 +549,10 @@ const Collection = () => {
             You&apos;ve reached the end of our collection! Didn&apos;t find the
             album you were looking for? Reach out to us!
           </p>
-          <Link href="mailto:support@framethebeat.com" className="text-[var(--theme)] underline">
+          <Link
+            href="mailto:support@framethebeat.com"
+            className="text-[var(--theme)] underline"
+          >
             Support@framethebeat.com
           </Link>
           <button
@@ -586,9 +599,8 @@ const CollectionCard = ({
   releaseDate,
 }: CollectionCardProps) => {
   const [imageError, setImageError] = useState(false);
-  const imageUrl = albumCover?.src && !imageError 
-    ? albumCover.src 
-    : "/placeholder.png";
+  const imageUrl =
+    albumCover?.src && !imageError ? albumCover.src : "/placeholder.png";
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
@@ -605,9 +617,15 @@ const CollectionCard = ({
         />
       </div>
       <div className="flex flex-col items-center gap-2">
-        <h3 className="text-xl font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">{album}</h3>
+        <h3 className="text-xl font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">
+          {album}
+        </h3>
         <p className="text-lg text-[rgba(var(--theme-rgb),0.7)]">{artist}</p>
-        {releaseDate && <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">{releaseDate}</p>}
+        {releaseDate && (
+          <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">
+            {releaseDate}
+          </p>
+        )}
         {genre && genre.toLocaleLowerCase() !== "unknown" && (
           <p className="font-extrabold text-xs tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
             {genre.charAt(0).toLocaleUpperCase() + genre.slice(1)}
@@ -636,16 +654,17 @@ const CollectionCard = ({
 
 const CollectionPage = () => {
   return (
-    <Suspense fallback={
-      <div className="loading-container flex flex-col items-center justify-center gap-4">
-        <div className="loading-spinner animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--theme)]"></div>
-        <p className="loading-text text-lg">Loading our collection...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="loading-container flex flex-col items-center justify-center gap-4">
+          <div className="loading-spinner animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--theme)]"></div>
+          <p className="loading-text text-lg">Loading our collection...</p>
+        </div>
+      }
+    >
       <Collection />
     </Suspense>
   );
 };
 
 export default CollectionPage;
-
