@@ -1,10 +1,10 @@
 "use client"
 import React from "react";
-//";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
 const Tours = () => {
   const router = useRouter();
   const [state] = React.useState<boolean>(true);
@@ -29,39 +29,54 @@ const Tours = () => {
 
   return (
     <>
-      <Nav/>
-      <main>
-        <header>
-          <h1>Available Tours</h1>
+      <Nav />
+      <main className="container mx-auto px-4 py-8">
+        <header className="mb-8">
+          <h1 className="text-xl font-bold text-foreground">
+            Available Tours
+          </h1>
         </header>
-        <section>
-            {AvailableTours.map((tour, index) => (
-            <article key={`tour-${tour.title}-${index}`} className="tourCard">
-              <div className="tourCard__image">
-              <Image 
-                src={tour.cover.src} 
-                alt={tour.cover.alt} 
-                width={1500} 
-                height={1500}
-                placeholder="blur"
-                blurDataURL={tour.cover.src}
-                className="tourCard__cover"
-              />
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+          {AvailableTours.map((tour, index) => (
+            <article 
+              key={`tour-${tour.title}-${index}`} 
+              className="backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] p-8 flex flex-col gap-5 transition-all duration-300 hover:shadow-lg"
+            >
+              <div className="relative h-[300px] overflow-hidden rounded-xl">
+                <Image 
+                  src={tour.cover.src} 
+                  alt={tour.cover.alt} 
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  placeholder="blur"
+                  blurDataURL={tour.cover.src}
+                  className="hover:scale-105 transition-all duration-300"
+                />
               </div>
-              <div className="tourCard__content">
-              <h2 className="tourCard__title">{tour.title}</h2>
-              <span className="tourCard__artist">{tour.artist}</span>
-              <p className="tourCard__description">{tour.desciption}</p>
-              <button className="tourCard__button" onClick={() => router.push(`/tours/tour/${tour.artist.toLowerCase().trim().replace(' ', '')}`)}>Start Tour</button>
+              <div className="space-y-4">
+                <h2 className="text-xl font-extrabold text-foreground">
+                  {tour.title}
+                </h2>
+                <span className="text-[rgba(var(--theme-rgb),0.7)] md:text-base font-semibold">
+                  {tour.artist}
+                </span>
+                <p className="text-[rgba(var(--foreground-rgb),0.9)] line-clamp-3">
+                  {tour.desciption}
+                </p>
+                <button 
+                  onClick={() => router.push(`/tours/tour/${tour.artist.toLowerCase().trim().replace(' ', '')}`)}
+                  className="w-full py-3 px-6 rounded-lg bg-gradient-to-br from-[var(--theme)] to-[rgba(var(--theme-rgb),0.8)] text-foreground text-base font-semibold border border-[rgba(255,255,255,0.1)] shadow-[0_4px_15px_rgba(var(--theme-rgb),0.2),inset_0_1px_2px_rgba(255,255,255,0.2)] backdrop-blur-sm transition-all duration-300 hover:translate-y-[-2px] hover:shadow-[0_6px_20px_rgba(var(--theme-rgb),0.3),inset_0_1px_3px_rgba(255,255,255,0.3)] active:translate-y-[1px] active:shadow-[0_2px_10px_rgba(var(--theme-rgb),0.2)]"
+                >
+                  Start Tour
+                </button>
               </div>
             </article>
-            ))}
+          ))}
         </section>
       </main>
-      <Footer/>
+      <Footer />
     </>
   );
 }
-
 
 export default Tours;

@@ -195,7 +195,7 @@ const Saved = () => {
     <>
       <Nav />
       <header className="flex flex-col items-center py-12 px-8 text-center">
-        <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground to-foreground mb-2 shadow-[0_0_15px_rgba(255,255,255,0.6),0_0_25px_rgba(255,255,255,0.4),0_0_35px_rgba(var(--theme-rgb),0.3)]">
+        <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] mb-2">
           Album covers you saved!
         </h2>
         <p className="text-[clamp(0.9rem,2vw,1.2rem)] text-[rgba(var(--foreground-rgb),0.5)] max-w-[600px]">
