@@ -17,6 +17,9 @@ module.exports = {
           dark: "rgba(var(--theme-rgb), 0.3)",
         },
       },
+      scale: {
+        '102': '1.02'
+      }
     },
   },
   plugins: [],

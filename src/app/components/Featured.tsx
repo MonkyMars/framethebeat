@@ -36,7 +36,7 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
         {album.map(
           (item, index) =>
             item && (
-              <div key={index} className="flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-105">
+              <div key={index} className="flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102">
                 <Image
                   src={getAlbumData(item.album, item.artist) || "/placeholder.png"}
                   alt={`Album cover for ${item.album} by ${item.artist}`}

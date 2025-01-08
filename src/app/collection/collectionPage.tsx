@@ -22,7 +22,7 @@ import {
   verifyAlbumDeleted,
 } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
-
+import clsx from "clsx";
 interface Album {
   artist: string;
   album: string;
@@ -41,7 +41,7 @@ const Collection = () => {
   const gridRef = useRef<HTMLDivElement>(null);
   const [collection, setCollection] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
-  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");  // Initialize with searchParams
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [filterBy, setFilterBy] = useState("all");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const { session } = useAuth();
@@ -592,21 +592,16 @@ const CollectionCard = ({
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] hover:scale-102 transition-all duration-300 ease-in-out">
-      <div className="w-full h-64 relative">
+      <div className="w-full aspect-square relative">
         <Image
           src={imageUrl}
           alt={albumCover?.alt || "Album cover"}
-          width={500}
-          height={500}
+          layout="fill"
+          objectFit="cover"
           priority={isHighPriority(imageUrl)}
           unoptimized={true}
           onError={() => setImageError(true)}
-          style={{ 
-            objectFit: 'cover',
-            width: '100%',
-            height: '100%',
-          }}
-          className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out brightness-105"
+          className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out brightness-105 w-full h-full"
         />
       </div>
       <div className="flex flex-col items-center gap-2">
@@ -627,7 +622,10 @@ const CollectionCard = ({
           <Heart
             size={24}
             onClick={(e) => onHeartClick(e)}
-            className={`cursor-pointer text-theme ${saved ? "text-theme fill-theme" : ""}`}
+            className={clsx(
+              "cursor-pointer text-theme",
+              saved && "text-theme fill-theme"
+            )}
           />
           <span>{saves}</span>
         </button>

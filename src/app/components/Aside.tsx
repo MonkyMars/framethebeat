@@ -1,6 +1,7 @@
 import { X } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import clsx from 'clsx';
 
 interface AsideProps {
   isOpen: boolean;
@@ -11,9 +12,16 @@ interface AsideProps {
 const Aside = ({ isOpen, onClose, user }: AsideProps) => {
   const linkClasses = `block w-full px-4 py-3 rounded-lg transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.1)]`;
   
-  const asideClasses = `fixed top-0 left-0 h-full w-80 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-xl shadow-2xl border-r border-[rgba(var(--theme-rgb),0.2)] transform transition-all duration-300 ease-out ${
-    isOpen ? "translate-x-0" : "-translate-x-full"
-  } z-50`;
+  
+
+  const asideClasses = clsx(
+    'fixed top-0 left-0 h-full w-80',
+    'bg-[rgba(var(--background-rgb),0.05)]',
+    'backdrop-blur-xl shadow-2xl',
+    'border-r border-[rgba(var(--theme-rgb),0.2)]',
+    'transform transition-all duration-300 ease-out z-50',
+    isOpen ? 'translate-x-0' : '-translate-x-full'
+  );
   
   return (
     <>
@@ -100,7 +108,7 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
                 <Link
                 href="/settings"
                 prefetch={true}
-                className={`${linkClasses} text-center hover:bg-inherit hover:scale-105`}
+                className={`${linkClasses} text-center hover:bg-inherit hover:scale-102`}
                 >
                 <span className="flex items-center gap-3 bg-[rgba(var(--theme-rgb),0.1)] backdrop-blur-sm rounded-lg p-4 w-full text-center">
                   Settings

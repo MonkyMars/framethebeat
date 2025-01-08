@@ -53,7 +53,7 @@ export default function Home() {
         height={2000}
         alt="album cover"
         priority
-        className="w-full max-w-[600px] aspect-square object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark"
+        className="w-full max-w-[600px] aspect-square object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
           />
         </div>
       </main>
