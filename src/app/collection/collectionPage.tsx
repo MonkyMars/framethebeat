@@ -585,10 +585,7 @@ const CollectionCard = ({
   onShare,
   releaseDate,
 }: CollectionCardProps) => {
-  // Add error state for image loading
   const [imageError, setImageError] = useState(false);
-
-  // Validate the image URL
   const imageUrl = albumCover?.src && !imageError 
     ? albumCover.src 
     : "/placeholder.png";
