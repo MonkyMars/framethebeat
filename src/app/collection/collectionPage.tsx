@@ -614,7 +614,7 @@ const CollectionCard = ({
           </p>
         )}
       </div>
-      <div className="flex gap-4">
+      <div className="flex items-center justify-between gap-4 w-full px-4">
         <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
           <Share2 size={24} onClick={() => onShare(artist, album)} />
         </button>
