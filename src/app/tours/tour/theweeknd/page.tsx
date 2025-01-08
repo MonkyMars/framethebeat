@@ -4,7 +4,10 @@ import Image from "next/image";
 import Nav from "@/app/components/Nav";
 import Footer from "@/app/components/Footer";
 import "react-vertical-timeline-component/style.min.css";
-import { VerticalTimeline, VerticalTimelineElement } from "react-vertical-timeline-component";
+import {
+  VerticalTimeline,
+  VerticalTimelineElement,
+} from "react-vertical-timeline-component";
 
 interface TimelineItem {
   date: string;
@@ -149,9 +152,13 @@ const StaticIntro = () => (
 const TimelineElementContent = ({ item }: { item: TimelineItem }) => (
   <article className="text-center bg-background p-8 rounded-xl shadow-lg">
     <header className="mb-4">
-      <h2 className="text-foreground/90 text-3xl font-bold mb-2 text-theme">{item.title}</h2>
+      <h2 className="text-foreground/90 text-3xl font-bold mb-2 text-theme">
+        {item.title}
+      </h2>
     </header>
-    <p className="text-foreground/90 leading-relaxed text-lg mt-4 mb-6 mx-auto max-w-3xl">{item.description}</p>
+    <p className="text-foreground/90 leading-relaxed text-lg mt-4 mb-6 mx-auto max-w-3xl">
+      {item.description}
+    </p>
     {item.image && (
       <div className="relative overflow-hidden rounded-lg mt-4">
         <Image
