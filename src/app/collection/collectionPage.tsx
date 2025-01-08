@@ -37,14 +37,11 @@ interface Album {
 
 const Collection = () => {
   const searchParams = useSearchParams();
-  const [sharePopUp, setSharePopUp] = useState<{
-    artist: string;
-    album: string;
-  } | null>(null);
+  const [sharePopUp, setSharePopUp] = useState<{ artist: string; album: string } | null>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const [collection, setCollection] = useState<Album[]>([]);
   const [sortBy, setSortBy] = useState("newest");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");  // Initialize with searchParams
   const [filterBy, setFilterBy] = useState("all");
   const [selectedGenre, setSelectedGenre] = useState<string>("all");
   const { session } = useAuth();
@@ -57,6 +54,7 @@ const Collection = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [ITEMS_PER_PAGE, setITEMS_PER_PAGE] = useState(50);
   const [displayedAlbums, setDisplayedAlbums] = useState<Album[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const getCollection = async () => {
@@ -99,14 +97,11 @@ const Collection = () => {
 
     const fetchData = async () => {
       await Promise.all([getCollection(), getUserCollection()]);
+      setIsLoading(false);
     };
 
     fetchData();
   }, [session]);
-
-  useEffect(() => {
-    setSearchQuery(searchParams.get("q") || "");
-  }, [searchParams]);
 
   interface SaveResponse {
     message: string;
@@ -359,8 +354,13 @@ const Collection = () => {
       setTitle("");
     }, 3000);
   };
-  if (!collection) {
-    return <div>Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="loading-container flex flex-col items-center justify-center gap-4">
+        <div className="loading-spinner animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--theme)]"></div>
+        <p className="loading-text text-lg">Loading our collection...</p>
+      </div>
+    );
   }
 
   const onShare = (artist: string, album: string) => {
@@ -584,51 +584,73 @@ const CollectionCard = ({
   saved = false,
   onShare,
   releaseDate,
-}: CollectionCardProps) => (
-  <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] hover:scale-102 transition-all duration-300 ease-in-out">
-    <div className="w-full h-64 relative">
-      <Image
-        src={albumCover.src ?? "/placeholder.png"}
-        alt={albumCover.alt || "Album cover"}
-        objectFit="cover"
-        layout="fill"
-        priority={isHighPriority(albumCover.src)}
-        unoptimized={true}
-        className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out brightness-105"
-      />
-    </div>
-    <div className="flex flex-col items-center gap-2">
-      <h3 className="text-lg font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">{album}</h3>
-      <p className="text-md text-[rgba(var(--theme-rgb),0.7)]">{artist}</p>
-      {releaseDate && <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">{releaseDate}</p>}
-      {genre && genre.toLocaleLowerCase() !== "unknown" && (
-        <p className="text-xs font-medium tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
-          {genre.charAt(0).toLocaleUpperCase() + genre.slice(1)}
-        </p>
-      )}
-    </div>
-    <div className="flex gap-4">
-      <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
-        <Share2 size={24} onClick={() => onShare(artist, album)} />
-      </button>
-      <button className="flex items-center gap-2 p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
-        <Heart
-          size={24}
-          onClick={(e) => onHeartClick(e)}
-          className={`cursor-pointer text-theme ${saved ? "text-theme fill-theme" : ""}`}	
+}: CollectionCardProps) => {
+  // Add error state for image loading
+  const [imageError, setImageError] = useState(false);
+
+  // Validate the image URL
+  const imageUrl = albumCover?.src && !imageError 
+    ? albumCover.src 
+    : "/placeholder.png";
+
+  return (
+    <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] hover:scale-102 transition-all duration-300 ease-in-out">
+      <div className="w-full h-64 relative">
+        <Image
+          src={imageUrl}
+          alt={albumCover?.alt || "Album cover"}
+          width={500}
+          height={500}
+          priority={isHighPriority(imageUrl)}
+          unoptimized={true}
+          onError={() => setImageError(true)}
+          style={{ 
+            objectFit: 'cover',
+            width: '100%',
+            height: '100%',
+          }}
+          className="rounded-lg hover:shadow-sm hover:shadow-theme transition-all duration-300 ease-in-out brightness-105"
         />
-        <span>{saves}</span>
-      </button>
+      </div>
+      <div className="flex flex-col items-center gap-2">
+        <h3 className="text-lg font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">{album}</h3>
+        <p className="text-md text-[rgba(var(--theme-rgb),0.7)]">{artist}</p>
+        {releaseDate && <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">{releaseDate}</p>}
+        {genre && genre.toLocaleLowerCase() !== "unknown" && (
+          <p className="text-xs font-medium tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
+            {genre.charAt(0).toLocaleUpperCase() + genre.slice(1)}
+          </p>
+        )}
+      </div>
+      <div className="flex gap-4">
+        <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
+          <Share2 size={24} onClick={() => onShare(artist, album)} />
+        </button>
+        <button className="flex items-center gap-2 p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
+          <Heart
+            size={24}
+            onClick={(e) => onHeartClick(e)}
+            className={`cursor-pointer text-theme ${saved ? "text-theme fill-theme" : ""}`}
+          />
+          <span>{saves}</span>
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const CollectionPage = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="loading-container flex flex-col items-center justify-center gap-4">
+        <div className="loading-spinner animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[var(--theme)]"></div>
+        <p className="loading-text text-lg">Loading our collection...</p>
+      </div>
+    }>
       <Collection />
     </Suspense>
   );
 };
 
 export default CollectionPage;
+

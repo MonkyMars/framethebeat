@@ -6,12 +6,13 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'zapqcxbffugqvfiiilci.supabase.co',
+      
       },
       {
         protocol: 'https',
         hostname: 'lastfm.freetls.fastly.net'
       }
-    ]
+    ],
   },
   webpack: (config, { dev }) => {
     config.devtool = dev ? 'source-map' : false;
