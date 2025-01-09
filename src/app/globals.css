@@ -92,7 +92,17 @@ a {
 }
 
 .section {
-  @apply flex flex-col gap-5 m-6 z-10 relative p-8 backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:shadow-lg;
+  @apply relative 
+  p-6 md:p-8
+  m-4 md:m-6
+  flex flex-col 
+  gap-4 md:gap-5
+  rounded-xl
+  border border-opacity-20
+  backdrop-blur 
+  transition-all duration-200
+  hover:shadow-lg hover:scale-[1.01]
+  bg-white/5
 }
 
 .section h2 {
