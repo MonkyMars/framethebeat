@@ -19,6 +19,7 @@ import { Album } from "../utils/types";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "../collection/components/loadingspinners";
+import CollectionHeader from "../utils/components/collectionHeader";
 
 const SavedContent = () => {
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
@@ -121,15 +122,7 @@ const SavedContent = () => {
     <>
       <Nav />
       <main className="p-8 w-full">
-        <header className="flex flex-col items-center gap-4 p-8">
-          <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-[var(--foreground)] via-[var(--foreground)] to-[var(--foreground)] shadow-white">
-            Your Collection
-          </h2>
-          <p className="text-center text-lg">
-            Here are all the albums you&apos;ve saved.
-          </p>
-        </header>
-
+      <CollectionHeader collection={savedAlbums} page="saved" />
         <FilterBar
           sortBy={sortBy}
           setSortBy={setSortBy}
