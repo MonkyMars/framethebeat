@@ -17,6 +17,7 @@ import { useAuth } from "../utils/AuthContext"
 import { useRouter } from "next/navigation"
 import { logOutUser, updateUser, deleteUser } from "../utils/database"
 import Banner from "../components/Banner"
+import Slider from "./Slider"
 
 const THEME_STORAGE_KEY = "album-covers-theme"
 
@@ -124,14 +125,22 @@ const Settings = () => {
     <>
       <Nav />
       <main className="container mx-auto px-4 py-8 max-w-[1200px] min-h-[calc(100vh-70px)]">
-        <header className="text-center py-12 mb-8">
-          <h1 className="text-xl font-extrabold uppercase tracking-wider leading-tight bg-gradient-to-r from-theme to-foreground-dark bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(var(--theme-rgb),0.2)] animate-fade-in">
-            Settings
-          </h1>
-          <p className="text-foreground/80 mt-4">
+      <header className="relative text-center py-16 mb-8">
+      <div className="absolute inset-0" />
+      
+      <div className="relative space-y-6">
+        <h1 className="inline-block text-2xl md:text-3xl font-black uppercase tracking-[0.15em]">
+          Settings
+        </h1>
+        
+        <div className="relative">
+          <p className="text-base md:text-lg font-medium text-[rgba(var(--foreground-rgb),0.8)] max-w-md mx-auto">
             Customize your album browsing experience
           </p>
-        </header>
+          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-1 rounded-full bg-gradient-to-r from-[rgba(var(--theme-rgb),0.5)] to-[rgba(var(--theme-rgb),0.2)]" />
+        </div>
+      </div>
+    </header>
 
         <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-8">
           <section className="bg-background/50 backdrop-blur-xl border border-theme rounded-xl p-8 shadow-lg transition-all duration-300 hover:shadow-[0_8px_20px_rgba(var(--theme-rgb),0.2)] hover:-translate-y-1">
@@ -156,18 +165,7 @@ const Settings = () => {
                   ))}
                 </div>
               </div>
-              <div className="flex justify-between items-center">
-                <label>Animations</label>
-                <label className="inline-block relative w-[50px] h-[24px]">
-                  <input
-                    type="checkbox"
-                    className="opacity-0 w-0 h-0"
-                    checked={animations}
-                    onChange={(e) => setAnimations(e.target.checked)}
-                  />
-                  <span className="slider absolute top-0 left-0 right-0 bottom-0 bg-theme/25 transition-all duration-300 rounded-full before:content-[''] before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-foreground before:transition-all before:duration-300 before:rounded-full"></span>
-                </label>
-              </div>
+              <Slider label="Animations" checked={animations} onChange={setAnimations} />
             </div>
           </section>
 
