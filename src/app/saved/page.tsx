@@ -2,23 +2,14 @@
 import React, { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Nav from "../components/Nav";
-import Image from "next/image";
-import { toast } from "react-hot-toast";
-import { Heart, Share2 } from "lucide-react";
 import Footer from "../components/Footer";
-import {
-  deleteAlbum,
-  fetchUserCollection,
-  fetchCollection,
-} from "../utils/database";
+import { fetchUserCollection, fetchCollection } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 import Banner from "../components/Banner";
 import SharePopup from "../components/SharePopup";
-import {
-  getAlbumData,
-  isHighPriority,
-  knownGenres,
-} from "../utils/functions";
+import { getAlbumData, onRemove } from "../utils/functions";
+import { knownGenres } from "../utils/knownGenres";
+import CollectionCard from "../utils/components/albumCard";
 
 interface Album {
   artist: string;
@@ -40,6 +31,7 @@ const Saved = () => {
   const [selectedGenre, setSelectedGenre] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [error, setError] = useState<string>("");
+  const [title, setTitle] = useState<string>("");
   const [sharePopUp, setSharePopUp] = useState<{
     artist: string;
     album: string;
@@ -88,47 +80,6 @@ const Saved = () => {
 
     fetchData();
   }, [session]);
-
-  interface DeleteResponse {
-    message: string;
-    status: number;
-    response: {
-      artist: string;
-      album: string;
-      user_id: string;
-    };
-    updateData: {
-      album: string;
-      artist: string;
-      saves: number;
-    };
-  }
-
-  const handleRemove = async (artist: string, album: string) => {
-    if (!session?.user?.id) {
-      toast.error("You must be logged in to remove albums");
-      return;
-    }
-    const originalAlbums = [...savedAlbums];
-
-    try {
-      setSavedAlbums((prev) => prev.filter((item) => item.album !== album));
-      const response: DeleteResponse = await deleteAlbum(
-        artist,
-        album,
-        session.user.id
-      );
-      if (response.status === 200) {
-        toast.success("Album removed from your collection");
-      } else {
-        throw new Error(response.message);
-      }
-    } catch (err) {
-      setSavedAlbums(originalAlbums);
-      setError(err instanceof Error ? err.message : "Failed to remove album");
-      toast.error("Failed to remove album. Please try again.");
-    }
-  };
 
   const filteredAlbums = useMemo(() => {
     return savedAlbums
@@ -228,7 +179,8 @@ const Saved = () => {
                 savedAlbums
                   .map((album) => album.release_date)
                   .filter(
-                    (date): date is number => date !== undefined && date !== null
+                    (date): date is number =>
+                      date !== undefined && date !== null
                   )
                   .sort(
                     (a, b) =>
@@ -272,16 +224,31 @@ const Saved = () => {
       {filteredAlbums.length > 0 ? (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-8 px-8 pb-8">
           {filteredAlbums.map((album, index) => (
-            <SavedCard
+            <CollectionCard
               key={index}
-              album={album}
+              {...album}
               onShare={onShare}
-              onRemove={handleRemove}
+              onHeartClick={() =>
+                onRemove(
+                  album.artist,
+                  album.album,
+                  session?.user?.id || "",
+                  setError,
+                  savedAlbums,
+                  setSavedAlbums,
+                  setTitle
+                )
+              }
               saves={
                 collection.find((item) => item.album === album.album)?.saves ||
                 0
               }
-              release_date={album.release_date?.toString() || "unknown"}
+              saved={
+                savedAlbums.find((item) => item.album === album.album)
+                  ? true
+                  : false
+              }
+              releaseDate={album.release_date?.toString() || "unknown"}
             />
           ))}
         </div>
@@ -319,6 +286,7 @@ const Saved = () => {
       )}
       <Footer />
       {error && <Banner title="Error" subtitle={error} />}
+      {title && <Banner title="Success" subtitle={title} />}
       {sharePopUp && (
         <SharePopup
           artistName={sharePopUp.artist}
@@ -327,75 +295,6 @@ const Saved = () => {
         />
       )}
     </>
-  );
-};
-
-interface SavedCardProps {
-  album: Album;
-  onShare: (artist: string, album: string) => void;
-  onRemove: (artist: string, album: string) => void;
-  saves: number;
-  release_date: string;
-}
-
-const SavedCard: React.FC<SavedCardProps> = ({
-  album,
-  onShare,
-  onRemove,
-  saves,
-  release_date,
-}) => {
-  const [imageError, setImageError] = useState(false);
-  const imageUrl = album.albumCover?.src && !imageError 
-    ? album.albumCover.src 
-    : "/placeholder.png";
-
-  return (
-    <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
-      <div className="w-full aspect-square relative">
-        <Image
-          src={imageUrl}
-          alt={album.albumCover?.alt || "Album cover"}
-          layout="fill"
-          objectFit="cover"
-          priority={isHighPriority(imageUrl)}
-          unoptimized={true}
-          onError={() => setImageError(true)}
-          className="rounded-lg hover:shadow-sm transition-all duration-300 ease-in-out brightness-105 w-full h-full"
-        />
-      </div>
-      <div className="flex flex-col items-center gap-2">
-        <h3 className="text-xl font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">
-          {album.album}
-        </h3>
-        <p className="text-lg text-[rgba(var(--theme-rgb),0.7)]">
-          {album.artist}
-        </p>
-        {release_date && release_date !== "unknown" && (
-          <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">
-            {release_date}
-          </p>
-        )}
-        {album.genre && album.genre.toLowerCase() !== "unknown" && (
-          <p className="font-extrabold text-xs tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
-            {album.genre.charAt(0).toUpperCase() + album.genre.slice(1)}
-          </p>
-        )}
-      </div>
-      <div className="flex items-center justify-between gap-4 w-full px-4">
-        <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
-          <Share2 size={24} onClick={() => onShare(album.artist, album.album)} />
-        </button>
-        <button className="flex items-center gap-2 p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
-          <Heart
-            size={24}
-            onClick={() => onRemove(album.artist, album.album)}
-            className="cursor-pointer text-theme fill-theme"
-          />
-          <span>{saves}</span>
-        </button>
-      </div>
-    </div>
   );
 };
 

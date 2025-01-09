@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import { knownGenres } from "../utils/functions";
+import { knownGenres } from "../utils/knownGenres";
 
 export default function Categories() {
   return (
