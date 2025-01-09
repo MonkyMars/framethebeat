@@ -55,7 +55,7 @@ const Login = () => {
   }, [error]);
 
   return (
-    <main className="min-h-screen bg-gradient-radial from-theme/10 via-transparent to-background/5">
+    <main className="min-h-screen bg-gradient-radial from-theme-dark via-transparent to-background/5">
     <h1 className="absolute left-1/2 -translate-x-1/2 text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-foreground to-theme drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] md:hidden">
       FRAME THE BEAT
     </h1>
@@ -80,7 +80,7 @@ const Login = () => {
           <input
             type="email"
             placeholder="Email"
-            className="w-full py-4 pl-12 pr-4 bg-background/5 border-2 border-theme/25 rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme/70 focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
+            className="w-full py-4 pl-12 pr-4 bg-transparent border-2 border-theme-dark rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme-dark focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
             value={formData.email}
             onChange={(e) => handleInputChange(e.target.value, "email")}
             required
@@ -97,7 +97,7 @@ const Login = () => {
           <input
             type="password"
             placeholder="Password"
-            className="w-full py-4 pl-12 pr-4 bg-background/5 border-2 border-theme/25 rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme/70 focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
+            className="w-full py-4 pl-12 pr-4 bg-transparent border-2 border-theme-dark rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme/70 focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
             value={formData.password}
             onChange={(e) => handleInputChange(e.target.value, "password")}
             required
@@ -107,7 +107,7 @@ const Login = () => {
         <div className="mt-4">
           <button
             type="submit"
-            className="w-full py-3 rounded-2xl bg-gradient-to-br from-theme to-theme/85 text-background text-lg font-semibold tracking-wider flex items-center justify-center gap-3 shadow-lg shadow-theme/35 transition-all duration-400 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-theme/45 hover:from-theme hover:to-theme/90"
+            className="w-full py-3 rounded-2xl bg-gradient-to-br from-theme to-theme/85 text-foreground text-lg font-semibold tracking-wider flex items-center justify-center gap-3 shadow-lg shadow-theme/35 transition-all duration-400 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-theme/45 hover:from-theme hover:to-theme/90"
           >
             Continue
             <ArrowRight
