@@ -1,6 +1,8 @@
+'use client';
+
 import { type Album } from "../../utils/types";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Heart, Share2 } from "lucide-react";
 import { isHighPriority } from "../../utils/functions";
@@ -24,9 +26,29 @@ const CollectionCard = ({
   onShare,
   releaseDate,
 }: CollectionCardProps) => {
+  const [mounted, setMounted] = useState(false);
   const [imageError, setImageError] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const imageUrl =
     albumCover?.src && !imageError ? albumCover.src : "/placeholder.png";
+
+  if (!mounted) {
+    return (
+      <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
+        <div className="w-full aspect-square relative">
+          <div className="w-full h-full rounded-lg bg-[rgba(var(--theme-rgb),0.1)]" />
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          <div className="h-7 w-48 bg-[rgba(var(--theme-rgb),0.1)] rounded" />
+          <div className="h-6 w-36 bg-[rgba(var(--theme-rgb),0.1)] rounded" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
@@ -34,12 +56,12 @@ const CollectionCard = ({
         <Image
           src={imageUrl}
           alt={albumCover?.alt || "Album cover"}
-          layout="fill"
-          objectFit="cover"
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority={isHighPriority(imageUrl)}
           unoptimized={true}
           onError={() => setImageError(true)}
-          className="rounded-lg hover:shadow-sm  transition-all duration-300 ease-in-out brightness-105 w-full h-full"
+          className="rounded-lg hover:shadow-sm transition-all duration-300 ease-in-out brightness-105 object-cover"
         />
       </div>
       <div className="flex flex-col items-center gap-2">
@@ -59,13 +81,16 @@ const CollectionCard = ({
         )}
       </div>
       <div className="flex items-center justify-between gap-4 w-full px-4">
-        <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
-          <Share2 size={24} onClick={() => onShare(artist, album)} />
+        <button 
+          className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center"
+          onClick={() => onShare(artist, album)}
+        >
+          <Share2 size={24} />
         </button>
         <button className="flex items-center gap-2 p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
           <Heart
             size={24}
-            onClick={(e) => onHeartClick(e)}
+            onClick={onHeartClick}
             className={clsx(
               "cursor-pointer text-theme",
               saved && "text-theme fill-theme"

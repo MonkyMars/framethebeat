@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { knownGenres } from "@/app/utils/knownGenres";
 import { Album } from "@/app/utils/types";
 import { X } from "lucide-react";
@@ -20,73 +23,89 @@ const FilterBar = ({
   filterBy,
   setFilterBy,
   setSelectedGenre,
-  searchQuery,
+  searchQuery, 
   setSearchQuery,
 }: FilterBarProps) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const yearOptions = Array.from(
+    new Set(
+      collection
+        .map((album) => album.release_date.toString())
+        .filter((date) => date !== "unknown")
+        .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
+    )
+  );
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
-    <div className="flex justify-between items-center p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
-      <div className="filters flex gap-4">
+    <div className="flex flex-col md:flex-row md:justify-between gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
+      <div className="filters flex flex-col md:flex-row gap-3 md:gap-4 w-full md:w-auto">
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
           disabled={collection.length === 0}
-          className="px-4 py-3 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+          className="w-full md:w-auto px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
         >
           <option value="newest">Newest First</option>
           <option value="oldest">Oldest First</option>
           <option value="title">By Title</option>
           <option value="artist">By Artist</option>
         </select>
+
         <select
           value={filterBy}
           onChange={(e) => setFilterBy(e.target.value)}
           disabled={collection.length === 0}
-          className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+          className="w-full md:w-auto px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
         >
           <option value="all">All Years</option>
-          {Array.from(
-            new Set(
-              collection
-                .map((album) => album.release_date.toString())
-                .filter((date) => date !== "unknown")
-                .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
-            )
-          ).map((year, index) => (
-            <option key={index} value={year}>
+          {yearOptions.map((year, index) => (
+            <option key={`year-${year}-${index}`} value={year}>
               {year}
             </option>
           ))}
         </select>
+
         <select
           name="genre"
           id="genre"
           onChange={(e) => setSelectedGenre(e.target.value)}
           disabled={collection.length === 0}
-          className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+          className="w-full md:w-auto px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
         >
           <option value="all">All Genres</option>
           {knownGenres.map((genre, index) => (
-            <option key={`${genre}-${index}`} value={genre}>
+            <option key={`genre-${genre}-${index}`} value={genre}>
               {genre.charAt(0).toUpperCase() + genre.slice(1)}
             </option>
           ))}
         </select>
       </div>
-      <div className="search flex items-center gap-2">
+
+      <div className="search flex items-center gap-2 w-full md:w-auto">
         <input
           type="text"
           placeholder="Search saved albums..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           disabled={collection.length === 0}
-          className="px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+          className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
         />
-        <X
-          size={24}
-          className="clear cursor-pointer"
-          onClick={() => setSearchQuery("")}
-          style={{ display: searchQuery ? "block" : "none" }}
-        />
+        {mounted && searchQuery && (
+          <X
+            size={24}
+            className="clear cursor-pointer flex-shrink-0"
+            onClick={() => setSearchQuery("")}
+          />
+        )}
       </div>
     </div>
   );
