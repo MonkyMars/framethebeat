@@ -2,9 +2,10 @@
 import '../globals.css'
 import React from "react";
 import { knownGenres } from "../utils/knownGenres";
-
+import { useRouter } from 'next/navigation';
 
 export default function Categories() {
+  const router = useRouter();
   return (
     <section className="section">
       <h2>Explore by Category</h2>
@@ -12,7 +13,7 @@ export default function Categories() {
         {knownGenres.slice(0, 10).map((genre, index) => (
           <li
             key={`genre-${genre}-${index}`}
-            onClick={() => window.location.href = `/collection?q=${genre}`}
+            onClick={() => router.push(`/collection?q=${genre}`)}
           >
             <span>{genre}</span>
           </li>

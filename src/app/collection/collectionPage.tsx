@@ -20,7 +20,7 @@ import Link from "next/link";
 import { fetchCollection, fetchUserCollection } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 import { Album } from "../utils/types";
-import FilterBar from "./components/filterBar";
+import FilterBar from "../utils/components/filterBar";
 
 const Collection = () => {
   const searchParams = useSearchParams();
@@ -120,7 +120,7 @@ const Collection = () => {
     <>
       <Nav />
       <main className="p-8 w-full">
-        <div className="flex flex-col items-center gap-4 p-8">
+        <header className="flex flex-col items-center gap-4 p-8">
           <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-[var(--foreground)] via-[var(--foreground)] to-[var(--foreground)] shadow-white">
             Our Collection
           </h2>
@@ -132,7 +132,7 @@ const Collection = () => {
               Browse between {collection.length} albums!
             </p>
           )}
-        </div>
+        </header>
         <FilterBar
           collection={collection}
           setSortBy={setSortBy}
@@ -144,7 +144,7 @@ const Collection = () => {
           setSearchQuery={setSearchQuery}
         />
         <div
-          className="collectionGrid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"
+          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"
           ref={gridRef}
         >
           {displayedAlbums.length > 0 &&

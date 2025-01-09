@@ -7,7 +7,14 @@ interface PaginationProps {
   setITEMS_PER_PAGE: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const Pagination = ({totalPages, setCurrentPage, gridRef,currentPage, ITEMS_PER_PAGE, setITEMS_PER_PAGE}: PaginationProps) => {
+const Pagination = ({
+  totalPages,
+  setCurrentPage,
+  gridRef,
+  currentPage,
+  ITEMS_PER_PAGE,
+  setITEMS_PER_PAGE,
+}: PaginationProps) => {
   const onPageNext = () => {
     setCurrentPage((p) => Math.min(totalPages - 1, p + 1));
     gridRef.current?.scrollIntoView({ behavior: "smooth" });
