@@ -1,7 +1,6 @@
 import '../globals.css'
 import { X } from "lucide-react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import clsx from 'clsx';
 
 
@@ -127,11 +126,4 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
   );
 };
 
-
-const NoSSR = dynamic(() => Promise.resolve(Aside), {
-  ssr: false,
-});
-
-export default function AsideWrapper(props: AsideProps) {
-  return <NoSSR {...props} />;
-}
+export default Aside;

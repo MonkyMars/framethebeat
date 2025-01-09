@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+"use client"
+import React, { useState, useEffect } from "react";
 import { Copy, Share2, Check, X } from "lucide-react";
 import '../globals.css'
 interface SharePopupProps {
@@ -13,6 +14,14 @@ const SharePopup: React.FC<SharePopupProps> = ({
   onClose,
 }) => {
   const [copied, setCopied] = useState(false);
+
+  const [isMobile, setIsMobile] = useState(false);
+  const [isHttps, setIsHttps] = useState(false);
+
+  useEffect(() => {
+    setIsMobile(window.matchMedia("(pointer: coarse)").matches);
+    setIsHttps(document.location.protocol === "https:");
+  }, []);
 
   const shareUrl = `${window.location.origin}/collection/share?artist=${encodeURIComponent(
     artistName
@@ -48,9 +57,7 @@ const SharePopup: React.FC<SharePopupProps> = ({
 
   const handleOSShare = async () => {
     if (
-      navigator.share &&
-      window.matchMedia("(pointer: coarse)").matches &&
-      document.location.protocol === "https:"
+      navigator.share && isMobile && isHttps
     ) {
       try {
         await navigator.share({
@@ -87,8 +94,7 @@ return (
             {copied ? "Copied!" : "Copy link"}
           </button>
           
-          {window.matchMedia("(pointer: coarse)").matches &&
-          document.location.protocol === "https:" && (
+          {isMobile && isHttps && (
             <button 
               onClick={handleOSShare} 
               className="w-full py-2 px-4 rounded bg-theme hover:bg-theme-dark text-white transition-all duration-300 flex items-center justify-center"

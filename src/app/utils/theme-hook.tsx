@@ -12,11 +12,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme | null>(null);
-  const [mounted, setMounted] = useState(false);
 
   const applyTheme = (newTheme: Theme) => {
-    if (typeof window === 'undefined') return;
-    
     const root = document.documentElement;
     if (newTheme === 'system') {
       root.removeAttribute('data-theme');
@@ -26,10 +23,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    setMounted(true);
-    const savedTheme = localStorage.getItem('album-covers-theme') as Theme || 'system';
-    setTheme(savedTheme);
-    applyTheme(savedTheme);
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme) {
+      setTheme(savedTheme as Theme);
+      applyTheme(savedTheme as Theme);
+    }
   }, []);
 
   const handleThemeChange = (newTheme: Theme) => {
@@ -37,10 +35,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('album-covers-theme', newTheme);
     applyTheme(newTheme);
   };
-
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider value={{ 
