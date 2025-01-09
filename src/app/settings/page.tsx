@@ -19,7 +19,7 @@ import { logOutUser, updateUser, deleteUser } from "../utils/database"
 import Banner from "../components/Banner"
 import Slider from "./Slider"
 
-const THEME_STORAGE_KEY = "album-covers-theme"
+const THEME_STORAGE_KEY = "framethebeat-theme"
 
 type Theme = "light" | "dark" | "system"
 

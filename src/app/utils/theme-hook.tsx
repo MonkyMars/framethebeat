@@ -11,36 +11,35 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme | null>(null);
+  const [theme, setTheme] = useState<Theme>('system');
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
+    
     if (newTheme === 'system') {
       root.removeAttribute('data-theme');
       return;
     }
+
     root.setAttribute('data-theme', newTheme);
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
+    const savedTheme = localStorage.getItem('framethebeat-theme') as Theme;
     if (savedTheme) {
-      setTheme(savedTheme as Theme);
-      applyTheme(savedTheme as Theme);
+      setTheme(savedTheme);
+      applyTheme(savedTheme);
     }
   }, []);
 
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
-    localStorage.setItem('album-covers-theme', newTheme);
+    localStorage.setItem('framethebeat-theme', newTheme);
     applyTheme(newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={{ 
-      theme: theme || 'system', 
-      setTheme: handleThemeChange 
-    }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleThemeChange }}>
       {children}
     </ThemeContext.Provider>
   );
