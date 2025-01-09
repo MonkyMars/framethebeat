@@ -1,3 +1,6 @@
+"use client"
+import { useEffect } from 'react';
+
 interface PaginationProps {
   totalPages: number;
   setCurrentPage: React.Dispatch<React.SetStateAction<number>>;
@@ -5,6 +8,8 @@ interface PaginationProps {
   currentPage: number;
   ITEMS_PER_PAGE: number;
   setITEMS_PER_PAGE: React.Dispatch<React.SetStateAction<number>>;
+  initialPage?: number;
+  initialItemsPerPage?: number;
 }
 
 const Pagination = ({
@@ -15,14 +20,26 @@ const Pagination = ({
   ITEMS_PER_PAGE,
   setITEMS_PER_PAGE,
 }: PaginationProps) => {
+
+
+  useEffect(() => {
+    if (gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [currentPage, gridRef]);
+
   const onPageNext = () => {
     setCurrentPage((p) => Math.min(totalPages - 1, p + 1));
-    gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof window !== "undefined") {
+      gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const onPagePrev = () => {
     setCurrentPage((p) => Math.max(0, p - 1));
-    gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (typeof window !== "undefined") {
+      gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
