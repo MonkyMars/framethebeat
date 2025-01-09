@@ -1,3 +1,5 @@
+import '../globals.css'
+
 const Discover = () => {
   return (
     <section className="flex flex-col gap-5 m-6 z-10 relative p-8 backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:shadow-lg">

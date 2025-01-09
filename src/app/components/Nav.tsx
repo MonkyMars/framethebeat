@@ -1,4 +1,5 @@
 "use client"
+import '../globals.css'
 import { Menu, Search } from "lucide-react";
 import { useState } from "react";
 import SearchNav from "./SearchNav";

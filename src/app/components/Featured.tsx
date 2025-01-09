@@ -1,4 +1,5 @@
 "use client";
+import '../globals.css'
 import React from "react";
 import Image from "next/image";
 import { getAlbumData } from "../utils/functions";

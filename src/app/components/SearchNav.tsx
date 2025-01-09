@@ -1,4 +1,5 @@
 "use client";
+import '../globals.css'
 import { X, ArrowRight } from "lucide-react";
 import { useState, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";

@@ -1,6 +1,8 @@
 "use client";
+import '../globals.css'
 import { useAuth } from "../utils/AuthContext";
 import { useRouter } from "next/navigation";
+
 
 const Cta = () => {
   const { session } = useAuth();

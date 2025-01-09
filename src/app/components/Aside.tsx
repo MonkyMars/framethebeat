@@ -1,7 +1,9 @@
+import '../globals.css'
 import { X } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import clsx from 'clsx';
+
 
 interface AsideProps {
   isOpen: boolean;
