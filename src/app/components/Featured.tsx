@@ -1,8 +1,8 @@
 "use client";
+import '../globals.css'
 import React from "react";
 import Image from "next/image";
 import { getAlbumData } from "../utils/functions";
-import styles from "../page.module.scss";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -29,27 +29,31 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
   }
   
   return (
-    <section className={styles.section}>
-      <h2>Most Popular Albums</h2>
-      <div className={styles.featuredGrid}>
+    <section className=" flex flex-col gap-5 m-6 z-10 relative p-8 backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:shadow-lg">
+      <h2 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground to-foreground">
+        Most Popular Albums
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
         {album.map(
           (item, index) =>
             item && (
-              <div key={index} className={styles.featuredCover}>
+              <div key={index} className="flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102">
                 <Image
                   src={getAlbumData(item.album, item.artist) || "/placeholder.png"}
                   alt={`Album cover for ${item.album} by ${item.artist}`}
                   width={1500}
                   height={1500}
                   priority
+                  className="rounded-lg shadow-md"
+                  unoptimized
                 />
-                <div className={styles.details}>
-                  <h3>{item.album}</h3>
+                <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
+                  <h3 className="text-foreground font-semibold truncate">{item.album}</h3>
                   <span>{item.release_date}</span>
                 </div>
-                <div className={styles.additionals}>
-                  <p>{item.artist}</p>
-                  <div className={styles.saves}>
+                <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
+                  <p className="truncate">{item.artist}</p>
+                  <div className="flex items-center gap-2 bg-[rgba(var(--theme-rgb),0.1)] p-1 rounded-md">
                     <Heart size={24} onClick={() => router.push(`/collection/share?artist=${encodeURIComponent(item.artist)}&album=${encodeURIComponent(item.album)}`)}/>
                     <span>{item.saves}</span>
                   </div>

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Nav from "../../components/Nav";
 import Footer from "../../components/Footer";
 import { useSearchParams } from "next/navigation";
-import "../styles.scss";
+
 import { useAuth } from "@/app/utils/AuthContext";
 import {
   deleteAlbum,
@@ -31,11 +31,13 @@ interface Album {
 const fetchUserInfo = async (user_id: string, album: string) => {
   const response = await fetchUserCollection(user_id);
   const data = await response.json();
-  const liked = data ? data.find(
-    (item: { artist: string; album: string }) => item.album === album
-  )
-    ? true
-    : false : false;
+  const liked = data
+    ? data.find(
+        (item: { artist: string; album: string }) => item.album === album
+      )
+      ? true
+      : false
+    : false;
   return liked;
 };
 
@@ -76,11 +78,11 @@ const SharePageContent = () => {
           alt: item.album,
         },
       };
-      setAlbum(mappedData); setLiked(await fetchUserInfo(session?.user?.id as string, albumQuery));
+      setAlbum(mappedData);
+      setLiked(await fetchUserInfo(session?.user?.id as string, albumQuery));
     };
 
     fetchData();
-   
   }, [artistQuery, albumQuery, session]);
 
   if (!artistQuery || !albumQuery) {
@@ -114,35 +116,55 @@ const SharePageContent = () => {
   return (
     <>
       <Nav />
-      <main className="mainContent share">
-        <section className="shareCard">
-          <Image
-            src={album.albumCover.src || "/placeholder.png"}
-            className="shareCard__image"
-            alt={album.album}
-            width={300}
-            height={300}
-            priority
-          />
-          <header className="shareCard__header">
-            <h1>{album.album}</h1>
-          </header>
-          <main className="shareCard__content">
-            <h2 className="shareCard__artist">{album.artist}</h2>
-          </main>
-          <footer className="shareCard_footer">
+      <main className="flex justify-center items-center w-screen h-screen p-8">
+        <div className="flex flex-col items-center gap-4 p-8 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out w-[600px]">
+          <div className="w-full aspect-square relative">
+            <Image
+              src={album.albumCover.src || "/placeholder.png"}
+              alt={album.albumCover.alt || "Album cover"}
+              layout="fill"
+              objectFit="cover"
+              priority={true}
+              unoptimized={true}
+              className="rounded-lg hover:shadow-sm transition-all duration-300 ease-in-out brightness-105 w-full h-full"
+            />
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <h3 className="text-xl font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300">
+              {album.album}
+            </h3>
+            <p className="text-lg text-[rgba(var(--theme-rgb),0.7)]">
+              {album.artist}
+            </p>
+            {album.release_date && (
+              <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">
+                {album.release_date}
+              </p>
+            )}
+            {album.genre && album.genre.toLowerCase() !== "unknown" && (
+              <p className="font-extrabold text-xs tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
+                {album.genre.charAt(0).toUpperCase() + album.genre.slice(1)}
+              </p>
+            )}
+          </div>
+          <div className="flex items-center justify-between gap-4 w-full px-4"></div>
+          <button className="p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out text-theme flex items-center justify-center">
             <Share2
               size={24}
-              fill="var(--background)"
-              onClick={() => onShare(artistQuery, albumQuery)}
+              onClick={() => onShare(album.artist, album.album)}
             />
+          </button>
+          <button className="flex items-center gap-2 p-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out">
             <Heart
               size={24}
-              fill={liked ? "var(--theme)" : "var(--background)"}
-              onClick={() => onHeart(artistQuery, albumQuery, liked)}
+              onClick={() => onHeart(album.artist, album.album, liked)}
+              className={`cursor-pointer text-theme ${
+                liked ? "fill-theme" : ""
+              }`}
             />
-          </footer>
-        </section>
+          </button>
+        </div>
+
         {error && <Banner title="Error" subtitle={error} />}
         {sharePopUp && (
           <SharePopup

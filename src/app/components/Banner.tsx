@@ -1,5 +1,6 @@
-import styles from "../page.module.scss";
 import React from "react";
+import '../globals.css'
+
 interface BannerProps {
     title: string;
     subtitle: string;
@@ -7,9 +8,9 @@ interface BannerProps {
 
 const Banner: React.FC<BannerProps> = ({title, subtitle}) => {
     return(
-        <section className={styles.banner}>
-            <h3>{title}</h3>
-            <p>{subtitle}</p>
+        <section className="fixed bottom-0 left-0 w-full p-4 bg-background/95 backdrop-blur-lg border-t border-theme flex justify-center items-center gap-4 z-50 transition-transform duration-300 shadow-md flex-col">
+            <h3 className="text-[clamp(1rem,3vw,1.6rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-foreground via-foreground to-foreground shadow-white">{title}</h3>
+            <p className="text-center text-[clamp(0.9rem,2.5vw,1.2rem)] text-foreground/90 leading-relaxed my-2 shadow-sm max-w-[800px]">{subtitle}</p>
         </section>
     )
 }

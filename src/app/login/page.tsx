@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Mail, Lock } from "lucide-react";
 import Link from "next/link";
-import "./styles.scss";
 import { logInUser } from "../utils/database";
 import { useRouter } from "next/navigation";
 import { createHash } from "crypto";
@@ -42,6 +41,10 @@ const Login = () => {
     }
   };
 
+  const handleInputChange = (value: string, name: string): void => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   useEffect(() => {
     if (error) {
       setTimeout(() => {
@@ -52,58 +55,89 @@ const Login = () => {
   }, [error]);
 
   return (
-    <main className="mainContent">
-      <h1>FRAME THE BEAT</h1>
-      <div className="section">
-        <div className="header">
-          <h2>Welcome Back</h2>
-          <p>Sign in to continue exploring album covers</p>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="inputGroup">
-            <Mail size={20} />
-            <input
-              type="email"
-              placeholder="Email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              required
-              name="email"
-              autoComplete="email"
-            />
-          </div>
-          <div className="inputGroup">
-            <Lock size={20} />
-            <input
-              type="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              required
-              name="password"
-              autoComplete="current-password"
-            />
-          </div>
-          <div className="checkboxContainer">
-            <Link href="/forgot-password">Forgot Password?</Link>
-          </div>
-          <div className="ctaButtonContainer">
-            <button type="submit">
-              Sign In
-              <ArrowRight size={20} />
-            </button>
-          </div>
-          <p className="registerLink">
-            Don&apos;t have an account? <Link href="/register">Register</Link>
-          </p>
-        </form>
+    <main className="min-h-screen bg-gradient-radial from-theme-dark via-transparent to-background/5">
+    <h1 className="absolute left-1/2 -translate-x-1/2 text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-foreground to-theme drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] md:hidden">
+      FRAME THE BEAT
+    </h1>
+
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(90%,520px)] p-2 rounded-3xl border border-theme bg-gradient-to-br from-background/5 to-background backdrop-blur-lg shadow-lg shadow-theme transition-all duration-400 ease-out hover:shadow-xl hover:shadow-theme">
+      <div className="text-center">
+        <h2 className="text-theme text-3xl font-bold p-2">Log In</h2>
+        <p className="text-foreground/70 text-lg my-7">
+          Welcome back!
+        </p>
       </div>
-      {error && <Banner title={"Log in failed"} subtitle={error} />}
-    </main>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col gap-3 w-full max-w-[440px] mx-auto"
+      >
+        <div className="relative w-full">
+          <Mail
+            className="absolute left-5 top-1/2 -translate-y-1/2 text-white transition-all duration-300 peer-focus:text-theme peer-focus:scale-110"
+            size={20}
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full py-4 pl-12 pr-4 bg-transparent border-2 border-theme-dark rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme-dark focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
+            value={formData.email}
+            onChange={(e) => handleInputChange(e.target.value, "email")}
+            required
+            name="email"
+            autoComplete="email"
+          />
+        </div>
+
+        <div className="relative w-full">
+          <Lock
+            className="absolute left-5 top-1/2 -translate-y-1/2 text-white transition-all duration-300 peer-focus:text-theme peer-focus:scale-110"
+            size={20}
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            className="w-full py-4 pl-12 pr-4 bg-transparent border-2 border-theme-dark rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme/70 focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
+            value={formData.password}
+            onChange={(e) => handleInputChange(e.target.value, "password")}
+            required
+          />
+        </div>
+
+        <div className="mt-4">
+          <button
+            type="submit"
+            className="w-full py-3 rounded-2xl bg-gradient-to-br from-theme to-theme/85 text-foreground text-lg font-semibold tracking-wider flex items-center justify-center gap-3 shadow-lg shadow-theme/35 transition-all duration-400 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-theme/45 hover:from-theme hover:to-theme/90"
+          >
+            Continue
+            <ArrowRight
+              size={20}
+              className="transition-transform duration-300 group-hover:translate-x-1"
+            />
+          </button>
+        </div>
+
+        <p className="text-center text-foreground/70">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/register"
+            className="text-theme font-semibold hover:underline ml-1"
+          >
+            Sign up
+          </Link>
+        </p>
+      </form>
+    </div>
+
+    {error && (
+      <Banner
+        title={"Log in process failed"}
+        subtitle={`${
+          error.charAt(0).toUpperCase() + error.slice(1)
+        }. Please try again later.`}
+      />
+    )}
+  </main>
   );
 };
 

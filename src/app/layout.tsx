@@ -1,11 +1,11 @@
+import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
 import { AuthProvider } from "./utils/AuthContext";
 import { ThemeProvider } from "./utils/theme-hook";
 import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import Script from "next/script";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 import Head from "next/head";
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -110,18 +110,6 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <Script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-SBYGVJEEPC"
-        />
-        <Script id="google-analytics">
-          {`
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){window.dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-SBYGVJEEPC');
-  `}
-        </Script>
         <Analytics />
         <SpeedInsights />
         <AuthProvider>

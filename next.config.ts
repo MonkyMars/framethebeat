@@ -1,17 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
   images: {
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'zapqcxbffugqvfiiilci.supabase.co',
+      
       },
       {
         protocol: 'https',
         hostname: 'lastfm.freetls.fastly.net'
       }
-    ]
+    ],
   },
   webpack: (config, { dev }) => {
     config.devtool = dev ? 'source-map' : false;

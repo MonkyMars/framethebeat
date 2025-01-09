@@ -11,24 +11,22 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme | null>(null);
 
   const applyTheme = (newTheme: Theme) => {
     const root = document.documentElement;
-    
     if (newTheme === 'system') {
       root.removeAttribute('data-theme');
       return;
     }
-
     root.setAttribute('data-theme', newTheme);
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('album-covers-theme') as Theme;
+    const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
+      setTheme(savedTheme as Theme);
+      applyTheme(savedTheme as Theme);
     }
   }, []);
 
@@ -39,7 +37,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleThemeChange }}>
+    <ThemeContext.Provider value={{ 
+      theme: theme || 'system', 
+      setTheme: handleThemeChange 
+    }}>
       {children}
     </ThemeContext.Provider>
   );
