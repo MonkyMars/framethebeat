@@ -11,25 +11,25 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system');
+  const [theme, setTheme] = useState<Theme | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const applyTheme = (newTheme: Theme) => {
-    const root = document.documentElement;
+    if (typeof window === 'undefined') return;
     
+    const root = document.documentElement;
     if (newTheme === 'system') {
       root.removeAttribute('data-theme');
       return;
     }
-
     root.setAttribute('data-theme', newTheme);
   };
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('album-covers-theme') as Theme;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
-    }
+    setMounted(true);
+    const savedTheme = localStorage.getItem('album-covers-theme') as Theme || 'system';
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
   }, []);
 
   const handleThemeChange = (newTheme: Theme) => {
@@ -38,8 +38,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     applyTheme(newTheme);
   };
 
+  if (!mounted) {
+    return <>{children}</>;
+  }
+
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleThemeChange }}>
+    <ThemeContext.Provider value={{ 
+      theme: theme || 'system', 
+      setTheme: handleThemeChange 
+    }}>
       {children}
     </ThemeContext.Provider>
   );

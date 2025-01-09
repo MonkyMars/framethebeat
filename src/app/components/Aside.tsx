@@ -27,7 +27,7 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 transition-opacity duration-300"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -38,6 +38,7 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
         aria-label="Main navigation"
         role="navigation"
         aria-hidden={!isOpen}
+        style={{ color: "var(--background) !important" }}
       >
         <div className="flex flex-col h-full p-6 text-[var(--foreground)]">
           <header className="flex justify-between items-center mb-8">
