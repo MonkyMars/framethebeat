@@ -6,7 +6,6 @@ import { ThemeProvider } from "./utils/theme-hook";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-import Head from "next/head";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -100,15 +99,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content={viewport.viewport} />
-        <meta name="theme-color" content={viewport.themeColor} />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="apple-touch-icon" href="/favicon.ico" />
-        <link rel="shortcut icon" href="/favicon.ico" />
-        <link rel="manifest" href="/manifest.json" />
-      </Head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <Analytics />
         <SpeedInsights />
