@@ -96,7 +96,7 @@ const SavedContent = () => {
     setSearchQuery(searchParams.get("q") || "");
   }, [searchParams]);
 
-  console.log("savedAlbums", savedAlbums);
+  
 
   const filteredAlbums = useFilteredData(
     savedAlbums,
