@@ -18,13 +18,9 @@ import { useRouter } from "next/navigation"
 import { logOutUser, updateUser, deleteUser } from "../utils/database"
 import Banner from "../components/Banner"
 import Slider from "./Slider"
-
-const THEME_STORAGE_KEY = "framethebeat-theme"
-
-type Theme = "light" | "dark" | "system"
+import { useTheme } from 'next-themes'
 
 const Settings = () => {
-  const [theme, setTheme] = useState<Theme>("system")
   const [gridSize, setGridSize] = useState("medium")
   const [defaultSort, setDefaultSort] = useState("newest")
   const [animations, setAnimations] = useState(true)
@@ -35,46 +31,9 @@ const Settings = () => {
   const [validatePopup, setValidatePopup] = useState<boolean>(false)
   const [formValues, setFormValues] = useState({ email: "", password: "" })
   const [togglePassword, setTogglePassword] = useState<boolean>(false)
-
-  const applyTheme = (newTheme: Theme) => {
-    const root = document.documentElement
-    if (newTheme === "system") {
-      root.removeAttribute("data-theme")
-      return
-    }
-    if (newTheme === "light") {
-      root.style.setProperty("--background", "#e3e3e3")
-      root.style.setProperty("--background-rgb", "227,227,227")
-      root.style.setProperty("--foreground", "#171717")
-      root.style.setProperty("--foreground-rgb", "23,23,23")
-      root.style.setProperty("--theme", "#2398f7")
-      root.style.setProperty("--theme-rgb", "35, 152, 247")
-    } else {
-      root.style.setProperty("--background", "#0a0a0a")
-      root.style.setProperty("--background-rgb", "10,10,10")
-      root.style.setProperty("--foreground", "#ededed")
-      root.style.setProperty("--foreground-rgb", "237,237,237")
-      root.style.setProperty("--theme", "#d17e3b")
-      root.style.setProperty("--theme-rgb", "209,126,59")
-    }
-    root.setAttribute("data-theme", newTheme)
-  }
-
-  const handleThemeChange = (newTheme: Theme) => {
-    setTheme(newTheme)
-    localStorage.setItem(THEME_STORAGE_KEY, newTheme)
-    applyTheme(newTheme)
-  }
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY)
-    if (savedTheme) {
-      setTheme(savedTheme as Theme)
-      applyTheme(savedTheme as Theme)
-    }
-    setFormValues((prev) => ({ ...prev, email: session?.user?.email || "" }))
-  }, [session])
-
+  const { theme, setTheme } = useTheme()
+ 
+  
   const onUpDateProfile = async () => {
     const response = await updateUser(formValues.email, formValues.password)
     if (response.error) {
@@ -158,8 +117,8 @@ const Settings = () => {
                       className={`px-4 py-2 rounded-md border border-theme bg-background/20 text-foreground hover:border-theme transition-all ${
                         theme === t ? "bg-theme text-background border-theme" : ""
                       }`}
-                      onClick={() => handleThemeChange(t as Theme)}
-                    >
+                      onClick={() => setTheme(t)}
+                    >s
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                   ))}
