@@ -40,6 +40,7 @@ const Tours = () => {
                   placeholder="blur"
                   blurDataURL={tour.cover.src}
                   className="hover:scale-105 transition-all duration-300"
+                  unoptimized
                 />
               </div>
               <div className="space-y-4">
