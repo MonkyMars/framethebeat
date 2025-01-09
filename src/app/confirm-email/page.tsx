@@ -9,15 +9,15 @@ import { Settings, Home } from "lucide-react";
 
 const ConfirmEmail = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verified, setVerified] = useState(false);
   const [pin, setPin] = useState(["", "", "", "", "", ""]);
   const searchParams = useSearchParams();
-  const email = searchParams.get("email");
+  const email = searchParams?.get("email") ?? null;
 
   useEffect(() => {
-    setLoading(false);
+    setLoading(true);
     const interval = setInterval(async () => {
       try {
         const {
@@ -141,7 +141,7 @@ const ConfirmEmail = () => {
         <main className="flex-1 flex items-center justify-center p-8" aria-label="Awaiting email verification">
           <div role="alert">
             <section className="w-[clamp(300px,90vw,500px)] text-center p-10 rounded-xl bg-[rgba(var(--theme-rgb),0.1)] backdrop-blur-[15px] border border-[rgba(var(--theme-rgb),0.2)] shadow-[0_10px_30px_rgba(0,0,0,0.2)] animate-fadeIn">
-              <h1 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] mb-6 bg-gradient-to-r from-[var(--foreground)] to-[var(--foreground)] bg-clip-text text-transparent shadow-[0_0_15px_rgba(255,255,255,0.6)]">
+              <h1 className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] mb-6 bg-gradient-to-r from-[var(--foreground)] to-[var(--foreground)] bg-clip-text text-transparent">
                 Awaiting Email Verification
               </h1>
               <p className="text-[clamp(1rem,2.5vw,1.2rem)] text-[var(--foreground)] leading-relaxed mb-8 shadow-[0_1px_3px_rgba(0,0,0,0.15)]">

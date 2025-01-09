@@ -2,7 +2,6 @@
 import "../globals.css";
 import { ThemeProvider } from "../utils/theme-hook";
 import React from "react";
-import { AuthProvider } from "../utils/AuthContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
@@ -15,9 +14,7 @@ export default function RootLayout({
     <>
       <Analytics />
       <SpeedInsights />
-      <AuthProvider>
-        <ThemeProvider>{children}</ThemeProvider>
-      </AuthProvider>
+      <ThemeProvider>{children}</ThemeProvider>
     </>
   );
 }
