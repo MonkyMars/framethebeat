@@ -45,6 +45,7 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
                   height={1500}
                   priority
                   className="rounded-lg shadow-md"
+                  unoptimized
                 />
                 <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
                   <h3 className="text-foreground font-semibold truncate">{item.album}</h3>
