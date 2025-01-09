@@ -1,13 +1,13 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import Image from "next/image";
+"use client"
+import React from "react";
+import dynamic from "next/dynamic";
 import Nav from "@/app/components/Nav";
 import Footer from "@/app/components/Footer";
-import "react-vertical-timeline-component/style.min.css";
-import {
-  VerticalTimeline,
-  VerticalTimelineElement,
-} from "react-vertical-timeline-component";
+
+const Timeline = dynamic(
+  () => import('@/app/components/TimeLine').then(mod => mod.Timeline),
+  { ssr: false }
+);
 
 interface TimelineItem {
   date: string;
@@ -19,21 +19,7 @@ interface TimelineItem {
   };
 }
 
-const Page = () => {
-  const [mounted, setMounted] = useState(false);
-  const [isIntroVisible, setIsIntroVisible] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setIsIntroVisible(true);
-    const timer = setTimeout(() => setIsIntroVisible(false), 4000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
-
+export default function Page() {
   const items: TimelineItem[] = [
     {
       date: "March 21, 2011",
@@ -95,86 +81,27 @@ const Page = () => {
 
   return (
     <>
-      {isIntroVisible ? (
-        <StaticIntro />
-      ) : (
-        <>
-          <Nav />
-          <main className="container mx-auto px-4 py-8 max-w-[1200px]">
-            <header className="text-center py-12 mb-8">
-              <h1 className="text-xl font-extrabold uppercase tracking-wider leading-tight bg-gradient-to-r from-theme to-foreground-dark bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(var(--theme-rgb),0.2)] animate-fade-in">
-                Three Nights, One Story: The Trilogy Experience
-              </h1>
-            </header>
-            {mounted && (
-              <VerticalTimeline>
-                {items.map((item: TimelineItem, index: number) => (
-                  <VerticalTimelineElement
-                    key={index}
-                    className="vertical-timeline-element"
-                    date={item.date}
-                    iconStyle={{ background: "var(--theme)", color: "#fff" }}
-                  >
-                    <TimelineElementContent item={item} />
-                  </VerticalTimelineElement>
-                ))}
-              </VerticalTimeline>
-            )}
-            <section className="mt-12 text-center p-8 bg-theme/5 rounded-xl">
-              <h2 className="text-2xl text-theme uppercase tracking-wider mb-4">
-                A Deeper Exploration
-              </h2>
-              <p className="text-foreground/90 max-w-3xl mx-auto leading-relaxed">
-                Reflect on the complexities, inspirations, and cultural impact
-                that shaped these tapes. Each track offers a new layer of
-                insight.
-              </p>
-            </section>
-          </main>
-          <Footer />
-        </>
-      )}
+      <Nav />
+      <main className="container mx-auto px-4 py-8 max-w-[1200px]">
+        <header className="text-center py-12 mb-8">
+          <h1 className="text-3xl text-theme uppercase tracking-wider font-extrabold">
+            Three Nights, One Story: The Trilogy Experience
+          </h1>
+        </header>
+        
+        <Timeline items={items} />
+
+        <section className="mt-12 text-center p-8 bg-theme/5 rounded-xl">
+          <h2 className="text-2xl text-theme uppercase tracking-wider mb-4">
+            A Deeper Exploration
+          </h2>
+          <p className="text-foreground/90 max-w-3xl mx-auto leading-relaxed">
+            Reflect on the complexities, inspirations, and cultural impact that
+            shaped these tapes. Each track offers a new layer of insight.
+          </p>
+        </section>
+      </main>
+      <Footer />
     </>
   );
-};
-
-const StaticIntro = () => (
-  <div className="fixed inset-0 flex flex-col items-center justify-center bg-background z-50 cinematicIntro p-4">
-    <h1 className="text-4xl md:text-5xl lg:text-6xl text-center text-theme font-extrabold w-full h-full flex items-center justify-center">
-      The Trilogy Immersion
-    </h1>
-    <p className="text-base md:text-lg lg:text-xl text-foreground/80 text-center max-w-xs md:max-w-lg">
-      Embark on a deep dive into The Weeknd&apos;s visionary mixtapes.
-    </p>
-  </div>
-);
-
-const TimelineElementContent = ({ item }: { item: TimelineItem }) => (
-  <article className="text-center bg-background p-8 rounded-xl shadow-lg">
-    <header className="mb-4">
-      <h2 className="text-foreground/90 text-3xl font-bold mb-2 text-theme">
-        {item.title}
-      </h2>
-    </header>
-    <p className="text-foreground/90 leading-relaxed text-lg mt-4 mb-6 mx-auto max-w-3xl">
-      {item.description}
-    </p>
-    {item.image && (
-      <div className="relative overflow-hidden rounded-lg mt-4">
-        <Image
-          src={item.image.src}
-          alt={item.image.alt}
-          width={500}
-          height={500}
-          className="rounded-lg w-full h-auto"
-          loading="lazy"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          priority={false}
-          unoptimized
-        />
-      </div>
-    )}
-  </article>
-);
-
-export default Page;
+}
