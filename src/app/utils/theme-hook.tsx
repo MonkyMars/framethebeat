@@ -1,6 +1,6 @@
-"use client"
-import { ThemeProvider as NextThemeProvider } from 'next-themes'
-import React from 'react'
+"use client";
+import { ThemeProvider as NextThemeProvider } from "next-themes";
+import React from "react";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (
@@ -8,11 +8,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       attribute="data-theme"
       defaultTheme="system"
       enableSystem={true}
-      themes={['light', 'dark']}
+      disableTransitionOnChange={true}
+      themes={["light", "dark", "system"]}
     >
       {children}
     </NextThemeProvider>
-  )
+  );
 }
 
-export { useTheme } from 'next-themes'
+export { useTheme } from "next-themes";

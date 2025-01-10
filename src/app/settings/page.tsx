@@ -118,7 +118,7 @@ const Settings = () => {
                         theme === t ? "bg-theme text-background border-theme" : ""
                       }`}
                       onClick={() => setTheme(t)}
-                    >s
+                    >
                       {t.charAt(0).toUpperCase() + t.slice(1)}
                     </button>
                   ))}
