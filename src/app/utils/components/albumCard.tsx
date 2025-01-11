@@ -13,7 +13,7 @@ type CollectionCardProps = Album & {
   saves: number;
   saved: boolean;
   releaseDate: string;
-  setExtraData: React.Dispatch<React.SetStateAction<Album | null>>;
+  setExtraData: (album: Album | null) => void;
 };
 
 const CollectionCard = ({
@@ -63,12 +63,13 @@ const CollectionCard = ({
 
   return (
     <div className="group flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out relative">
-      <Expand 
+      <button className="absolute top-5 right-5 z-10 p-2 bg-background rounded-[50%] transition-all duration-300 hover:scale-110">
+        <Expand 
       size={24} 
-      onClick={() => setExtraData(mappedAlbum)} 
-      className="opacity-0 group-hover:opacity-100 cursor-pointer text-theme absolute top-3 right-3 z-10 transition-all duration-300 hover:scale-110" 
+      onClick={() => setExtraData(mappedAlbum)}
+      className="cursor-pointer text-theme"
       />
-      
+      </button>
       <div className="w-full aspect-square relative">
       <Image
         src={imageUrl}

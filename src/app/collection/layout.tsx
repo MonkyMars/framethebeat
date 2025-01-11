@@ -1,11 +1,12 @@
 "use client";
-import { ThemeProvider } from "../utils/theme-hook";
+
 import React from "react";
-import { AuthProvider } from "../utils/AuthContext";
+// import { AuthProvider } from "../utils/AuthContext";
+// import { ThemeProvider } from "../utils/theme-hook";
 import Head from "next/head";
 
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+// import { Analytics } from "@vercel/analytics/next";
+// import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default function RootLayout({
   children,
@@ -21,11 +22,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
       </Head>
-      <Analytics />
-      <SpeedInsights />
-      <AuthProvider>
-        <ThemeProvider>{children}</ThemeProvider>
-      </AuthProvider>
+      {children}
     </>
   );
 }
