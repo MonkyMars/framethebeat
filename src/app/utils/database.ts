@@ -1,5 +1,6 @@
 import { supabase } from "./supabase";
 import { NextResponse } from "next/server";
+import { Album } from "./types";
 
 export const fetchUserCollection = async (id: string) => {
   try {
@@ -19,7 +20,7 @@ export const fetchUserCollection = async (id: string) => {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return NextResponse.json(collection);
+    return NextResponse.json(collection as Album[]);
   } catch (error) {
     return NextResponse.json(
       { message: `Internal Server Error: ${error}` },

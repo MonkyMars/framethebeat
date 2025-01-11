@@ -1,7 +1,7 @@
-"use client"
-import React, { useState, useEffect } from "react"
-import Nav from "../components/Nav"
-import Footer from "../components/Footer"
+"use client";
+import React, { useState, useEffect } from "react";
+import Nav from "../components/Nav";
+import Footer from "../components/Footer";
 import {
   Sun,
   Languages,
@@ -12,94 +12,97 @@ import {
   Eye,
   EyeClosed,
   X,
-} from "lucide-react"
-import { useAuth } from "../utils/AuthContext"
-import { useRouter } from "next/navigation"
-import { logOutUser, updateUser, deleteUser } from "../utils/database"
-import Banner from "../components/Banner"
-import Slider from "./Slider"
-import { useTheme } from 'next-themes'
+} from "lucide-react";
+import { useAuth } from "../utils/AuthContext";
+import { useRouter } from "next/navigation";
+import { logOutUser, updateUser, deleteUser } from "../utils/database";
+import Banner from "../components/Banner";
+import Slider from "./Slider";
+import { useTheme } from "next-themes";
 
 const Settings = () => {
-  const [gridSize, setGridSize] = useState("medium")
-  const [defaultSort, setDefaultSort] = useState("newest")
-  const [animations, setAnimations] = useState(true)
-  const { session } = useAuth()
-  const router = useRouter()
-  const [response, setResponse] = useState<string | null>(null)
-  const [validateValue, setValidateValue] = useState<string>("")
-  const [validatePopup, setValidatePopup] = useState<boolean>(false)
-  const [formValues, setFormValues] = useState({ email: "", password: "" })
-  const [togglePassword, setTogglePassword] = useState<boolean>(false)
-  const { theme, setTheme } = useTheme()
- 
+  const [gridSize, setGridSize] = useState("medium");
+  const [defaultSort, setDefaultSort] = useState("newest");
+  const [animations, setAnimations] = useState(true);
+  const { session } = useAuth();
+  const router = useRouter();
+  const [response, setResponse] = useState<string | null>(null);
+  const [validateValue, setValidateValue] = useState<string>("");
+  const [validatePopup, setValidatePopup] = useState<boolean>(false);
+  const [formValues, setFormValues] = useState({ email: "", password: "" });
+  const [togglePassword, setTogglePassword] = useState<boolean>(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
   
-  const onUpDateProfile = async () => {
-    const response = await updateUser(formValues.email, formValues.password)
-    if (response.error) {
-      console.error(response.error)
-      return
+  useEffect(() => {
+    if (response) {
+      setTimeout(() => setResponse(null), 5000);
     }
-    setResponse("Profile updated successfully")
-  }
+  }, [response]);
+  if (!mounted) return null;
+
+  const onUpDateProfile = async () => {
+    const response = await updateUser(formValues.email, formValues.password);
+    if (response.error) {
+      console.error(response.error);
+      return;
+    }
+    setResponse("Profile updated successfully");
+  };
 
   const onDeleteAccount = async () => {
-    const user_id = session?.user.id
-    if (!user_id) return
-    const response = await deleteUser(user_id)
-    const data = await response.json()
+    const user_id = session?.user.id;
+    if (!user_id) return;
+    const response = await deleteUser(user_id);
+    const data = await response.json();
     if (data.message) {
-      console.error(data.message)
+      console.error(data.message);
     }
-    setResponse("Account deleted successfully")
-    router.push("/login")
-  }
+    setResponse("Account deleted successfully");
+    router.push("/login");
+  };
 
   const validateOnDeleteUser = () => {
-    const email = session?.user.email
-    if (!email) return
+    const email = session?.user.email;
+    if (!email) return;
     if (validateValue === email) {
-      onDeleteAccount()
-      setValidatePopup(false)
+      onDeleteAccount();
+      setValidatePopup(false);
     } else {
-      setResponse("Values do not match")
+      setResponse("Values do not match");
     }
-  }
+  };
 
   const handleFormChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     name: string,
     value: string
   ) => {
-    setFormValues((prev) => ({ ...prev, [name]: value }))
-  }
-
-  useEffect(() => {
-    if (response) {
-      setTimeout(() => setResponse(null), 5000)
-    }
-  }, [response])
+    setFormValues((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
     <>
       <Nav />
       <main className="container mx-auto px-4 py-8 max-w-[1200px] min-h-[calc(100vh-70px)]">
-      <header className="relative text-center py-16 mb-8">
-      <div className="absolute inset-0" />
-      
-      <div className="relative space-y-6">
-        <h1 className="inline-block text-2xl md:text-3xl font-black uppercase tracking-[0.15em]">
-          Settings
-        </h1>
-        
-        <div className="relative">
-          <p className="text-base md:text-lg font-medium text-[rgba(var(--foreground-rgb),0.8)] max-w-md mx-auto">
-            Customize your album browsing experience
-          </p>
-          <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-1 rounded-full bg-gradient-to-r from-[rgba(var(--theme-rgb),0.5)] to-[rgba(var(--theme-rgb),0.2)]" />
-        </div>
-      </div>
-    </header>
+        <header className="relative text-center py-16 mb-8">
+          <div className="absolute inset-0" />
+
+          <div className="relative space-y-6">
+            <h1 className="inline-block text-2xl md:text-3xl font-black uppercase tracking-[0.15em]">
+              Settings
+            </h1>
+
+            <div className="relative">
+              <p className="text-base md:text-lg font-medium text-[rgba(var(--foreground-rgb),0.8)] max-w-md mx-auto">
+                Customize your album browsing experience
+              </p>
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-1 rounded-full bg-gradient-to-r from-[rgba(var(--theme-rgb),0.5)] to-[rgba(var(--theme-rgb),0.2)]" />
+            </div>
+          </div>
+        </header>
 
         <div className="grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-8">
           <section className="bg-background/50 backdrop-blur-xl border border-theme rounded-xl p-8 shadow-lg transition-all duration-300 hover:shadow-[0_8px_20px_rgba(var(--theme-rgb),0.2)] hover:-translate-y-1">
@@ -115,7 +118,9 @@ const Settings = () => {
                     <button
                       key={t}
                       className={`px-4 py-2 rounded-md border border-theme bg-background/20 text-foreground hover:border-theme transition-all ${
-                        theme === t ? "bg-theme text-background border-theme" : ""
+                        theme === t
+                          ? "bg-theme text-background border-theme"
+                          : ""
                       }`}
                       onClick={() => setTheme(t)}
                     >
@@ -124,7 +129,11 @@ const Settings = () => {
                   ))}
                 </div>
               </div>
-              <Slider label="Animations" checked={animations} onChange={setAnimations} />
+              <Slider
+                label="Animations"
+                checked={animations}
+                onChange={setAnimations}
+              />
             </div>
           </section>
 
@@ -161,7 +170,9 @@ const Settings = () => {
               </div>
             </div>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-xl font-bold uppercase tracking-wider text-foreground/90">Coming Soon</span>
+              <span className="text-xl font-bold uppercase tracking-wider text-foreground/90">
+                Coming Soon
+              </span>
             </div>
           </section>
 
@@ -176,8 +187,8 @@ const Settings = () => {
                   <button
                     className="w-full px-6 py-3 rounded-lg bg-red-500/10 border-2 border-red-500/20 text-red-500 font-medium transition-all duration-300 hover:bg-red-500/20"
                     onClick={async () => {
-                      await logOutUser()
-                      router.push("/login")
+                      await logOutUser();
+                      router.push("/login");
                     }}
                   >
                     Sign Out
@@ -202,7 +213,9 @@ const Settings = () => {
                     placeholder="Enter your email address"
                     className="px-4 py-3 rounded-lg border border-theme bg-background text-foreground focus:outline-none focus:border-theme/50 focus:shadow-[0_0_0_2px_rgba(var(--theme-rgb),0.1)]"
                     value={formValues.email}
-                    onChange={(e) => handleFormChange(e, "email", e.target.value)}
+                    onChange={(e) =>
+                      handleFormChange(e, "email", e.target.value)
+                    }
                   />
                   <label className="font-medium text-theme/80 flex items-center gap-2">
                     <Lock size={24} />
@@ -230,7 +243,10 @@ const Settings = () => {
                       onClick={() => setTogglePassword(true)}
                     />
                   )}
-                  <button className="w-full px-6 py-3 rounded-lg bg-theme-dark text-foreground font-medium transition-all duration-300 hover:bg-theme hover:shadow-lg hover:shadow-theme/30" onClick={onUpDateProfile}>
+                  <button
+                    className="w-full px-6 py-3 rounded-lg bg-theme-dark text-foreground font-medium transition-all duration-300 hover:bg-theme hover:shadow-lg hover:shadow-theme/30"
+                    onClick={onUpDateProfile}
+                  >
                     Update Profile
                   </button>
                 </div>
@@ -245,16 +261,10 @@ const Settings = () => {
             </div>
             <div className="flex flex-col gap-4">
               <p>Version 1.0.0</p>
-              <a
-                className="text-theme hover:underline"
-                href="#"
-              >
+              <a className="text-theme hover:underline" href="#">
                 Terms of Service
               </a>
-              <a
-                className="text-theme hover:underline"
-                href="#"
-              >
+              <a className="text-theme hover:underline" href="#">
                 Privacy Policy
               </a>
             </div>
@@ -297,7 +307,9 @@ const Settings = () => {
                 Are you sure you want to delete your account?
               </p>
               <label className="text-center">
-                To confirm, type &apos;&apos;<b className="text-theme/90">{session?.user.email}</b>&apos;&apos; in the box below
+                To confirm, type &apos;&apos;
+                <b className="text-theme/90">{session?.user.email}</b>
+                &apos;&apos; in the box below
               </label>
               <input
                 type="text"
@@ -330,7 +342,7 @@ const Settings = () => {
       {response && <Banner title={response} subtitle={response} />}
       <Footer />
     </>
-  )
-}
+  );
+};
 
-export default Settings
+export default Settings;
