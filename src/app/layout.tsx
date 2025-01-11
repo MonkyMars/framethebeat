@@ -1,10 +1,9 @@
-import "./globals.css";
-import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/react"
+import { ThemeProvider } from "./utils/theme-hook"
+import { AuthProvider } from "./utils/AuthContext"
 import { Geist, Geist_Mono } from "next/font/google";
-import { AuthProvider } from "./utils/AuthContext";
-import { ThemeProvider } from "./utils/theme-hook";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import type { Metadata } from "next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -87,25 +86,23 @@ export const metadata: Metadata = {
   category: "Music",
 };
 
-export const viewport = {
-  themeColor: "#d17e3b",
-  viewport: "width=device-width, initial-scale=1",
-};
-
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`} suppressHydrationWarning>
+    <html lang="en">
+      <head />
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider>
-          <Analytics />
-          <SpeedInsights />
-          <AuthProvider>{children}</AuthProvider>
-        </ThemeProvider>{" "}
+          <AuthProvider>
+            {children}
+            <Analytics />
+            <SpeedInsights />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
-  );
+  )
 }
