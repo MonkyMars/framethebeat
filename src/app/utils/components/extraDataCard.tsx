@@ -5,7 +5,7 @@ import Image from "next/image";
 
 const ExtraDataCard = ({extraData}: {extraData: Album}) => {
   return (
-    <div className="flex flex-col gap-2 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
+    <div className="fixed place-center flex flex-col gap-2 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
       <h2 className="text-lg font-semibold text-foreground">Extra Data</h2>
       <button className="self-end" onClick={() => {}}>
         <X size={24} />
