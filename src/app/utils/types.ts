@@ -11,7 +11,7 @@ export interface Album {
   tracklist?: {
     track: string;
     duration: string;
-  }
+  }[]
 }
 
 export interface DeleteResponse {
