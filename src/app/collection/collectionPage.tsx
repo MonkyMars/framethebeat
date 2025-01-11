@@ -228,7 +228,7 @@ const Collection = () => {
       {title && <Banner title={title} subtitle={title} />}
       {extraData && (
         <>
-        <ExtraDataCard extraData={extraData}/>
+        <ExtraDataCard extraData={extraData} setExtraData={setExtraData}/>
         </>
       )}
       {sharePopUp && (
