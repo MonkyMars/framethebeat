@@ -1,6 +1,7 @@
 import { supabase } from "./supabase";
 import { Album } from "./types";
 import { useMemo } from "react";
+import levenshtein from "fast-levenshtein";
 import { DeleteResponse, SaveResponse } from "./types";
 import { verifyAlbumDeleted, deleteAlbum, saveAlbum } from "./database";
 
@@ -37,8 +38,10 @@ export const useFilteredData = (
   filterBy: string,
   selectedGenre: string,
   sortBy: string
-): Album[] => {
+) => {
   return useMemo(() => {
+    if (!data || !Array.isArray(data)) return [];
+
     return data
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
@@ -57,19 +60,22 @@ export const useFilteredData = (
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
 
-        const searchTerm = searchQuery
-          .toLowerCase()
-          .replace(/[. ]/g, "")
-          .trim();
-        const albumName = album.album.toLowerCase().replace(/[. ]/g, "");
-        const artistName = album.artist.toLowerCase().replace(/[. ]/g, "");
+        const searchTerm = searchQuery.toLowerCase().trim();
+        const albumName = album.album.toLowerCase();
+        const artistName = album.artist.toLowerCase();
         const genreName = album.genre?.toLowerCase() || "";
         const releaseYear = String(album.release_date || "");
 
+        // Levenshtein threshold (adjust as needed)
+        const threshold = 3;
+
+        const isCloseMatch = (input: string, target: string) =>
+          levenshtein.get(input, target) <= threshold;
+
         return (
-          albumName.includes(searchTerm) ||
-          artistName.includes(searchTerm) ||
-          genreName.includes(searchTerm) ||
+          isCloseMatch(searchTerm, albumName) ||
+          isCloseMatch(searchTerm, artistName) ||
+          isCloseMatch(searchTerm, genreName) ||
           releaseYear.includes(searchTerm)
         );
       })
