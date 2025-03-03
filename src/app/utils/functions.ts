@@ -59,6 +59,7 @@ export const useFilteredData = (
       })
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
+        if (!searchQuery) return true;
 
         const searchTerm = searchQuery.toLowerCase().trim();
         const albumName = album.album.toLowerCase();
@@ -66,18 +67,56 @@ export const useFilteredData = (
         const genreName = album.genre?.toLowerCase() || "";
         const releaseYear = String(album.release_date || "");
 
-        // Levenshtein threshold (adjust as needed)
-        const threshold = 3;
-
-        const isCloseMatch = (input: string, target: string) =>
-          levenshtein.get(input, target) <= threshold;
-
-        return (
-          isCloseMatch(searchTerm, albumName) ||
-          isCloseMatch(searchTerm, artistName) ||
-          isCloseMatch(searchTerm, genreName) ||
+        // Direct substring matches (highest priority)
+        if (
+          albumName.includes(searchTerm) ||
+          artistName.includes(searchTerm) ||
+          genreName.includes(searchTerm) ||
           releaseYear.includes(searchTerm)
-        );
+        ) {
+          return true;
+        }
+
+        // Word prefix matching (for partial typing)
+        const albumWords = albumName.split(/\s+/);
+        const artistWords = artistName.split(/\s+/);
+        const allWords = [...albumWords, ...artistWords];
+        
+        // Check if any word starts with the search term
+        if (allWords.some(word => word.startsWith(searchTerm))) {
+          return true;
+        }
+        
+        // Fuzzy matching for typos (adjust threshold based on search term length)
+        if (searchTerm.length >= 2) {
+          // Adaptive threshold - stricter for short words, more lenient for longer ones
+          const getThreshold = (wordLength: number, termLength: number) => {
+            const base = Math.min(wordLength, termLength) <= 4 ? 1 : 2;
+            return base + Math.floor(Math.max(wordLength, termLength) / 5);
+          };
+          
+          // Check each word against the search term
+          return allWords.some(word => {
+            // More lenient if searching for a short term
+            const threshold = getThreshold(word.length, searchTerm.length);
+            
+            // Check complete word match
+            if (levenshtein.get(searchTerm, word) <= threshold) {
+              return true;
+            }
+            
+            // Also check if the beginning part matches with fuzzy search
+            // This helps with partial typing + typos
+            if (searchTerm.length <= word.length) {
+              const wordPrefix = word.substring(0, Math.min(word.length, searchTerm.length + 2));
+              return levenshtein.get(searchTerm, wordPrefix) <= Math.min(2, threshold);
+            }
+            
+            return false;
+          });
+        }
+        
+        return false;
       })
       .sort((a, b) => {
         if (!a?.album || !b?.album) return 0;
