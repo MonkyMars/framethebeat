@@ -9,7 +9,6 @@ import Cta from "./components/Cta";
 import Footer from "./components/Footer";
 import Featured from "./components/Featured";
 import { fetchMostSavedAlbums } from "./utils/database";
-import Head from "next/head";
 
 interface Album {
   artist: string;
