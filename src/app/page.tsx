@@ -54,7 +54,7 @@ export default function Home() {
         Frame The Beat
           </h1>
           <Image
-        src={`/albumcovers/nothingbutthieves_moralpanic_fsei.jpg`}
+        src={`/albumcovers/nothingbutthieves_moralpanic.webp`}
         width={2000}
         height={2000}
         alt="album cover"
