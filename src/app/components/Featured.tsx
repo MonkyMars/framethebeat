@@ -57,7 +57,6 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
       </h2>
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 list-none p-0" aria-label="Popular albums list">
         {!album || album.length === 0 ? (
-          // Show skeletons while loading
           Array.from({ length: 4 }).map((_, index) => (
             <AlbumSkeleton key={`skeleton-${index}`} />
           ))
@@ -67,7 +66,7 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
               <article 
                 className="cursor-pointer flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102"
                 aria-labelledby={`album-title-${index}`}
-              onClick={() => handleAlbumClick(item.artist, item.album)}
+                onClick={() => handleAlbumClick(item.artist, item.album)}
               >
                 <div className="w-full aspect-square relative">
                   <div className="w-full h-full bg-[rgba(var(--theme-rgb),0.1)] rounded-lg absolute top-0 left-0"></div>
