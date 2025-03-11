@@ -47,14 +47,18 @@ export default function Home() {
           <h1 id="main-heading" className="text-[clamp(2.5rem,8vw,5rem)] font-black uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-theme to-theme/20 text-center">
             Frame The Beat
           </h1>
-          <figure aria-labelledby="featured-album-caption">
+          <figure aria-labelledby="featured-album-caption" className="w-full max-w-[600px] aspect-square relative">
+            <div className="w-full h-full bg-[rgba(var(--theme-rgb),0.1)] rounded-md absolute top-0 left-0"></div>
             <Image
               src={`/albumcovers/nothingbutthieves_moralpanic.webp`}
-              width={2000}
-              height={2000}
+              width={600}
+              height={600}
               alt="Nothing But Thieves - Moral Panic album cover"
               priority
-              className="w-full max-w-[600px] aspect-square object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
+              className="w-full h-full object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
+              sizes="(max-width: 768px) 100vw, 600px"
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2JhKDIwOSwxMjYsNTksMC4xKSIvPjwvc3ZnPg=="
             />
             <figcaption id="featured-album-caption" className="sr-only">Featured album: Nothing But Thieves - Moral Panic</figcaption>
           </figure>
