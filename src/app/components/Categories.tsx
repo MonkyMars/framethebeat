@@ -7,7 +7,7 @@ export default function Categories() {
   const router = useRouter();
   
   const handleGenreClick = (genre: string) => {
-    router.push(`/collection?q=${encodeURIComponent(genre)}`);
+    router.push(`/collection?genre=${encodeURIComponent(genre)}`);
   };
   
   return (
@@ -25,7 +25,7 @@ export default function Categories() {
                 className="px-4 py-2 bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[rgba(var(--theme-rgb),0.6)] min-w-[80px] text-center"
                 aria-label={`Browse ${genre} albums`}
               >
-                <span>{genre}</span>
+                <span>{genre.charAt(0).toUpperCase() + genre.slice(1)}</span>
               </button>
             </li>
           ))}

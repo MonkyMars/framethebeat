@@ -37,7 +37,9 @@ export const useFilteredData = (
   searchQuery: string,
   filterBy: string,
   selectedGenre: string,
-  sortBy: string
+  sortBy: string,
+  selectedAlbum?: string,
+  selectedArtist?: string
 ) => {
   return useMemo(() => {
     if (!data || !Array.isArray(data)) return [];
@@ -45,17 +47,28 @@ export const useFilteredData = (
     return data
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
-        if (filterBy === "all" && selectedGenre === "all") return true;
-
-        const matchesYear =
-          filterBy === "all" || String(album.release_date) === filterBy;
-
+        
+        // Filter by genre
         const matchesGenre =
           selectedGenre === "all" ||
           (album.genre &&
             album.genre.toLowerCase() === selectedGenre.toLowerCase());
-
-        return matchesYear && matchesGenre;
+        
+        // Filter by year
+        const matchesYear =
+          filterBy === "all" || String(album.release_date) === filterBy;
+        
+        // Filter by album name
+        const matchesAlbum = 
+          !selectedAlbum || 
+          album.album.toLowerCase().includes(selectedAlbum.toLowerCase());
+        
+        // Filter by artist name
+        const matchesArtist = 
+          !selectedArtist || 
+          album.artist.toLowerCase().includes(selectedArtist.toLowerCase());
+        
+        return matchesYear && matchesGenre && matchesAlbum && matchesArtist;
       })
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
@@ -131,7 +144,7 @@ export const useFilteredData = (
           ? a.album.localeCompare(b.album)
           : a.artist.localeCompare(b.artist);
       });
-  }, [data, filterBy, selectedGenre, searchQuery, sortBy]);
+  }, [data, filterBy, selectedGenre, searchQuery, sortBy, selectedAlbum, selectedArtist]);
 };
 
 export const onShare = (

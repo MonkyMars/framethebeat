@@ -2,7 +2,7 @@
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 import { useEffect, useState, Suspense, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import "../globals.css";
 import Banner from "../components/Banner";
 import {
@@ -20,13 +20,15 @@ import Link from "next/link";
 import { fetchCollection, fetchUserCollection } from "../utils/database";
 import { useAuth } from "../utils/AuthContext";
 import { Album } from "../utils/types";
-import FilterBar from "../utils/components/filterBar";
 import CollectionHeader from "../utils/components/collectionHeader";
 import ExtraDataCard from "../utils/components/extraDataCard";
+import { X } from "lucide-react";
 
 
 const Collection = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const [sharePopUp, setSharePopUp] = useState<{
     artist: string;
     album: string;
@@ -36,7 +38,9 @@ const Collection = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [filterBy, setFilterBy] = useState("all");
-  const [selectedGenre, setSelectedGenre] = useState<string>("all");
+  const [selectedGenre, setSelectedGenre] = useState<string>(searchParams.get("genre") || "all");
+  const [selectedAlbum, setSelectedAlbum] = useState<string>(searchParams.get("album") || "");
+  const [selectedArtist, setSelectedArtist] = useState<string>(searchParams.get("artist") || "");
   const { session } = useAuth();
   const [userCollectionNames, setUserCollectionNames] = useState<
     { artist: string; title: string }[]
@@ -49,6 +53,64 @@ const Collection = () => {
   const [displayedAlbums, setDisplayedAlbums] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [extraData, setExtraData] = useState<Album | null>(null);
+
+  // Function to update URL with query parameters
+  const updateUrlWithFilters = (
+    genre?: string,
+    album?: string,
+    artist?: string,
+    query?: string
+  ) => {
+    const params = new URLSearchParams();
+    
+    if (genre && genre !== "all") {
+      params.set("genre", genre);
+    }
+    
+    if (album) {
+      params.set("album", album);
+    }
+    
+    if (artist) {
+      params.set("artist", artist);
+    }
+    
+    if (query) {
+      params.set("q", query);
+    }
+    
+    const queryString = params.toString();
+    const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
+    
+    router.push(newUrl);
+  };
+
+  // Effect to handle URL query parameters
+  useEffect(() => {
+    // Update search query from URL
+    const queryParam = searchParams.get("q");
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+
+    // Update genre filter from URL
+    const genreParam = searchParams.get("genre");
+    if (genreParam) {
+      setSelectedGenre(genreParam);
+    }
+
+    // Update album filter from URL
+    const albumParam = searchParams.get("album");
+    if (albumParam) {
+      setSelectedAlbum(albumParam);
+    }
+
+    // Update artist filter from URL
+    const artistParam = searchParams.get("artist");
+    if (artistParam) {
+      setSelectedArtist(artistParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const getCollection = async () => {
@@ -105,7 +167,9 @@ const Collection = () => {
     searchQuery,
     filterBy,
     selectedGenre,
-    sortBy
+    sortBy,
+    selectedAlbum,
+    selectedArtist
   );
 
   useEffect(() => {
@@ -121,21 +185,168 @@ const Collection = () => {
     }
   }, [searchQuery]);
 
+  // Handle filter changes
+  const handleGenreChange = (newGenre: string) => {
+    setSelectedGenre(newGenre);
+    updateUrlWithFilters(
+      newGenre, 
+      selectedAlbum, 
+      selectedArtist, 
+      searchQuery
+    );
+  };
+
+  const handleAlbumChange = (newAlbum: string) => {
+    setSelectedAlbum(newAlbum);
+    updateUrlWithFilters(
+      selectedGenre,
+      newAlbum || undefined,
+      selectedArtist,
+      searchQuery
+    );
+  };
+
+  const handleArtistChange = (newArtist: string) => {
+    setSelectedArtist(newArtist);
+    updateUrlWithFilters(
+      selectedGenre,
+      selectedAlbum,
+      newArtist || undefined,
+      searchQuery
+    );
+  };
+
+  const handleSearchChange = (newQuery: string) => {
+    setSearchQuery(newQuery);
+    
+    // Only update URL if query is significant
+    if (newQuery.length >= 3 || newQuery === "") {
+      updateUrlWithFilters(
+        selectedGenre, 
+        selectedAlbum, 
+        selectedArtist, 
+        newQuery || undefined
+      );
+    }
+  };
+
   return (
     <>
       <Nav />
       <main className="p-8 w-full">
         <CollectionHeader collection={collection} page="collection" />
-        <FilterBar
-          collection={collection}
-          setSortBy={setSortBy}
-          sortBy={sortBy}
-          filterBy={filterBy}
-          setFilterBy={setFilterBy}
-          setSelectedGenre={setSelectedGenre}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
+        <div className="flex flex-col gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              disabled={collection.length === 0}
+              className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="title">By Title</option>
+              <option value="artist">By Artist</option>
+            </select>
+
+            <select
+              value={filterBy}
+              onChange={(e) => setFilterBy(e.target.value)}
+              disabled={collection.length === 0}
+              className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+            >
+              <option value="all">All Years</option>
+              {Array.from(
+                new Set(
+                  collection
+                    .map((album) => album.release_date.toString())
+                    .filter((date) => date !== "unknown")
+                    .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
+                )
+              ).map((year, index) => (
+                <option key={`year-${year}-${index}`} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
+
+            <select
+              name="genre"
+              id="genre"
+              value={selectedGenre}
+              onChange={(e) => handleGenreChange(e.target.value)}
+              disabled={collection.length === 0}
+              className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+            >
+              <option value="all">All Genres</option>
+              {Array.from(
+                new Set(
+                  collection
+                    .filter((album) => album.genre)
+                    .map((album) => album.genre?.toLowerCase())
+                )
+              ).map((genre, index) => (
+                <option key={`genre-${genre}-${index}`} value={genre}>
+                  {genre?.charAt(0).toUpperCase() + genre?.slice(1)}
+                </option>
+              ))}
+            </select>
+
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search collection..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                disabled={collection.length === 0}
+                className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+              />
+              {searchQuery && (
+                <X
+                  size={18}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={() => handleSearchChange("")}
+                />
+              )}
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Filter by album..."
+                value={selectedAlbum}
+                onChange={(e) => handleAlbumChange(e.target.value)}
+                disabled={collection.length === 0}
+                className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+              />
+              {selectedAlbum && (
+                <X
+                  size={18}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={() => handleAlbumChange("")}
+                />
+              )}
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Filter by artist..."
+                value={selectedArtist}
+                onChange={(e) => handleArtistChange(e.target.value)}
+                disabled={collection.length === 0}
+                className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
+              />
+              {selectedArtist && (
+                <X
+                  size={18}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
+                  onClick={() => handleArtistChange("")}
+                />
+              )}
+            </div>
+          </div>
+        </div>
         <div
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"
           ref={gridRef}
