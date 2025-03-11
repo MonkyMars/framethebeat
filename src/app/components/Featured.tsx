@@ -46,6 +46,10 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
     router.push(`/collection/share?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}`);
   };
   
+  const handleAlbumClick = (artist: string, album: string) => {
+    router.push(`/collection?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}`);
+  };
+
   return (
     <section className="flex flex-col gap-5 m-6 z-10 relative p-8 backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:shadow-lg" aria-labelledby="popular-albums-heading">
       <h2 id="popular-albums-heading" className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground to-foreground">
@@ -53,7 +57,6 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
       </h2>
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 list-none p-0" aria-label="Popular albums list">
         {!album || album.length === 0 ? (
-          // Show skeletons while loading
           Array.from({ length: 4 }).map((_, index) => (
             <AlbumSkeleton key={`skeleton-${index}`} />
           ))
@@ -61,8 +64,9 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
           album.map((item, index) => (
             <li key={index} className="list-none">
               <article 
-                className="flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102"
+                className="cursor-pointer flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102"
                 aria-labelledby={`album-title-${index}`}
+                onClick={() => handleAlbumClick(item.artist, item.album)}
               >
                 <div className="w-full aspect-square relative">
                   <div className="w-full h-full bg-[rgba(var(--theme-rgb),0.1)] rounded-lg absolute top-0 left-0"></div>
