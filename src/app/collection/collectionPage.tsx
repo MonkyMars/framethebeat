@@ -22,6 +22,8 @@ import { useAuth } from "../utils/AuthContext";
 import { Album } from "../utils/types";
 import FilterBar from "../utils/components/filterBar";
 import CollectionHeader from "../utils/components/collectionHeader";
+import ExtraDataCard from "../utils/components/extraDataCard";
+
 
 const Collection = () => {
   const searchParams = useSearchParams();
@@ -46,6 +48,7 @@ const Collection = () => {
   const [ITEMS_PER_PAGE, setITEMS_PER_PAGE] = useState(50);
   const [displayedAlbums, setDisplayedAlbums] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [extraData, setExtraData] = useState<Album | null>(null);
 
   useEffect(() => {
     const getCollection = async () => {
@@ -67,6 +70,7 @@ const Collection = () => {
               src: getAlbumData(item.album, item.artist),
               alt: `${item.album} by ${item.artist}`,
             },
+            tracklist: item.tracklist ? item.tracklist : null,
           };
         })
         .filter(Boolean);
@@ -141,6 +145,7 @@ const Collection = () => {
               <CollectionCard
                 key={`${album.artist}-${album.album}-${index}`}
                 {...album}
+                setExtraData={setExtraData}
                 onHeartClick={(e) =>
                   userCollectionNames.find((item) => item.title === album.album)
                     ? onDelete(
@@ -221,6 +226,11 @@ const Collection = () => {
       </div>
       {error && <Banner title="Error" subtitle={error} />}
       {title && <Banner title={title} subtitle={title} />}
+      {extraData && (
+        <>
+        <ExtraDataCard extraData={extraData} setExtraData={setExtraData}/>
+        </>
+      )}
       {sharePopUp && (
         <SharePopup
           artistName={sharePopUp.artist}

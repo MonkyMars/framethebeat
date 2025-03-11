@@ -1,6 +1,8 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /collection/share
+Disallow: /confirm-email
 
 # Host
 Host: https://www.framethebeat.com

@@ -41,6 +41,12 @@ export default function Home() {
 
   return (
     <>
+    {/* <Head>
+      <link
+        rel="canonical"
+        href="https://framethebeat.com"
+      />
+    </Head> */}
       <Nav />
       <main className="mainContent w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="desktop flex flex-col items-center justify-center gap-8 py-12">

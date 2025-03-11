@@ -20,6 +20,7 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import LoadingSpinner from "../collection/components/loadingspinners";
 import CollectionHeader from "../utils/components/collectionHeader";
+import ExtraDataCard from "../utils/components/extraDataCard";
 
 const SavedContent = () => {
   const [savedAlbums, setSavedAlbums] = useState<Album[]>([]);
@@ -38,6 +39,7 @@ const SavedContent = () => {
   } | null>(null);
   const [collection, setCollection] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [extraData, setExtraData] = useState<Album | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,6 +66,7 @@ const SavedContent = () => {
             src: getAlbumData(item.album, item.artist),
             alt: `${item.album} by ${item.artist}`,
           },
+          tracklist: item.tracklist ? item.tracklist : null,
         }));
 
         const userCollectionItems = userData.map(
@@ -140,6 +143,7 @@ const SavedContent = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
             {filteredAlbums.map((album, index) => (
               <CollectionCard
+              setExtraData={setExtraData}
                 key={index}
                 {...album}
                 onShare={() =>
@@ -205,6 +209,11 @@ const SavedContent = () => {
       <Footer />
       {error && <Banner title="Error" subtitle={error} />}
       {title && <Banner title="Success" subtitle={title} />}
+      {extraData && (
+        <>
+        <ExtraDataCard extraData={extraData} setExtraData={setExtraData}/>
+        </>
+      )}
       {sharePopUp && (
         <SharePopup
           artistName={sharePopUp.artist}
