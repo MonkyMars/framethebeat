@@ -23,7 +23,7 @@ interface FeaturedProps {
 }
 
 const AlbumSkeleton = () => (
-  <article className="flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg">
+  <li className="flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg">
     <div className="w-full aspect-square bg-[rgba(var(--theme-rgb),0.1)] rounded-lg"></div>
     <div className="flex justify-between items-center p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
       <div className="h-5 w-24 bg-[rgba(var(--theme-rgb),0.1)] rounded"></div>
@@ -36,7 +36,7 @@ const AlbumSkeleton = () => (
         <div className="h-5 w-8 bg-[rgba(var(--theme-rgb),0.1)] rounded"></div>
       </div>
     </div>
-  </article>
+  </li>
 );
 
 const Featured: React.FC<FeaturedProps> = ({ album }) => {
@@ -55,7 +55,7 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
       <h2 id="popular-albums-heading" className="text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-foreground to-foreground">
         Most Popular Albums
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8" role="list" aria-label="Popular albums list">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 list-none p-0" aria-label="Popular albums list">
         {!album || album.length === 0 ? (
           // Show skeletons while loading
           Array.from({ length: 4 }).map((_, index) => (
@@ -63,48 +63,49 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
           ))
         ) : (
           album.map((item, index) => (
-            <article 
-              key={index} 
-              className="cursor-pointer flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102"
-              aria-labelledby={`album-title-${index}`}
+            <li key={index} className="list-none">
+              <article 
+                className="cursor-pointer flex flex-col gap-4 p-6 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-xl border border-[rgba(255,255,255,0.1)] shadow-lg transition-all duration-300 hover:shadow-md hover:scale-102"
+                aria-labelledby={`album-title-${index}`}
               onClick={() => handleAlbumClick(item.artist, item.album)}
-            >
-              <div className="w-full aspect-square relative">
-                <div className="w-full h-full bg-[rgba(var(--theme-rgb),0.1)] rounded-lg absolute top-0 left-0"></div>
-                <Image
-                  src={getAlbumData(item.album, item.artist) || "/placeholder.png"}
-                  alt={`Album cover for ${item.album} by ${item.artist}`}
-                  width={300}
-                  height={300}
-                  priority={index < 2}
-                  className="w-full h-full object-cover rounded-lg shadow-md"
-                  unoptimized
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                  placeholder="blur"
-                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2JhKDIwOSwxMjYsNTksMC4xKSIvPjwvc3ZnPg=="
-                />
-              </div>
-              <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
-                <h3 id={`album-title-${index}`} className="text-foreground font-semibold truncate">{item.album}</h3>
-                <span aria-label={`Released in ${item.release_date}`}>{item.release_date}</span>
-              </div>
-              <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
-                <p className="truncate" aria-label={`Artist: ${item.artist}`}>{item.artist}</p>
-                <div className="flex items-center gap-2 bg-[rgba(var(--theme-rgb),0.1)] p-1 rounded-md">
-                  <button 
-                    onClick={() => handleHeartClick(item.artist, item.album)}
-                    aria-label={`Save ${item.album} by ${item.artist}`}
-                    className="focus:outline-none focus:ring-2 focus:ring-[rgba(var(--theme-rgb),0.6)] rounded-full p-1"
-                  >
-                    <Heart size={24} aria-hidden="true" />
-                  </button>
-                  <span aria-label={`${item.saves} saves`}>{item.saves}</span>
+              >
+                <div className="w-full aspect-square relative">
+                  <div className="w-full h-full bg-[rgba(var(--theme-rgb),0.1)] rounded-lg absolute top-0 left-0"></div>
+                  <Image
+                    src={getAlbumData(item.album, item.artist) || "/placeholder.png"}
+                    alt={`Album cover for ${item.album} by ${item.artist}`}
+                    width={300}
+                    height={300}
+                    priority={index < 2}
+                    className="w-full h-full object-cover rounded-lg shadow-md"
+                    unoptimized
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2JhKDIwOSwxMjYsNTksMC4xKSIvPjwvc3ZnPg=="
+                  />
                 </div>
-              </div>
-            </article>
+                <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
+                  <h3 id={`album-title-${index}`} className="text-foreground font-semibold truncate">{item.album}</h3>
+                  <span aria-label={`Released in ${item.release_date}`}>{item.release_date}</span>
+                </div>
+                <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
+                  <p className="truncate" aria-label={`Artist: ${item.artist}`}>{item.artist}</p>
+                  <div className="flex items-center gap-2 bg-[rgba(var(--theme-rgb),0.1)] p-1 rounded-md">
+                    <button 
+                      onClick={() => handleHeartClick(item.artist, item.album)}
+                      aria-label={`Save ${item.album} by ${item.artist}`}
+                      className="focus:outline-none focus:ring-2 focus:ring-[rgba(var(--theme-rgb),0.6)] rounded-full p-1"
+                    >
+                      <Heart size={24} aria-hidden="true" />
+                    </button>
+                    <span aria-label={`${item.saves} saves`}>{item.saves}</span>
+                  </div>
+                </div>
+              </article>
+            </li>
           ))
         )}
-      </div>
+      </ul>
     </section>
   );
 };
