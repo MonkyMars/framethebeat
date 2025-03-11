@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../utils/supabase";
 import Footer from "../components/Footer";
@@ -13,10 +13,13 @@ const ConfirmEmail = () => {
   const [error, setError] = useState<string | null>(null);
   const [verified, setVerified] = useState(false);
   const [pin, setPin] = useState(["", "", "", "", "", ""]);
+  const [mounted, setMounted] = useState(false);
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const searchParams = useSearchParams();
   const email = searchParams?.get("email") ?? null;
 
   useEffect(() => {
+    setMounted(true);
     setLoading(true);
     const interval = setInterval(async () => {
       try {
@@ -69,8 +72,9 @@ const ConfirmEmail = () => {
     const newPin = [...pin];
     newPin[index] = value;
     setPin(newPin);
-    if (value && index < pin.length - 1) {
-      const nextInput = document.getElementById(`pin-${index + 1}`);
+    
+    if (value && index < pin.length - 1 && mounted) {
+      const nextInput = inputRefs.current[index + 1];
       if (nextInput) nextInput.focus();
     }
   };
@@ -148,16 +152,16 @@ const ConfirmEmail = () => {
                 Please check <b className="text-[rgba(var(--theme-rgb),0.9)]">{email}</b> for a verification pin. Once verified, this page will update automatically.
               </p>
               <div className="flex justify-center gap-4 my-8">
-                {pin.map((value, index) => (
+                {pin.map((digit, index) => (
                   <input
                     key={index}
                     id={`pin-${index}`}
-                    className="w-12 h-12 text-center text-2xl border-2 border-[rgba(var(--theme-rgb),0.25)] rounded-lg bg-[rgba(var(--background-rgb),0.1)] text-[var(--foreground)] transition-all duration-300 ease-in-out focus:outline-none focus:border-[rgba(var(--theme-rgb),0.5)] focus:shadow-[0_0_0_2px_rgba(var(--theme-rgb),0.1)] focus:translate-y-[-2px] placeholder-[rgba(var(--foreground-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--theme-rgb),0.5)]"
+                    ref={(el) => {
+                      inputRefs.current[index] = el;
+                    }}
                     type="text"
-                    inputMode="numeric"
                     maxLength={1}
-                    placeholder={(index + 1).toString()}
-                    value={value}
+                    value={digit}
                     onChange={(e) => handleInputChange(e.target.value, index)}
                     onKeyDown={(e) => {
                       if (
@@ -173,6 +177,7 @@ const ConfirmEmail = () => {
                         e.preventDefault();
                       }
                     }}
+                    className="w-12 h-12 text-center text-2xl border-2 border-[rgba(var(--theme-rgb),0.25)] rounded-lg bg-[rgba(var(--background-rgb),0.1)] text-[var(--foreground)] transition-all duration-300 ease-in-out focus:outline-none focus:border-[rgba(var(--theme-rgb),0.5)] focus:shadow-[0_0_0_2px_rgba(var(--theme-rgb),0.1)] focus:translate-y-[-2px] placeholder-[rgba(var(--foreground-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--theme-rgb),0.5)]"
                   />
                 ))}
               </div>

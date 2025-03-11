@@ -2,7 +2,7 @@ import '../globals.css'
 import { X } from "lucide-react";
 import Link from "next/link";
 import clsx from 'clsx';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface AsideProps {
   isOpen: boolean;
@@ -12,11 +12,17 @@ interface AsideProps {
 
 const Aside = ({ isOpen, onClose, user }: AsideProps) => {
   const linkClasses = `block w-full px-4 py-3 rounded-lg transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.1)]`;
-
   const firstLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Handle keyboard accessibility - close on Escape key
   useEffect(() => {
+    if (!mounted) return;
+    
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -34,7 +40,7 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, mounted]);
 
   const asideClasses = clsx(
     'fixed top-0 left-0 h-full w-80',

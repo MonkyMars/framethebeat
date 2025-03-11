@@ -114,7 +114,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -127,6 +127,7 @@ export default function RootLayout({
           href="/albumcovers/nothingbutthieves_moralpanic.webp"
           as="image"
         />
+        <meta name="color-scheme" content="light dark" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider>

@@ -14,67 +14,68 @@ const SharePopup: React.FC<SharePopupProps> = ({
   onClose,
 }) => {
   const [copied, setCopied] = useState(false);
-
   const [isMobile, setIsMobile] = useState(false);
   const [isHttps, setIsHttps] = useState(false);
-
+  const [mounted, setMounted] = useState(false);
+  const [shareUrl, setShareUrl] = useState('');
+  
   useEffect(() => {
+    setMounted(true);
     setIsMobile(window.matchMedia("(pointer: coarse)").matches);
-    setIsHttps(document.location.protocol === "https:");
-  }, []);
+    setIsHttps(window.location.protocol === "https:");
+    setShareUrl(`${window.location.origin}/collection/share?artist=${encodeURIComponent(
+      artistName
+    )}&album=${encodeURIComponent(albumName)}`);
+  }, [artistName, albumName]);
 
-  const shareUrl = `${window.location.origin}/collection/share?artist=${encodeURIComponent(
-    artistName
-  )}&album=${encodeURIComponent(albumName)}`;
   const text = `Check out ${albumName} by ${artistName} on Frame The Beat!`;
 
   const shareLinks = [
     {
-      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}\n&url=${encodeURIComponent(
+      url: mounted ? `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}\n&url=${encodeURIComponent(
         shareUrl
-      )}`,
+      )}` : '#',
       platform: "Twitter",
     },
     {
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+      url: mounted ? `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` : '#',
       platform: "Facebook",
     },
   ];
 
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
-
   const handleShare = (url: string) => {
+    if (!mounted) return;
     window.open(url, "_blank", "width=600,height=400");
   };
 
   const handleOSShare = async () => {
-    if (
-      navigator.share && isMobile && isHttps
-    ) {
-      try {
-        await navigator.share({
-          title: `${albumName} by ${artistName}`,
-          text: text,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.error("Failed to share:", err);
-      }
-    } else {
-      alert("OS sharing is not available on this device or browser.");
+    if (!mounted || !navigator.share) return;
+    
+    try {
+      await navigator.share({
+        title: `${albumName} by ${artistName}`,
+        text: text,
+        url: shareUrl,
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
     }
   };
 
-return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  const handleCopyLink = async () => {
+    if (!mounted) return;
+    
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("Failed to copy:", error);
+    }
+  };
+
+  return (
+    <div style={{ visibility: mounted ? 'visible' : 'hidden' }} className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(var(--background-rgb),0.5)] backdrop-blur-md">
       <div className="bg-background p-6 rounded-lg shadow-lg w-80">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Share this album</h2>

@@ -51,12 +51,8 @@ const FilterBar = ({
     )
   );
 
-  if (!mounted) {
-    return null;
-  }
-
   return (
-    <div className="flex flex-col gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
+    <div style={{ visibility: mounted ? 'visible' : 'hidden' }} className="flex flex-col gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
         <select
           value={sortBy}

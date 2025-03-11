@@ -1,5 +1,5 @@
 "use client"
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface PaginationProps {
   totalPages: number;
@@ -20,25 +20,29 @@ const Pagination = ({
   ITEMS_PER_PAGE,
   setITEMS_PER_PAGE,
 }: PaginationProps) => {
-
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (gridRef.current) {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && gridRef.current) {
       gridRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [currentPage, gridRef]);
+  }, [currentPage, gridRef, mounted]);
 
   const onPageNext = () => {
     setCurrentPage((p) => Math.min(totalPages - 1, p + 1));
-    if (typeof window !== "undefined") {
-      gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (mounted && gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   const onPagePrev = () => {
     setCurrentPage((p) => Math.max(0, p - 1));
-    if (typeof window !== "undefined") {
-      gridRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (mounted && gridRef.current) {
+      gridRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 

@@ -31,8 +31,8 @@ const Settings = () => {
   const [validatePopup, setValidatePopup] = useState<boolean>(false);
   const [formValues, setFormValues] = useState({ email: "", password: "" });
   const [togglePassword, setTogglePassword] = useState<boolean>(false);
-  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => setMounted(true), []);
   
@@ -41,7 +41,6 @@ const Settings = () => {
       setTimeout(() => setResponse(null), 5000);
     }
   }, [response]);
-  if (!mounted) return null;
 
   const onUpDateProfile = async () => {
     const response = await updateUser(formValues.email, formValues.password);
@@ -83,8 +82,37 @@ const Settings = () => {
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Theme buttons component that only renders after mounting
+  const ThemeButtons = () => {
+    if (!mounted) return (
+      <div className="flex gap-2 h-10">
+        <div className="w-20 h-10 rounded-md bg-[rgba(var(--theme-rgb),0.1)]"></div>
+        <div className="w-20 h-10 rounded-md bg-[rgba(var(--theme-rgb),0.1)]"></div>
+        <div className="w-20 h-10 rounded-md bg-[rgba(var(--theme-rgb),0.1)]"></div>
+      </div>
+    );
+    
+    return (
+      <div className="flex gap-2">
+        {["light", "dark", "system"].map((t) => (
+          <button
+            key={t}
+            className={`px-4 py-2 rounded-md border border-theme bg-background/20 text-foreground hover:border-theme transition-all ${
+              theme === t
+                ? "bg-theme text-background border-theme"
+                : ""
+            }`}
+            onClick={() => setTheme(t)}
+          >
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   return (
-    <>
+    <div style={{ visibility: mounted ? 'visible' : 'hidden' }}>
       <Nav />
       <main className="container mx-auto px-4 py-8 max-w-[1200px] min-h-[calc(100vh-70px)]">
         <header className="relative text-center py-16 mb-8">
@@ -113,21 +141,7 @@ const Settings = () => {
             <div className="flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <label>Theme</label>
-                <div className="flex gap-2">
-                  {["light", "dark", "system"].map((t) => (
-                    <button
-                      key={t}
-                      className={`px-4 py-2 rounded-md border border-theme bg-background/20 text-foreground hover:border-theme transition-all ${
-                        theme === t
-                          ? "bg-theme text-background border-theme"
-                          : ""
-                      }`}
-                      onClick={() => setTheme(t)}
-                    >
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                  ))}
-                </div>
+                <ThemeButtons />
               </div>
               <Slider
                 label="Animations"
@@ -341,7 +355,7 @@ const Settings = () => {
 
       {response && <Banner title={response} subtitle={response} />}
       <Footer />
-    </>
+    </div>
   );
 };
 
