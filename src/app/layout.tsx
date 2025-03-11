@@ -86,6 +86,23 @@ export const metadata: Metadata = {
   category: "Music",
 };
 
+// export const generateMetadata = ({ params, searchParams }: {
+//   params: { slug?: string[] }
+//   searchParams: { [key: string]: string | string[] | undefined }
+// }): Metadata => {
+//   const path = params.slug ? `/${params.slug.join('/')}` : ''
+  
+//   const canonical = path === '' ? 'https://framethebeat.com' : undefined
+
+//   return {
+//     ...(canonical && { 
+//       alternates: {
+//         canonical
+//       }
+//     })
+//   }
+// }
+
 export default function RootLayout({
   children,
 }: {
@@ -93,7 +110,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <head />
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider>
           <AuthProvider>
