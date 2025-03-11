@@ -1,7 +1,7 @@
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/react"
-import { ThemeProvider } from "./utils/theme-hook"
-import { AuthProvider } from "./utils/AuthContext"
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { ThemeProvider } from "./utils/theme-hook";
+import { AuthProvider } from "./utils/AuthContext";
 import { Geist, Geist_Mono } from "next/font/google";
 import type { Metadata } from "next";
 
@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Frame The Beat",
   description:
-    "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+    "Frame The Beat is a comprehensive open-source platform dedicated to album cover art discovery and curation. Browse, search, and explore thousands of album covers by artist, title, genre, or release year. Create your personal collection of favorite artwork, share discoveries with friends, and dive into the visual side of music history. Perfect for vinyl enthusiasts, music collectors, designers, and anyone who appreciates the artistic dimension of music packaging. Frame The Beat celebrates album artwork as an essential part of the musical experience.",
   keywords:
     "album covers, music art, album artwork, music database, cover art search, vinyl artwork",
   authors: [{ name: "Frame The Beat" }],
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Frame The Beat",
     description:
-      "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+      "Frame The Beat is a comprehensive open-source platform dedicated to album cover art discovery and curation. Browse, search, and explore thousands of album covers by artist, title, genre, or release year. Create your personal collection of favorite artwork, share discoveries with friends, and dive into the visual side of music history. Perfect for vinyl enthusiasts, music collectors, designers, and anyone who appreciates the artistic dimension of music packaging. Frame The Beat celebrates album artwork as an essential part of the musical experience.",
     url: "https://www.framethebeat.com",
     siteName: "Frame The Beat",
     locale: "en_US",
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Frame The Beat",
     description:
-      "Frame The Beat is an open-source platform for album cover art. Search here for your favorite album covers and save them.",
+      "Frame The Beat is a comprehensive open-source platform dedicated to album cover art discovery and curation. Browse, search, and explore thousands of album covers by artist, title, genre, or release year. Create your personal collection of favorite artwork, share discoveries with friends, and dive into the visual side of music history. Perfect for vinyl enthusiasts, music collectors, designers, and anyone who appreciates the artistic dimension of music packaging. Frame The Beat celebrates album artwork as an essential part of the musical experience.",
     images: ["/favicon.ico"],
     creator: "@framethebeat",
   },
@@ -96,11 +96,11 @@ export const metadata: Metadata = {
 //   searchParams: { [key: string]: string | string[] | undefined }
 // }): Metadata => {
 //   const path = params.slug ? `/${params.slug.join('/')}` : ''
-  
+
 //   const canonical = path === '' ? 'https://framethebeat.com' : undefined
 
 //   return {
-//     ...(canonical && { 
+//     ...(canonical && {
 //       alternates: {
 //         canonical
 //       }
@@ -111,14 +111,22 @@ export const metadata: Metadata = {
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="preload" href="/albumcovers/nothingbutthieves_moralpanic.webp" as="image" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/albumcovers/nothingbutthieves_moralpanic.webp"
+          as="image"
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ThemeProvider>
@@ -130,5 +138,5 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
-  )
+  );
 }
