@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://www.framethebeat.com</loc><lastmod>2025-03-03T14:54:20.161Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/collection</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/collection/share</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/confirm-email</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/login</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/register</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/saved</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/settings</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/tours</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/tp/privacy-policy</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/tp/terms-of-service</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://www.framethebeat.com/tours/tour/theweeknd</loc><lastmod>2025-03-03T14:54:20.162Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/register</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/confirm-email</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/tp/terms-of-service</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/tp/privacy-policy</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/tours/tour/theweeknd</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/settings</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/collection</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/tours</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/collection/share</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/login</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://www.framethebeat.com/saved</loc><lastmod>2025-03-11T16:20:01.270Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>

@@ -26,6 +26,13 @@ interface Album {
     src: string;
     alt: string;
   };
+  tracklist?: {
+    track: {
+      name: string;
+      duration: string;
+    }[]
+  }[];
+  saves?: number;
 }
 
 const fetchUserInfo = async (user_id: string, album: string) => {
@@ -77,6 +84,8 @@ const SharePageContent = () => {
           src: getAlbumData(item.album, item.artist),
           alt: item.album,
         },
+        tracklist: item.tracklist || [],
+        saves: item.saves || 0
       };
       setAlbum(mappedData);
       setLiked(await fetchUserInfo(session?.user?.id as string, albumQuery));
