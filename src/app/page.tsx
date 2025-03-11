@@ -42,19 +42,22 @@ export default function Home() {
   return (
     <>
       <Nav />
-      <main className="mainContent w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="mainContent w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" id="main-content" role="main" aria-labelledby="main-heading">
         <div className="desktop flex flex-col items-center justify-center gap-8 py-12">
-          <h1 className="text-[clamp(2.5rem,8vw,5rem)] font-black uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-theme to-theme/20 text-center">
-        Frame The Beat
+          <h1 id="main-heading" className="text-[clamp(2.5rem,8vw,5rem)] font-black uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-br from-foreground via-theme to-theme/20 text-center">
+            Frame The Beat
           </h1>
-          <Image
-        src={`/albumcovers/nothingbutthieves_moralpanic.webp`}
-        width={2000}
-        height={2000}
-        alt="album cover"
-        priority
-        className="w-full max-w-[600px] aspect-square object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
-          />
+          <figure aria-labelledby="featured-album-caption">
+            <Image
+              src={`/albumcovers/nothingbutthieves_moralpanic.webp`}
+              width={2000}
+              height={2000}
+              alt="Nothing But Thieves - Moral Panic album cover"
+              priority
+              className="w-full max-w-[600px] aspect-square object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
+            />
+            <figcaption id="featured-album-caption" className="sr-only">Featured album: Nothing But Thieves - Moral Panic</figcaption>
+          </figure>
         </div>
       </main>
       <Discover />
