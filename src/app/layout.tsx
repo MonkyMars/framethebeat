@@ -36,7 +36,6 @@ export const metadata: Metadata = {
     apple: "/favicon.ico",
     shortcut: "/favicon.ico",
   },
-  manifest: "/manifest.json",
   openGraph: {
     title: "Frame The Beat",
     description:
