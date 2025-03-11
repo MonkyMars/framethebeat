@@ -1,30 +1,23 @@
-"use client";
-import { ThemeProvider } from "../utils/theme-hook";
 import React from "react";
-import { AuthProvider } from "../utils/AuthContext";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import Head from "next/head";
+import type { Metadata } from "next";
 
-export default function RootLayout({
+export const metadata: Metadata = {
+  title: "Saved Albums | Frame The Beat",
+  description: "Your saved album collection on Frame The Beat.",
+};
+
+export default function SavedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
     <>
-      <Head>
-        <link
-          rel="preconnect"
-          href="https://zapqcxbffugqvfiiilci.supabase.co"
-          crossOrigin="anonymous"
-        />
-      </Head>
       <Analytics />
       <SpeedInsights />
-      <AuthProvider>
-        <ThemeProvider>{children}</ThemeProvider>
-      </AuthProvider>
+      {children}
     </>
   );
 }

@@ -8,9 +8,11 @@ export interface Album {
     src: string;
     alt: string;
   };
-  tracklist?: {
-    track: string;
-    duration: string;
+  tracklist: {
+    track: {
+      name: string;
+      duration: string;
+    }[]
   }[]
 }
 
