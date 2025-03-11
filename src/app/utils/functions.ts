@@ -297,6 +297,7 @@ export const onSave = async (
             src: albumData ?? "/placeholder.png",
             alt: `${album} by ${artist}`,
           },
+          tracklist: []
         },
       ];
     });

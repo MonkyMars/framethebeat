@@ -14,8 +14,8 @@ type CollectionCardProps = Album & {
   saved: boolean;
   releaseDate: string;
   setExtraData: (album: Album | null) => void;
+  tracklist?: Album["tracklist"];
 };
-
 const CollectionCard = ({
   album,
   genre,
@@ -27,6 +27,7 @@ const CollectionCard = ({
   onShare,
   releaseDate,
   setExtraData,
+  tracklist,
 }: CollectionCardProps) => {
   const [mounted, setMounted] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -38,6 +39,7 @@ const CollectionCard = ({
     artist,
     saves,
     release_date: parseInt(releaseDate),
+    tracklist: tracklist || []
   }
   
   useEffect(() => {

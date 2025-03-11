@@ -66,7 +66,7 @@ const SavedContent = () => {
             src: getAlbumData(item.album, item.artist),
             alt: `${item.album} by ${item.artist}`,
           },
-          tracklist: item.tracklist ? item.tracklist : null,
+          tracklist: item.tracklist || [],
         }));
 
         const userCollectionItems = userData.map(

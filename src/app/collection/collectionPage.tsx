@@ -70,7 +70,7 @@ const Collection = () => {
               src: getAlbumData(item.album, item.artist),
               alt: `${item.album} by ${item.artist}`,
             },
-            tracklist: item.tracklist ? item.tracklist : null,
+            tracklist: item.tracklist
           };
         })
         .filter(Boolean);
@@ -146,6 +146,7 @@ const Collection = () => {
                 key={`${album.artist}-${album.album}-${index}`}
                 {...album}
                 setExtraData={setExtraData}
+                tracklist={album.tracklist}
                 onHeartClick={(e) =>
                   userCollectionNames.find((item) => item.title === album.album)
                     ? onDelete(
