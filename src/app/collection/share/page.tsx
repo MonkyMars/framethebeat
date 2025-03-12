@@ -8,11 +8,11 @@ import { useSearchParams } from "next/navigation";
 
 import { useAuth } from "@/app/utils/AuthContext";
 import {
-  deleteAlbum,
   fetchAlbum,
   fetchUserCollection,
-  saveAlbum,
-} from "@/app/utils/database";
+} from "@/app/utils/databaseService";
+import { saveAlbum, deleteAlbum } from "@/app/utils/database";
+import { formatErrorMessage } from "@/app/utils/errorHandler";
 import Banner from "@/app/components/Banner";
 import SharePopup from "@/app/components/SharePopup";
 import { getAlbumData } from "@/app/utils/functions";
@@ -36,16 +36,24 @@ interface Album {
 }
 
 const fetchUserInfo = async (user_id: string, album: string) => {
-  const response = await fetchUserCollection(user_id);
-  const data = await response.json();
-  const liked = data
-    ? data.find(
-        (item: { artist: string; album: string }) => item.album === album
-      )
-      ? true
-      : false
-    : false;
-  return liked;
+  if (!user_id) return false;
+  
+  try {
+    const response = await fetchUserCollection(user_id);
+    if (response.error) {
+      console.error("Error fetching user collection:", response.error);
+      return false;
+    }
+    
+    if (!response.data) {
+      return false;
+    }
+    
+    return response.data.some((item) => item.album === album);
+  } catch (err) {
+    console.error("Error in fetchUserInfo:", err);
+    return false;
+  }
 };
 
 const SharePageContent = () => {
@@ -73,25 +81,48 @@ const SharePageContent = () => {
   useEffect(() => {
     if (!artistQuery || !albumQuery) return;
     if (fetchedOnce.current) return;
+    
     const fetchData = async () => {
-      const item = await fetchAlbum(artistQuery, albumQuery);
-      const mappedData = {
-        artist: item.artist,
-        album: item.album,
-        release_date: item.release_date,
-        genre: item.genre,
-        albumCover: {
-          src: getAlbumData(item.album, item.artist),
-          alt: item.album,
-        },
-        tracklist: item.tracklist || [],
-        saves: item.saves || 0
-      };
-      setAlbum(mappedData);
-      setLiked(await fetchUserInfo(session?.user?.id as string, albumQuery));
+      try {
+        const response = await fetchAlbum(artistQuery, albumQuery);
+        if (response.error) {
+          console.error("Error fetching album:", response.error);
+          setError(formatErrorMessage(response.error));
+          return;
+        }
+        
+        if (!response.data) {
+          setError("Album not found");
+          return;
+        }
+        
+        const item = response.data;
+        const mappedData = {
+          artist: item.artist,
+          album: item.album,
+          release_date: item.release_date,
+          genre: item.genre,
+          albumCover: {
+            src: getAlbumData(item.album, item.artist),
+            alt: item.album,
+          },
+          tracklist: item.tracklist || [],
+          saves: item.saves || 0
+        };
+        setAlbum(mappedData);
+        
+        if (session?.user?.id) {
+          const isLiked = await fetchUserInfo(session.user.id, albumQuery);
+          setLiked(isLiked);
+        }
+      } catch (err) {
+        console.error("Error in fetchData:", err);
+        setError(formatErrorMessage(err));
+      }
     };
 
     fetchData();
+    fetchedOnce.current = true;
   }, [artistQuery, albumQuery, session]);
 
   if (!artistQuery || !albumQuery) {

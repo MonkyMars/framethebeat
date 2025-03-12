@@ -1,7 +1,7 @@
 "use client";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense, useRef, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import "../globals.css";
 import Banner from "../components/Banner";
@@ -12,18 +12,20 @@ import {
   onSave,
   onDelete,
 } from "../utils/functions";
-import Pagination from "./components/pagination";
+import Pagination from "../components/collection/Pagination";
 import SharePopup from "../components/SharePopup";
 import LoadingSpinner from "./components/loadingspinners";
-import CollectionCard from "../utils/components/albumCard";
 import Link from "next/link";
-import { fetchCollection, fetchUserCollection } from "../utils/database";
+import { fetchCollection, fetchUserCollection } from "../utils/databaseService";
 import { useAuth } from "../utils/AuthContext";
 import { Album } from "../utils/types";
-import CollectionHeader from "../utils/components/collectionHeader";
-import ExtraDataCard from "../utils/components/extraDataCard";
-import { X } from "lucide-react";
+import { formatErrorMessage } from "../utils/errorHandler";
 
+// Import our new components
+import AlbumCard from "../components/collection/AlbumCard";
+import CollectionHeader from "../components/collection/CollectionHeader";
+import ExtraDataCard from "../components/collection/ExtraDataCard";
+import FilterBar from "../components/collection/FilterBar";
 
 const Collection = () => {
   const searchParams = useSearchParams();
@@ -53,6 +55,13 @@ const Collection = () => {
   const [displayedAlbums, setDisplayedAlbums] = useState<Album[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [extraData, setExtraData] = useState<Album | null>(null);
+
+  const albumSavesMap = useMemo(() => {
+    return collection.reduce<Record<string, number>>((acc, item) => {
+      acc[item.album] = item.saves || 0;
+      return acc;
+    }, {});
+  }, [collection]);
 
   // Function to update URL with query parameters
   const updateUrlWithFilters = (
@@ -112,11 +121,23 @@ const Collection = () => {
     }
   }, [searchParams]);
 
-  useEffect(() => {
-    const getCollection = async () => {
+  const getCollection = useCallback(async () => {
+    try {
       const response = await fetchCollection();
-      const { collection } = await response.json();
-      const mappedData = collection
+      if (response.error) {
+        console.error("Error fetching collection:", response.error);
+        setError(formatErrorMessage(response.error));
+        setCollection([]);
+        return;
+      }
+      
+      if (!response.data) {
+        console.error("No collection data received");
+        setCollection([]);
+        return;
+      }
+      
+      const mappedData = response.data
         .map((item: Album) => {
           if (!item?.artist || !item?.album) {
             console.error("Invalid album data:", item);
@@ -132,35 +153,59 @@ const Collection = () => {
               src: getAlbumData(item.album, item.artist),
               alt: `${item.album} by ${item.artist}`,
             },
-            tracklist: item.tracklist
+            tracklist: item.tracklist,
           };
         })
-        .filter(Boolean);
+        .filter((item): item is Album => item !== null);
       setCollection(mappedData);
-    };
+    } catch (err) {
+      console.error("Error in getCollection:", err);
+      setError(formatErrorMessage(err));
+      setCollection([]);
+    }
+  }, [setCollection, setError]);
 
-    const getUserCollection = async () => {
-      if (!session?.user?.id) {
+  const getUserCollection = useCallback(async () => {
+    if (!session?.user?.id) {
+      return;
+    }
+    try {
+      const response = await fetchUserCollection(session.user.id);
+      if (response.error) {
+        console.error("Error fetching user collection:", response.error);
+        setError(formatErrorMessage(response.error));
+        setUserCollectionNames([]);
         return;
       }
-      const response = await fetchUserCollection(session.user.id);
-      const data = await response.json();
-      const mappedData = data.map(
+      
+      if (!response.data) {
+        console.error("No user collection data received");
+        setUserCollectionNames([]);
+        return;
+      }
+      
+      const mappedData = response.data.map(
         (item: { artist: string; album: string }) => ({
           artist: item.artist,
           title: item.album,
         })
       );
       setUserCollectionNames(mappedData);
-    };
+    } catch (err) {
+      console.error("Error in getUserCollection:", err);
+      setError(formatErrorMessage(err));
+      setUserCollectionNames([]);
+    }
+  }, [session?.user?.id, setUserCollectionNames, setError]);
 
-    const fetchData = async () => {
-      await Promise.all([getCollection(), getUserCollection()]);
-      setIsLoading(false);
-    };
+  const fetchData = useCallback(async () => {
+    await Promise.all([getCollection(), getUserCollection()]);
+    setIsLoading(false);
+  }, [getCollection, getUserCollection]);
 
+  useEffect(() => {
     fetchData();
-  }, [session]);
+  }, [fetchData, session]);
 
   const filteredAlbums = useFilteredData(
     collection,
@@ -233,127 +278,36 @@ const Collection = () => {
   return (
     <>
       <Nav />
-      <main className="p-8 w-full">
-        <CollectionHeader collection={collection} page="collection" />
-        <div className="flex flex-col gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              disabled={collection.length === 0}
-              className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
-            >
-              <option value="newest">Newest First</option>
-              <option value="oldest">Oldest First</option>
-              <option value="title">By Title</option>
-              <option value="artist">By Artist</option>
-            </select>
+      <main className="p-8 w-full" id="main-content" role="main" aria-labelledby="collection-heading">
+        <CollectionHeader collection={collection} page={pathname.includes("saved") ? "saved" : "collection"} />
 
-            <select
-              value={filterBy}
-              onChange={(e) => setFilterBy(e.target.value)}
-              disabled={collection.length === 0}
-              className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
-            >
-              <option value="all">All Years</option>
-              {Array.from(
-                new Set(
-                  collection
-                    .map((album) => album.release_date.toString())
-                    .filter((date) => date !== "unknown")
-                    .sort((a, b) => parseInt(b || "0") - parseInt(a || "0"))
-                )
-              ).map((year, index) => (
-                <option key={`year-${year}-${index}`} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+        <FilterBar
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          collection={collection}
+          filterBy={filterBy}
+          setFilterBy={setFilterBy}
+          setSelectedGenre={handleGenreChange}
+          searchQuery={searchQuery}
+          setSearchQuery={handleSearchChange}
+          selectedGenre={selectedGenre}
+          selectedAlbum={selectedAlbum}
+          setSelectedAlbum={handleAlbumChange}
+          selectedArtist={selectedArtist}
+          setSelectedArtist={handleArtistChange}
+        />
 
-            <select
-              name="genre"
-              id="genre"
-              value={selectedGenre}
-              onChange={(e) => handleGenreChange(e.target.value)}
-              disabled={collection.length === 0}
-              className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground cursor-pointer transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
-            >
-              <option value="all">All Genres</option>
-              {Array.from(
-                new Set(
-                  collection
-                    .filter((album) => album.genre)
-                    .map((album) => album.genre?.toLowerCase())
-                )
-              ).map((genre, index) => (
-                <option key={`genre-${genre}-${index}`} value={genre}>
-                  {genre?.charAt(0).toUpperCase() + genre?.slice(1)}
-                </option>
-              ))}
-            </select>
-
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search collection..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                disabled={collection.length === 0}
-                className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
-              />
-              {searchQuery && (
-                <X
-                  size={18}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={() => handleSearchChange("")}
-                />
-              )}
-            </div>
-
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Filter by album..."
-                value={selectedAlbum}
-                onChange={(e) => handleAlbumChange(e.target.value)}
-                disabled={collection.length === 0}
-                className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
-              />
-              {selectedAlbum && (
-                <X
-                  size={18}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={() => handleAlbumChange("")}
-                />
-              )}
-            </div>
-
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Filter by artist..."
-                value={selectedArtist}
-                onChange={(e) => handleArtistChange(e.target.value)}
-                disabled={collection.length === 0}
-                className="w-full px-4 py-2 border border-[rgba(var(--theme-rgb),0.3)] rounded-md bg-[rgba(var(--background-rgb),0.1)] text-foreground transition-all duration-300 ease-in-out hover:border-[rgba(var(--theme-rgb),0.5)] focus:outline-none focus:border-[var(--theme)] focus:shadow-[0_0_10px_rgba(var(--theme-rgb),0.2)] disabled:bg-[rgba(var(--theme-rgb),0.1)] disabled:text-[rgba(var(--foreground-rgb),0.5)] disabled:cursor-not-allowed"
-              />
-              {selectedArtist && (
-                <X
-                  size={18}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
-                  onClick={() => handleArtistChange("")}
-                />
-              )}
-            </div>
-          </div>
-        </div>
         <div
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8"
           ref={gridRef}
+          aria-live="polite"
+          aria-busy={isLoading}
         >
-          {displayedAlbums.length > 0 &&
+          {isLoading && <LoadingSpinner text="Loading our collection..." />}
+          
+          {!isLoading && displayedAlbums.length > 0 &&
             displayedAlbums.map((album, index) => (
-              <CollectionCard
+              <AlbumCard
                 key={`${album.artist}-${album.album}-${index}`}
                 {...album}
                 setExtraData={setExtraData}
@@ -384,10 +338,7 @@ const Collection = () => {
                         setTitle
                       )
                 }
-                saves={
-                  collection.find((item) => item.album === album.album)
-                    ?.saves || 0
-                }
+                saves={albumSavesMap[album.album] || 0}
                 saved={
                   userCollectionNames.find((item) => item.title === album.album)
                     ? true
@@ -399,10 +350,34 @@ const Collection = () => {
                 releaseDate={album.release_date?.toString() || "unknown"}
               />
             ))}
-          {(collection.length === 0 && filteredAlbums.length === 0) ||
-            (isLoading && <LoadingSpinner text="Loading our collection..." />)}
-          {filteredAlbums.length === 0 && collection.length > 0 && (
-            <LoadingSpinner text="No results found with search filters. Please try different filters" />
+          
+          {!isLoading && collection.length > 0 && displayedAlbums.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-12">
+              <p className="text-xl text-center text-[rgba(var(--foreground-rgb),0.7)]">
+                No results found with the current filters.
+              </p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterBy('all');
+                  setSelectedGenre('all');
+                  setSelectedAlbum('');
+                  setSelectedArtist('');
+                }}
+                className="mt-4 px-6 py-2 bg-[rgba(var(--theme-rgb),0.1)] border border-[rgba(var(--theme-rgb),0.3)] rounded-md hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300"
+                aria-label="Clear all filters"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
+          
+          {!isLoading && collection.length === 0 && (
+            <div className="col-span-full flex flex-col items-center justify-center py-12">
+              <p className="text-xl text-center text-[rgba(var(--foreground-rgb),0.7)]">
+                No albums found in the collection.
+              </p>
+            </div>
           )}
         </div>
       </main>
@@ -412,8 +387,9 @@ const Collection = () => {
           totalPages={totalPages}
           setCurrentPage={setCurrentPage}
           gridRef={gridRef}
-          ITEMS_PER_PAGE={ITEMS_PER_PAGE}
-          setITEMS_PER_PAGE={setITEMS_PER_PAGE}
+          itemsPerPage={ITEMS_PER_PAGE}
+          setItemsPerPage={setITEMS_PER_PAGE}
+          totalItems={filteredAlbums.length}
         />
       </div>
       <div className="endText flex flex-col items-center gap-4 mt-8 px-4 md:px-8 max-w-2xl mx-auto">
@@ -439,9 +415,7 @@ const Collection = () => {
       {error && <Banner title="Error" subtitle={error} />}
       {title && <Banner title={title} subtitle={title} />}
       {extraData && (
-        <>
-        <ExtraDataCard extraData={extraData} setExtraData={setExtraData}/>
-        </>
+        <ExtraDataCard extraData={extraData} setExtraData={setExtraData} />
       )}
       {sharePopUp && (
         <SharePopup

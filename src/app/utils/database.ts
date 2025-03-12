@@ -1,73 +1,63 @@
 import { supabase } from "./supabase";
 import { NextResponse } from "next/server";
 import { Album } from "./types";
+import { asyncHandler, createError, ErrorType, logError } from "./errorHandler";
 
-export const fetchUserCollection = async (id: string) => {
-  try {
-    if (!id) {
-      return NextResponse.json(
-        { error: "User ID is required" },
-        { status: 400 }
-      );
-    }
-
-    const { data: collection, error } = await supabase
-      .from("saved")
-      .select("*")
-      .eq("user_id", id);
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    return NextResponse.json(collection as Album[]);
-  } catch (error) {
-    return NextResponse.json(
-      { message: `Internal Server Error: ${error}` },
-      { status: 500 }
-    );
+/**
+ * Fetch a user's collection of saved albums
+ */
+export const fetchUserCollection = asyncHandler(async (id: string) => {
+  if (!id) {
+    throw createError(ErrorType.VALIDATION_ERROR, "User ID is required");
   }
-};
 
-export const fetchCollection = async () => {
-  try {
-    const { data: collection, error } = await supabase
-      .from("collection")
-      .select("*");
+  const { data: collection, error } = await supabase
+    .from("saved")
+    .select("*")
+    .eq("user_id", id);
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-    return NextResponse.json({ collection });
-  } catch (error) {
-    return NextResponse.json(
-      { message: `Internal Server Error: ${error}` },
-      { status: 500 }
-    );
+  if (error) {
+    logError(error);
+    throw createError(ErrorType.DATABASE_ERROR, error.message);
   }
-};
 
-export const fetchAlbum = async (artist: string, album: string) => {
-  try {
-    const { data: albumData, error } = await supabase
-      .from("collection")
-      .select("*")
-      .eq("artist", artist)
-      .eq("album", album)
-      .single();
+  return collection as Album[];
+});
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
+/**
+ * Fetch the entire collection of albums
+ */
+export const fetchCollection = asyncHandler(async () => {
+  const { data: collection, error } = await supabase
+    .from("collection")
+    .select("*");
 
-    return albumData;
-  } catch (error) {
-    return NextResponse.json(
-      { message: `Internal Server Error: ${error}` },
-      { status: 500 }
-    );
+  if (error) {
+    logError(error);
+    throw createError(ErrorType.DATABASE_ERROR, error.message);
   }
-}
+
+  return collection as Album[];
+});
+
+/**
+ * Fetch a specific album by artist and album name
+ */
+export const fetchAlbum = asyncHandler(async (artist: string, album: string) => {
+  const { data: albumData, error } = await supabase
+    .from("collection")
+    .select("*")
+    .eq("artist", artist)
+    .eq("album", album)
+    .single();
+
+  if (error) {
+    logError(error);
+    throw createError(ErrorType.DATABASE_ERROR, error.message);
+  }
+
+  return albumData;
+});
 
 interface SavedAlbum {
   artist: string;
