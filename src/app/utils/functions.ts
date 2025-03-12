@@ -5,6 +5,14 @@ import levenshtein from "fast-levenshtein";
 import { DeleteResponse, SaveResponse } from "./types";
 import { verifyAlbumDeleted, deleteAlbum, saveAlbum } from "./database";
 
+/**
+ * Capitalizes the first letter of a string
+ */
+export const capitalizeFirstLetter = (string: string): string => {
+  if (!string) return '';
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
 export const getAlbumData = (album: string, artist: string): string => {
   try {
     const filename = `${album}-${artist}`.replace(/[^a-zA-Z0-9-_\.]/g, "_");

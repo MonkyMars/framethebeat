@@ -60,8 +60,6 @@ const Aside = ({ isOpen, onClose, user }: AsideProps) => {
       <aside
         className={asideClasses}
         aria-label="Main navigation"
-        aria-modal={isOpen}
-        aria-expanded={isOpen}
         style={{ color: "var(--background) !important" }}
       >
         <div className="flex flex-col h-full p-6 text-[var(--foreground)]">
