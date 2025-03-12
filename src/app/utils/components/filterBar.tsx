@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { knownGenres } from "@/app/utils/knownGenres";
 import { Album } from "@/app/utils/types";
 import { X } from "lucide-react";
+import { capitalizeFirstLetter } from '../functions';
 
 interface FilterBarProps {
   sortBy: string;
@@ -91,7 +92,7 @@ const FilterBar = ({
           <option value="all">All Genres</option>
           {knownGenres.map((genre, index) => (
             <option key={`genre-${genre}-${index}`} value={genre}>
-              {genre.charAt(0).toUpperCase() + genre.slice(1)}
+              {capitalizeFirstLetter(genre)}
             </option>
           ))}
         </select>

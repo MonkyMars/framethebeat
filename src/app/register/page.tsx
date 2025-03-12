@@ -6,6 +6,7 @@ import { createHash } from "crypto";
 import { useRouter } from "next/navigation";
 import Banner from "../components/Banner";
 import { supabase } from "../utils/supabase";
+import { capitalizeFirstLetter } from "../utils/functions";
 
 const hashString = (data: string): string => {
   return createHash("sha256").update(data).digest("hex");
@@ -186,7 +187,7 @@ const Register = () => {
         <Banner
           title={"Log in process failed"}
           subtitle={`${
-            error.charAt(0).toUpperCase() + error.slice(1)
+            capitalizeFirstLetter(error)
           }. Please try again later.`}
         />
       )}

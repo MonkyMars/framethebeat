@@ -19,6 +19,7 @@ import { logOutUser, updateUser, deleteUser } from "../utils/database";
 import Banner from "../components/Banner";
 import Slider from "./Slider";
 import { useTheme } from "next-themes";
+import { capitalizeFirstLetter } from "../utils/functions";
 
 const Settings = () => {
   const [gridSize, setGridSize] = useState("medium");
@@ -104,7 +105,7 @@ const Settings = () => {
             }`}
             onClick={() => setTheme(t)}
           >
-            {t.charAt(0).toUpperCase() + t.slice(1)}
+            {capitalizeFirstLetter(t)}
           </button>
         ))}
       </div>

@@ -11,6 +11,7 @@ import {
   onShare,
   onSave,
   onDelete,
+  capitalizeFirstLetter,
 } from "../utils/functions";
 import Pagination from "./components/pagination";
 import SharePopup from "../components/SharePopup";
@@ -287,7 +288,7 @@ const Collection = () => {
                 )
               ).map((genre, index) => (
                 <option key={`genre-${genre}-${index}`} value={genre}>
-                  {genre?.charAt(0).toUpperCase() + genre?.slice(1)}
+                  {capitalizeFirstLetter(genre)}
                 </option>
               ))}
             </select>

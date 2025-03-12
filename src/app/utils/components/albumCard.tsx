@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Heart, Share2, Expand } from "lucide-react";
-import { isHighPriority } from "../../utils/functions";
+import { capitalizeFirstLetter, isHighPriority } from "../../utils/functions";
 
 type CollectionCardProps = Album & {
   onHeartClick: (e: React.MouseEvent<SVGSVGElement>) => void;
@@ -100,7 +100,7 @@ const CollectionCard = ({
             )}
             {genre && genre.toLocaleLowerCase() !== "unknown" && (
               <span className="font-semibold text-xs tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
-                {genre.charAt(0).toLocaleUpperCase() + genre.slice(1)}
+                {capitalizeFirstLetter(genre)}
               </span>
             )}
           </div>

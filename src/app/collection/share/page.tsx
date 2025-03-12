@@ -15,7 +15,7 @@ import {
 } from "@/app/utils/database";
 import Banner from "@/app/components/Banner";
 import SharePopup from "@/app/components/SharePopup";
-import { getAlbumData } from "@/app/utils/functions";
+import { capitalizeFirstLetter, getAlbumData } from "@/app/utils/functions";
 
 interface Album {
   artist: string;
@@ -152,7 +152,7 @@ const SharePageContent = () => {
             )}
             {album.genre && album.genre.toLowerCase() !== "unknown" && (
               <p className="font-extrabold text-xs tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
-                {album.genre.charAt(0).toUpperCase() + album.genre.slice(1)}
+                {capitalizeFirstLetter(album.genre)}
               </p>
             )}
           </div>
