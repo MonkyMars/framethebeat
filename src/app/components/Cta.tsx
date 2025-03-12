@@ -1,4 +1,5 @@
-"use client";
+
+import Link from 'next/link';
 import '../globals.css'
 import { useAuth } from "../utils/AuthContext";
 import { useRouter } from "next/navigation";
@@ -6,7 +7,6 @@ import { useRouter } from "next/navigation";
 
 const Cta = () => {
   const { session } = useAuth();
-  const router = useRouter();
 
   return !session ? (
     <section className="section" aria-labelledby="join-heading">
@@ -17,20 +17,20 @@ const Cta = () => {
         Sign up now to save your favorite album covers and contribute your own!
       </p>
       <div className="flex justify-center gap-4 w-full" role="group" aria-label="Authentication options">
-        <button
-          onClick={() => router.push("/login")}
+        <Link
+          href="/login"
           className="px-6 py-3 rounded-lg bg-gradient-to-br from-theme to-theme/80 text-foreground text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-theme/30 focus:outline-none focus:ring-2 focus:ring-theme focus:ring-offset-2"
           aria-label="Log in to your account"
         >
           Log In
-        </button>
-        <button
-          onClick={() => router.push("/register")}
+        </Link>
+        <Link
+          href="/register"
           className="px-6 py-3 rounded-lg bg-gradient-to-br from-theme to-theme/80 text-foreground text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-theme/30 focus:outline-none focus:ring-2 focus:ring-theme focus:ring-offset-2"
           aria-label="Create a new account"
         >
           Sign Up
-        </button>
+        </Link>
       </div>
     </section>
   ) : (
@@ -42,20 +42,20 @@ const Cta = () => {
         Welcome to Frame The Beat! Save your favorite album covers and share them with the world.
       </p>
       <div className="flex justify-center gap-4 w-full" role="group" aria-label="User options">
-        <button
-          onClick={() => router.push("/settings")}
+        <Link
+          href="/settings"
           className="px-6 py-3 rounded-lg bg-gradient-to-br from-theme to-theme/80 text-foreground text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-theme/30 focus:outline-none focus:ring-2 focus:ring-theme focus:ring-offset-2"
           aria-label="Go to account settings"
         >
           Settings
-        </button>
-        <button
-          onClick={() => router.push("/saved")}
+        </Link>
+        <Link
+          href={`/saved`}
           className="px-6 py-3 rounded-lg bg-gradient-to-br from-theme to-theme/80 text-foreground text-base font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-theme/30 focus:outline-none focus:ring-2 focus:ring-theme focus:ring-offset-2"
           aria-label="View your saved album covers"
         >
           Saved album covers
-        </button>
+        </Link>
       </div>
     </section>
   );

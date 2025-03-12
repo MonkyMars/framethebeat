@@ -1,15 +1,8 @@
-"use client"
 import React from "react";
-import { useRouter } from 'next/navigation';
 import { capitalizeFirstLetter } from "../utils/functions";
+import Link from "next/link";
 
 export default function Categories() {
-  const router = useRouter();
-  
-  const handleGenreClick = (genre: string) => {
-    router.push(`/collection?genre=${encodeURIComponent(genre)}`);
-  };
-  
   const genres: string[] = [
     "pop",
     "hip-hop",
@@ -31,15 +24,17 @@ export default function Categories() {
           {genres.slice(0, 10).map((genre, index) => (
             <li
               key={`genre-${genre}-${index}`}
-              className="m-1"
+              className="inline-block" aria-label={`Browse ${genre} albums`}
             >
-              <button
-                onClick={() => handleGenreClick(genre)}
-                className="px-4 py-2 bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[rgba(var(--theme-rgb),0.6)] min-w-[80px] text-center"
+              <Link
+                href={`/collection?genre=${encodeURIComponent(genre)}`}
+                passHref
+                prefetch
+                className="px-4 py-2 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-[rgba(var(--theme-rgb),0.6)] min-w-[80px] text-center"
                 aria-label={`Browse ${genre} albums`}
               >
                 <span>{capitalizeFirstLetter(genre)}</span>
-              </button>
+              </Link>
             </li>
           ))}
         </ul>

@@ -1,10 +1,10 @@
-"use client";
 import '../globals.css'
 import React from "react";
 import Image from "next/image";
 import { getAlbumData } from "../utils/functions";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from 'next/link';
 
 interface Album {
   artist: string;
@@ -41,10 +41,6 @@ const AlbumSkeleton = () => (
 
 const Featured: React.FC<FeaturedProps> = ({ album }) => {
   const router = useRouter();
-  
-  const handleHeartClick = (artist: string, album: string) => {
-    router.push(`/collection/share?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}`);
-  };
   
   const handleAlbumClick = (artist: string, album: string) => {
     router.push(`/collection?artist=${encodeURIComponent(artist)}&album=${encodeURIComponent(album)}`);
@@ -90,13 +86,13 @@ const Featured: React.FC<FeaturedProps> = ({ album }) => {
                 <div className="flex justify-between items-center text-[rgba(var(--foreground-rgb),0.7)] text-sm p-2 bg-[rgba(255,255,255,0.05)] backdrop-blur-md rounded-md border border-[rgba(255,255,255,0.1)]">
                   <p className="truncate" aria-label={`Artist: ${item.artist}`}>{item.artist}</p>
                   <div className="flex items-center gap-2 bg-[rgba(var(--theme-rgb),0.1)] p-1 rounded-md">
-                    <button 
-                      onClick={() => handleHeartClick(item.artist, item.album)}
+                    <Link 
+                      href={`/collection/share?artist=${encodeURIComponent(item.artist)}&album=${encodeURIComponent(item.album)}`}
                       aria-label={`Save ${item.album} by ${item.artist}`}
                       className="focus:outline-none focus:ring-2 focus:ring-[rgba(var(--theme-rgb),0.6)] rounded-full p-1"
                     >
                       <Heart size={24} aria-hidden="true" />
-                    </button>
+                    </Link>
                     <span aria-label={`${item.saves} saves`}>{item.saves}</span>
                   </div>
                 </div>

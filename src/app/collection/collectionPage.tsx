@@ -1,7 +1,7 @@
 "use client";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense, useRef, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import "../globals.css";
 import Banner from "../components/Banner";
@@ -25,7 +25,6 @@ import CollectionHeader from "../utils/components/collectionHeader";
 import ExtraDataCard from "../utils/components/extraDataCard";
 import { X } from "lucide-react";
 
-
 const Collection = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,9 +38,15 @@ const Collection = () => {
   const [sortBy, setSortBy] = useState("newest");
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [filterBy, setFilterBy] = useState("all");
-  const [selectedGenre, setSelectedGenre] = useState<string>(searchParams.get("genre") || "all");
-  const [selectedAlbum, setSelectedAlbum] = useState<string>(searchParams.get("album") || "");
-  const [selectedArtist, setSelectedArtist] = useState<string>(searchParams.get("artist") || "");
+  const [selectedGenre, setSelectedGenre] = useState<string>(
+    searchParams.get("genre") || "all"
+  );
+  const [selectedAlbum, setSelectedAlbum] = useState<string>(
+    searchParams.get("album") || ""
+  );
+  const [selectedArtist, setSelectedArtist] = useState<string>(
+    searchParams.get("artist") || ""
+  );
   const { session } = useAuth();
   const [userCollectionNames, setUserCollectionNames] = useState<
     { artist: string; title: string }[]
@@ -55,6 +60,13 @@ const Collection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [extraData, setExtraData] = useState<Album | null>(null);
 
+  const albumSavesMap = useMemo(() => {
+    return collection.reduce<Record<string, number>>((acc, item) => {
+      acc[item.album] = item.saves || 0;
+      return acc;
+    }, {});
+  }, [collection]);
+
   // Function to update URL with query parameters
   const updateUrlWithFilters = (
     genre?: string,
@@ -63,26 +75,26 @@ const Collection = () => {
     query?: string
   ) => {
     const params = new URLSearchParams();
-    
+
     if (genre && genre !== "all") {
       params.set("genre", genre);
     }
-    
+
     if (album) {
       params.set("album", album);
     }
-    
+
     if (artist) {
       params.set("artist", artist);
     }
-    
+
     if (query) {
       params.set("q", query);
     }
-    
+
     const queryString = params.toString();
     const newUrl = queryString ? `${pathname}?${queryString}` : pathname;
-    
+
     router.push(newUrl);
   };
 
@@ -133,7 +145,7 @@ const Collection = () => {
               src: getAlbumData(item.album, item.artist),
               alt: `${item.album} by ${item.artist}`,
             },
-            tracklist: item.tracklist
+            tracklist: item.tracklist,
           };
         })
         .filter(Boolean);
@@ -189,12 +201,7 @@ const Collection = () => {
   // Handle filter changes
   const handleGenreChange = (newGenre: string) => {
     setSelectedGenre(newGenre);
-    updateUrlWithFilters(
-      newGenre, 
-      selectedAlbum, 
-      selectedArtist, 
-      searchQuery
-    );
+    updateUrlWithFilters(newGenre, selectedAlbum, selectedArtist, searchQuery);
   };
 
   const handleAlbumChange = (newAlbum: string) => {
@@ -219,13 +226,13 @@ const Collection = () => {
 
   const handleSearchChange = (newQuery: string) => {
     setSearchQuery(newQuery);
-    
+
     // Only update URL if query is significant
     if (newQuery.length >= 3 || newQuery === "") {
       updateUrlWithFilters(
-        selectedGenre, 
-        selectedAlbum, 
-        selectedArtist, 
+        selectedGenre,
+        selectedAlbum,
+        selectedArtist,
         newQuery || undefined
       );
     }
@@ -385,10 +392,7 @@ const Collection = () => {
                         setTitle
                       )
                 }
-                saves={
-                  collection.find((item) => item.album === album.album)
-                    ?.saves || 0
-                }
+                saves={albumSavesMap[album.album] || 0}
                 saved={
                   userCollectionNames.find((item) => item.title === album.album)
                     ? true
@@ -441,7 +445,7 @@ const Collection = () => {
       {title && <Banner title={title} subtitle={title} />}
       {extraData && (
         <>
-        <ExtraDataCard extraData={extraData} setExtraData={setExtraData}/>
+          <ExtraDataCard extraData={extraData} setExtraData={setExtraData} />
         </>
       )}
       {sharePopUp && (
