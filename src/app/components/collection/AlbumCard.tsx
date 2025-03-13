@@ -86,20 +86,11 @@ const AlbumCard = ({
     <div style={{ visibility: mounted ? 'visible' : 'hidden' }}>
       {mounted ? (
         <article
-          className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-[rgba(var(--theme-rgb),0.1)] hover:scale-[1.02]"
+          className="relative flex flex-col items-center gap-5 p-5 bg-[rgba(var(--background-rgb),0.08)] backdrop-blur-lg rounded-2xl border border-[rgba(var(--theme-rgb),0.15)] shadow-sm shadow-[rgba(var(--theme-rgb),0.05)] transition-all duration-300 ease-out hover:shadow-xl hover:shadow-[rgba(var(--theme-rgb),0.15)] hover:scale-[1.01] hover:border-[rgba(var(--theme-rgb),0.25)]"
           aria-labelledby={`album-title-${album}`}
         >
-          <button 
-            className="absolute top-5 right-5 z-10 p-2 bg-background rounded-[50%] transition-all duration-300 hover:scale-110"
-            onClick={handleExpandClick}
-            aria-label={`View details for ${album} by ${artist}`}
-          >
-            <Expand 
-              size={24} 
-              className="cursor-pointer text-theme"
-            />
-          </button>
-          <div className="w-full aspect-square relative">
+          {/* Expand button moved to the corner of the image for better integration */}
+          <div className="w-full aspect-square relative rounded-xl overflow-hidden shadow-md">
             <Image
               src={imageUrl}
               alt={albumCover?.alt || `Album cover for ${album} by ${artist}`}
@@ -108,44 +99,54 @@ const AlbumCard = ({
               priority={isHighPriority(imageUrl)}
               unoptimized={true}
               onError={handleImageError}
-              className="rounded-lg object-cover transition-all duration-300 hover:brightness-105 hover:shadow-lg"
+              className="object-cover transition-all duration-300 hover:brightness-[1.03]"
             />
+            <button 
+              className="absolute bottom-3 right-3 z-10 p-2 bg-background/80 backdrop-blur-sm rounded-full transition-all duration-300 hover:scale-110 hover:bg-background shadow-md"
+              onClick={handleExpandClick}
+              aria-label={`View details for ${album} by ${artist}`}
+            >
+              <Expand 
+                size={20} 
+                className="cursor-pointer text-theme"
+              />
+            </button>
           </div>
 
-          <div className="flex flex-col items-center gap-2 w-full">
+          <div className="flex flex-col items-center gap-2.5 w-full px-1">
             <h3 
               id={`album-title-${album}`}
               className="text-xl font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300 line-clamp-2"
             >
               {album}
             </h3>
-            <p className="text-lg text-[rgba(var(--theme-rgb),0.7)] line-clamp-1">{artist}</p>
+            <p className="text-lg text-[rgba(var(--theme-rgb),0.8)] line-clamp-1 font-medium">{artist}</p>
             {releaseDate && (
-              <p className="text-sm text-[rgba(var(--foreground-rgb),0.7)]">
+              <p className="text-sm text-[rgba(var(--foreground-rgb),0.65)]">
                 {releaseDate}
               </p>
             )}
             {genre && genre.toLocaleLowerCase() !== "unknown" && (
-              <span className="font-semibold text-xs tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)]">
+              <span className="font-semibold text-xs p-2 tracking-wider text-[rgba(var(--foreground-rgb),0.9)] uppercase bg-[rgba(var(--theme-rgb),0.15)] px-3.5 py-1.5 rounded-full border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 hover:bg-[rgba(var(--theme-rgb),0.25)] shadow-sm">
                 {capitalizeFirstLetter(genre)}
               </span>
             )}
           </div>
 
-          <div className="flex items-center justify-between w-full mt-2">
+          <div className="flex items-center justify-between w-full mt-auto">
             <button 
-              className="p-2.5 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 text-theme"
+              className="p-2.5 rounded-full bg-[rgba(var(--theme-rgb),0.08)] hover:bg-[rgba(var(--theme-rgb),0.18)] transition-all duration-300 text-theme border border-[rgba(var(--theme-rgb),0.15)] shadow-sm"
               onClick={handleShareClick}
               aria-label={`Share ${album} by ${artist}`}
             >
-              <Share2 size={20} />
+              <Share2 size={18} />
             </button>
             <button 
-              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(var(--theme-rgb),0.1)] hover:bg-[rgba(var(--theme-rgb),0.2)] transition-all duration-300"
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-[rgba(var(--theme-rgb),0.08)] hover:bg-[rgba(var(--theme-rgb),0.18)] transition-all duration-300 border border-[rgba(var(--theme-rgb),0.15)] shadow-sm"
               aria-label={saved ? `Remove ${album} by ${artist} from saved` : `Save ${album} by ${artist}`}
             >
               <Heart
-                size={20}
+                size={18}
                 onClick={onHeartClick}
                 className={clsx(
                   "cursor-pointer text-theme",
@@ -162,4 +163,4 @@ const AlbumCard = ({
   );
 };
 
-export default AlbumCard; 
+export default AlbumCard;
