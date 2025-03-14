@@ -129,7 +129,8 @@ const FilterBar: React.FC<FilterBarProps> = ({
   return (
     <div className="w-full sticky top-0 z-30 bg-background/80 backdrop-blur-md border-b border-[rgba(var(--theme-rgb),0.2)] py-4 px-4 md:px-8">
       <div className="flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col flex-wrap items-center justify-between gap-4">
+        <label htmlFor="collection-search" className='text-xs font-medium text-[rgba(var(--foreground-rgb),0.7)]'>Search</label>
           <div className="relative flex-1 min-w-[200px]">
             <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <Search size={18} className="text-[rgba(var(--theme-rgb),0.7)]" aria-hidden="true" />
