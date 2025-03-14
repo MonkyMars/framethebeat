@@ -9,6 +9,7 @@ import Cta from "./components/Cta";
 import Footer from "./components/Footer";
 import Featured from "./components/Featured";
 import { fetchMostSavedAlbums } from "./utils/database";
+import CookiePopup from "./components/Cookies";
 
 interface Album {
   artist: string;
@@ -70,6 +71,7 @@ export default function Home() {
       <Featured album={mostSavedAlbums} />
       <Cta />
       <Footer />
+      <CookiePopup/>
     </>
   );
 }
