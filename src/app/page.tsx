@@ -9,6 +9,7 @@ import Cta from "./components/Cta";
 import Footer from "./components/Footer";
 import Featured from "./components/Featured";
 import { fetchMostSavedAlbums } from "./utils/database";
+import { useTheme } from "next-themes";
 
 interface Album {
   artist: string;
@@ -24,7 +25,8 @@ interface Album {
 
 export default function Home() {
   const [mostSavedAlbums, setMostSavedAlbums] = React.useState<Album[]>([]);
-
+  const { theme } = useTheme();
+  const [cover, setCover] = React.useState<"pink" | "dawnfm">("pink");
   const getMostSavedAlbums = async () => {
     try {
       const collection = await fetchMostSavedAlbums(4);
@@ -37,7 +39,17 @@ export default function Home() {
 
   React.useEffect(() => {
     getMostSavedAlbums();
-  }, []);
+    switch(theme) {
+      case "pink":
+        setCover("pink");
+        break;
+      case "dawnfm":
+        setCover("dawnfm");
+        break;
+      default:
+        setCover("pink");
+    }
+  }, [theme]);
 
   return (
     <>
@@ -50,12 +62,12 @@ export default function Home() {
           <figure aria-labelledby="featured-album-caption" className="w-full max-w-[600px] aspect-square relative">
             <div className="w-full h-full bg-[rgba(var(--theme-rgb),0.1)] rounded-md absolute top-0 left-0"></div>
             <Image
-              src={`/albumcovers/nothingbutthieves_moralpanic.webp`}
+              src={`/albumcovers/${cover}.webp`}
               width={600}
               height={600}
-              alt="Nothing But Thieves - Moral Panic album cover"
+              alt={`Album Cover: ${cover}`}
               priority
-              className="w-full h-full object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
+              className="w-full p-1 h-full object-contain rounded-md transition-all duration-300 hover:shadow-xl hover:shadow-theme-dark hover:scale-102"
               sizes="(max-width: 768px) 100vw, 600px"
               placeholder="blur"
               blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAwIiBoZWlnaHQ9IjYwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJyZ2JhKDIwOSwxMjYsNTksMC4xKSIvPjwvc3ZnPg=="
