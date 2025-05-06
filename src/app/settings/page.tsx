@@ -275,7 +275,7 @@ const Settings = () => {
               <h2 className="text-xl">About</h2>
             </div>
             <div className="flex flex-col gap-4">
-              <p>Version 1.0.0</p>
+              <p>Version 2.4.1</p>
               <a className="text-theme hover:underline" href="#">
                 Terms of Service
               </a>

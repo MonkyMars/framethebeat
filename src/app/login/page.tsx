@@ -8,6 +8,8 @@ import { createHash } from "crypto";
 import Banner from "../components/Banner";
 import { supabase } from "../utils/supabase";
 import { capitalizeFirstLetter } from "../utils/functions";
+import Nav from "../components/Nav";
+import Footer from "../components/Footer";
 
 const hashString = (data: string): string => {
   return createHash("sha256").update(data).digest("hex");
@@ -50,95 +52,103 @@ const Login = () => {
     if (error) {
       setTimeout(() => {
         setError(null);
-      }, 5000
-      );
+      }, 5000);
     }
   }, [error]);
 
   return (
-    <main className="min-h-screen bg-gradient-radial from-theme-dark via-transparent to-background/5">
-    <h1 className="absolute left-1/2 -translate-x-1/2 text-[clamp(1.5rem,5vw,2.2rem)] font-extrabold uppercase tracking-[3px] text-transparent bg-clip-text bg-gradient-to-r from-foreground to-theme drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] md:hidden">
-      FRAME THE BEAT
-    </h1>
+    <>
+      <Nav />
+      <main className="container mx-auto px-4 py-12 min-h-[calc(100vh-70px)]">
+        <div className="max-w-xl mx-auto">
+          <header className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-black uppercase tracking-[0.15em] mb-4">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-foreground to-theme">
+                Welcome Back
+              </span>
+            </h1>
+            <div className="relative">
+              <p className="text-base md:text-lg font-medium text-[rgba(var(--foreground-rgb),0.8)] max-w-md mx-auto">
+                Log in to access your saved album covers and collections
+              </p>
+              <div className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 w-12 h-1 rounded-full bg-gradient-to-r from-[rgba(var(--theme-rgb),0.5)] to-[rgba(var(--theme-rgb),0.2)]" />
+            </div>
+          </header>
 
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(90%,520px)] p-2 rounded-3xl border border-theme bg-gradient-to-br from-background/5 to-background backdrop-blur-lg shadow-lg shadow-theme transition-all duration-400 ease-out hover:shadow-xl hover:shadow-theme">
-      <div className="text-center">
-        <h2 className="text-theme text-3xl font-bold p-2">Log In</h2>
-        <p className="text-foreground/70 text-lg my-7">
-          Welcome back!
-        </p>
-      </div>
+          <section className="section backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] p-8 transition-all duration-300 shadow-lg">
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-col gap-5 w-full max-w-md mx-auto"
+            >
+              <div className="relative">
+                <Mail
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgba(var(--foreground-rgb),0.5)] transition-all duration-300"
+                  size={20}
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="w-full p-4 pl-12 bg-[rgba(var(--background-rgb),0.45)] border-2 border-[rgba(var(--theme-rgb),0.2)] rounded-xl text-foreground text-lg transition-all duration-300 focus:outline-none focus:border-[rgba(var(--theme-rgb),0.7)] focus:shadow-[0_0_20px_rgba(var(--theme-rgb),0.25)] focus:translate-y-[-3px] placeholder:text-[rgba(var(--foreground-rgb),0.45)]"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange(e.target.value, "email")}
+                  required
+                  name="email"
+                  autoComplete="email"
+                />
+              </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-3 w-full max-w-[440px] mx-auto"
-      >
-        <div className="relative w-full">
-          <Mail
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-white transition-all duration-300 peer-focus:text-theme peer-focus:scale-110"
-            size={20}
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full py-4 pl-12 pr-4 bg-transparent border-2 border-theme-dark rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme-dark focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
-            value={formData.email}
-            onChange={(e) => handleInputChange(e.target.value, "email")}
-            required
-            name="email"
-            autoComplete="email"
-          />
+              <div className="relative w-full">
+                <Lock
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[rgba(var(--foreground-rgb),0.5)] transition-all duration-300"
+                  size={20}
+                />
+                <input
+                  type="password"
+                  placeholder="Password"
+                  className="w-full p-4 pl-12 bg-[rgba(var(--background-rgb),0.45)] border-2 border-[rgba(var(--theme-rgb),0.2)] rounded-xl text-foreground text-lg transition-all duration-300 focus:outline-none focus:border-[rgba(var(--theme-rgb),0.7)] focus:shadow-[0_0_20px_rgba(var(--theme-rgb),0.25)] focus:translate-y-[-3px] placeholder:text-[rgba(var(--foreground-rgb),0.45)]"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange(e.target.value, "password")}
+                  required
+                />
+              </div>
+
+              <div className="mt-4">
+                <button
+                  type="submit"
+                  className="w-full py-4 rounded-xl bg-gradient-to-br from-theme to-[rgba(var(--theme-rgb),0.8)] text-background text-lg font-semibold tracking-wider flex items-center justify-center gap-3 transition-all duration-300 hover:shadow-[0_5px_15px_rgba(var(--theme-rgb),0.4)] hover:translate-y-[-2px]"
+                >
+                  Continue
+                  <ArrowRight size={20} className="transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+              </div>
+
+              <div className="flex justify-between items-center mt-4">
+                <Link
+                  href="/register"
+                  className="text-[rgba(var(--foreground-rgb),0.7)] hover:text-theme transition-all duration-300 hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-theme focus:ring-offset-2 rounded-md p-1"
+                >
+                  Create an account
+                </Link>
+                
+                <Link
+                  href="#"
+                  className="text-[rgba(var(--foreground-rgb),0.7)] hover:text-theme transition-all duration-300 hover:translate-y-[-2px] focus:outline-none focus:ring-2 focus:ring-theme focus:ring-offset-2 rounded-md p-1"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+            </form>
+          </section>
         </div>
-
-        <div className="relative w-full">
-          <Lock
-            className="absolute left-5 top-1/2 -translate-y-1/2 text-white transition-all duration-300 peer-focus:text-theme peer-focus:scale-110"
-            size={20}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full py-4 pl-12 pr-4 bg-transparent border-2 border-theme-dark rounded-2xl text-foreground text-lg tracking-wide transition-all duration-300 ease-out focus:outline-none focus:border-theme/70 focus:shadow-[0_0_25px_rgba(var(--theme-rgb),0.2)] focus:-translate-y-0.5"
-            value={formData.password}
-            onChange={(e) => handleInputChange(e.target.value, "password")}
-            required
-          />
-        </div>
-
-        <div className="mt-4">
-          <button
-            type="submit"
-            className="w-full py-3 rounded-2xl bg-gradient-to-br from-theme to-theme/85 text-foreground text-lg font-semibold tracking-wider flex items-center justify-center gap-3 shadow-lg shadow-theme/35 transition-all duration-400 ease-out hover:-translate-y-1 hover:shadow-xl hover:shadow-theme/45 hover:from-theme hover:to-theme/90"
-          >
-            Continue
-            <ArrowRight
-              size={20}
-              className="transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </button>
-        </div>
-
-        <p className="text-center text-foreground/70">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/register"
-            className="text-theme font-semibold hover:underline ml-1"
-          >
-            Sign up
-          </Link>
-        </p>
-      </form>
-    </div>
-
-    {error && (
-      <Banner
-        title={"Log in process failed"}
-        subtitle={`${
-          capitalizeFirstLetter(error)
-        }. Please try again later.`}
-      />
-    )}
-  </main>
+      </main>
+      <Footer />
+      {error && (
+        <Banner
+          title={"Login failed"}
+          subtitle={`${capitalizeFirstLetter(error)}. Please try again.`}
+        />
+      )}
+    </>
   );
 };
 

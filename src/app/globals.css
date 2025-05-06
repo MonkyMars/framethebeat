@@ -6,24 +6,24 @@
   :root {
     --background: #e3e3e3;
     --foreground: #171717;
-    --theme: #2398f7;
-    --theme-rgb: 35, 152, 247;
+    --theme: #d81b60;
+    --theme-rgb: 216, 29, 94;
   }
 
   [data-theme="dark"] {
-    --background: #0a0a0a;
-    --background-rgb: 10, 10, 10;
+    --background: #0e0e0e;
+    --background-rgb: 14, 14, 14;
     --foreground: #ededed;
     --foreground-rgb: 237, 237, 237;
-    --theme: #d17e3b;
-    --theme-rgb: 209, 126, 59;
+    --theme: #0d55d5; 
+    --theme-rgb: 13, 85, 213;
   }
 
   [data-theme="light"] {
     --background: #e3e3e3;
     --foreground: #171717;
-    --theme: #2398f7;
-    --theme-rgb: 35, 152, 247;
+    --theme: #d81b60;
+    --theme-rgb: 216, 29, 94;
   }
 }
 

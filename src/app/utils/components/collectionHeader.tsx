@@ -13,7 +13,7 @@ const CollectionHeader = ({ collection, page }: { collection: Album[]; page: str
             <p className="text-center text-lg md:text-xl font-medium text-[rgba(var(--foreground-rgb),0.8)]">
               Here are all the albums {page === 'collection' ? 'we' : 'you'}&apos;ve saved.
             </p>
-
+            {page === 'collection' && <p className="text-center text-lg md:text-xl font-medium text-[rgba(var(--foreground-rgb),0.8)]">Sign up to unlock all features!</p>}
             {collection && collection.length > 0 && (
               <div className="flex items-center gap-2 mt-2">
                 <div className="px-4 py-1 rounded-full bg-[rgba(var(--theme-rgb),0.1)] border border-[rgba(var(--theme-rgb),0.2)] backdrop-blur-sm">

@@ -65,7 +65,7 @@ const CollectionCard = ({
     <div style={{ visibility: mounted ? 'visible' : 'hidden' }}>
       {mounted ? (
         <article
-          className="flex flex-col items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-[rgba(var(--theme-rgb),0.1)] hover:scale-[1.02]"
+          className="flex flex-col group items-center gap-4 p-4 bg-[rgba(var(--background-rgb),0.05)] backdrop-blur-md rounded-2xl border border-[rgba(var(--theme-rgb),0.2)] transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-[rgba(var(--theme-rgb),0.1)] hover:scale-[1.02]"
           aria-labelledby={`album-title-${album}`}
         >
           <button className="absolute top-5 right-5 z-10 p-2 bg-background rounded-[50%] transition-all duration-300 hover:scale-110">
@@ -89,7 +89,7 @@ const CollectionCard = ({
           </div>
 
           <div className="flex flex-col items-center gap-2 w-full">
-            <h3 className="text-xl font-bold text-center tracking-wide hover:text-[var(--theme)] transition-colors duration-300 line-clamp-2">
+            <h3 className="text-xl font-bold text-center tracking-wide group-hover:text-[var(--theme)] transition-colors duration-300 line-clamp-2">
               {album}
             </h3>
             <p className="text-lg text-[rgba(var(--theme-rgb),0.7)] line-clamp-1">{artist}</p>

@@ -26,7 +26,7 @@ module.exports = {
         theme: {
           DEFAULT: "var(--theme)",
           rgb: "var(--theme-rgb)",
-          dark: "rgba(var(--theme-rgb), 0.3)",
+          dark: "rgba(var(--theme-rgb), 1)",
         },
       },
       scale: {
