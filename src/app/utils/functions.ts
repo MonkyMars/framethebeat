@@ -7,7 +7,13 @@ import { verifyAlbumDeleted, deleteAlbum, saveAlbum } from "./database";
 
 export const getAlbumData = (album: string, artist: string): string => {
   try {
-    const filename = `${album}-${artist}`.replace(/[^a-zA-Z0-9-_\.]/g, "_");
+    const filename = `${album}-${artist}`
+      .normalize("NFKD") // Normalize accented characters
+      .replace(/[\u0300-\u036f]/g, "") // Remove diacritics
+      .replace(/[^a-zA-Z0-9._-]/g, "_") // Replace unwanted chars with underscores
+      .replace(/_+/g, "_") // Collapse multiple underscores
+      .replace(/^[_\.]+|[_\.]+$/g, "") // Trim leading/trailing underscores or dots
+      .toLowerCase(); // Normalize case
     const { data } = supabase.storage
       .from("albumcovers")
       .getPublicUrl(`images/${filename}`);
@@ -47,27 +53,27 @@ export const useFilteredData = (
     return data
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
-        
+
         // Filter by genre
         const matchesGenre =
           selectedGenre === "all" ||
           (album.genre &&
             album.genre.toLowerCase() === selectedGenre.toLowerCase());
-        
+
         // Filter by year
         const matchesYear =
           filterBy === "all" || String(album.release_date) === filterBy;
-        
+
         // Filter by album name
-        const matchesAlbum = 
-          !selectedAlbum || 
+        const matchesAlbum =
+          !selectedAlbum ||
           album.album.toLowerCase().includes(selectedAlbum.toLowerCase());
-        
+
         // Filter by artist name
-        const matchesArtist = 
-          !selectedArtist || 
+        const matchesArtist =
+          !selectedArtist ||
           album.artist.toLowerCase().includes(selectedArtist.toLowerCase());
-        
+
         return matchesYear && matchesGenre && matchesAlbum && matchesArtist;
       })
       .filter((album) => {
@@ -94,12 +100,12 @@ export const useFilteredData = (
         const albumWords = albumName.split(/\s+/);
         const artistWords = artistName.split(/\s+/);
         const allWords = [...albumWords, ...artistWords];
-        
+
         // Check if any word starts with the search term
-        if (allWords.some(word => word.startsWith(searchTerm))) {
+        if (allWords.some((word) => word.startsWith(searchTerm))) {
           return true;
         }
-        
+
         // Fuzzy matching for typos (adjust threshold based on search term length)
         if (searchTerm.length >= 2) {
           // Adaptive threshold - stricter for short words, more lenient for longer ones
@@ -107,28 +113,34 @@ export const useFilteredData = (
             const base = Math.min(wordLength, termLength) <= 4 ? 1 : 2;
             return base + Math.floor(Math.max(wordLength, termLength) / 5);
           };
-          
+
           // Check each word against the search term
-          return allWords.some(word => {
+          return allWords.some((word) => {
             // More lenient if searching for a short term
             const threshold = getThreshold(word.length, searchTerm.length);
-            
+
             // Check complete word match
             if (levenshtein.get(searchTerm, word) <= threshold) {
               return true;
             }
-            
+
             // Also check if the beginning part matches with fuzzy search
             // This helps with partial typing + typos
             if (searchTerm.length <= word.length) {
-              const wordPrefix = word.substring(0, Math.min(word.length, searchTerm.length + 2));
-              return levenshtein.get(searchTerm, wordPrefix) <= Math.min(2, threshold);
+              const wordPrefix = word.substring(
+                0,
+                Math.min(word.length, searchTerm.length + 2)
+              );
+              return (
+                levenshtein.get(searchTerm, wordPrefix) <=
+                Math.min(2, threshold)
+              );
             }
-            
+
             return false;
           });
         }
-        
+
         return false;
       })
       .sort((a, b) => {
@@ -144,7 +156,15 @@ export const useFilteredData = (
           ? a.album.localeCompare(b.album)
           : a.artist.localeCompare(b.artist);
       });
-  }, [data, filterBy, selectedGenre, searchQuery, sortBy, selectedAlbum, selectedArtist]);
+  }, [
+    data,
+    filterBy,
+    selectedGenre,
+    searchQuery,
+    sortBy,
+    selectedAlbum,
+    selectedArtist,
+  ]);
 };
 
 export const onShare = (
@@ -310,7 +330,7 @@ export const onSave = async (
             src: albumData ?? "/placeholder.png",
             alt: `${album} by ${artist}`,
           },
-          tracklist: []
+          tracklist: [],
         },
       ];
     });
@@ -376,4 +396,4 @@ export const onRemove = async (
 
 export const capitalizeFirstLetter = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
-}
+};
