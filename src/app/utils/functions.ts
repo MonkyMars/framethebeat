@@ -54,25 +54,65 @@ export const useFilteredData = (
       .filter((album) => {
         if (!album?.album || !album?.artist) return false;
 
-        // Filter by genre
+        // Filter by genre - strict exact match
         const matchesGenre =
           selectedGenre === "all" ||
           (album.genre &&
             album.genre.toLowerCase() === selectedGenre.toLowerCase());
 
-        // Filter by year
+        // Filter by year - exact match only
         const matchesYear =
           filterBy === "all" || String(album.release_date) === filterBy;
 
-        // Filter by album name
+        // Filter by album name - stricter matching requiring complete word match
         const matchesAlbum =
           !selectedAlbum ||
-          album.album.toLowerCase().includes(selectedAlbum.toLowerCase());
+          (() => {
+            // Normalize album name: lowercase + remove punctuation
+            const normalizedAlbum = album.album
+              .toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
+            const albumWords = normalizedAlbum
+              .split(/\s+/)
+              .filter((word) => word.length > 0);
 
-        // Filter by artist name
+            // Normalize search: lowercase + remove punctuation
+            const normalizedSearch = selectedAlbum
+              .toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
+            const searchWords = normalizedSearch
+              .split(/\s+/)
+              .filter((word) => word.length > 0);
+
+            return searchWords.every((searchWord) =>
+              albumWords.some((albumWord) => albumWord === searchWord)
+            );
+          })();
+
+        // Filter by artist name - stricter matching requiring complete word match
         const matchesArtist =
           !selectedArtist ||
-          album.artist.toLowerCase().includes(selectedArtist.toLowerCase());
+          (() => {
+            // Normalize artist name: lowercase + remove punctuation
+            const normalizedArtist = album.artist
+              .toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
+            const artistWords = normalizedArtist
+              .split(/\s+/)
+              .filter((word) => word.length > 0);
+
+            // Normalize search: lowercase + remove punctuation
+            const normalizedSearch = selectedArtist
+              .toLowerCase()
+              .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ");
+            const searchWords = normalizedSearch
+              .split(/\s+/)
+              .filter((word) => word.length > 0);
+
+            return searchWords.every((searchWord) =>
+              artistWords.some((artistWord) => artistWord === searchWord)
+            );
+          })();
 
         return matchesYear && matchesGenre && matchesAlbum && matchesArtist;
       })
@@ -80,68 +120,87 @@ export const useFilteredData = (
         if (!album?.album || !album?.artist) return false;
         if (!searchQuery) return true;
 
+        // Normalize search: lowercase + remove punctuation
         const searchTerm = searchQuery.toLowerCase().trim();
+
+        // Skip empty searches
+        if (searchTerm.length === 0) return true;
+
+        // Require minimum search length
+        if (searchTerm.length < 3) return false;
+
         const albumName = album.album.toLowerCase();
-        const artistName = album.artist.toLowerCase();
+        // Normalize artist name: lowercase + remove punctuation
+        const artistName = album.artist
+          .toLowerCase()
+          .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, " ")
+          .trim();
         const genreName = album.genre?.toLowerCase() || "";
         const releaseYear = String(album.release_date || "");
 
-        // Direct substring matches (highest priority)
-        if (
-          albumName.includes(searchTerm) ||
-          artistName.includes(searchTerm) ||
-          genreName.includes(searchTerm) ||
-          releaseYear.includes(searchTerm)
-        ) {
-          return true;
-        }
+        // Normalize search term: remove punctuation and split into words
+        const normalizedSearchTerm = searchTerm.replace(
+          /[.,\/#!$%\^&\*;:{}=\-_`~()]/g,
+          " "
+        );
+        const searchWords = normalizedSearchTerm
+          .split(/\s+/)
+          .filter((word) => word.length > 0);
 
-        // Word prefix matching (for partial typing)
-        const albumWords = albumName.split(/\s+/);
-        const artistWords = artistName.split(/\s+/);
-        const allWords = [...albumWords, ...artistWords];
+        // Require all search words to match something
+        return searchWords.every((word) => {
+          // Direct exact word matches - check if any field contains this exact word
+          const albumWords = albumName
+            .split(/\s+/)
+            .filter((word) => word.length > 0);
+          const artistWords = artistName
+            .split(/\s+/)
+            .filter((word) => word.length > 0);
+          const genreWords = genreName
+            .split(/\s+/)
+            .filter((word) => word.length > 0);
 
-        // Check if any word starts with the search term
-        if (allWords.some((word) => word.startsWith(searchTerm))) {
-          return true;
-        }
+          const exactWordMatch =
+            albumWords.some((albumWord) => albumWord === word) ||
+            artistWords.some((artistWord) => artistWord === word) ||
+            genreWords.some((genreWord) => genreWord === word) ||
+            releaseYear === word;
 
-        // Fuzzy matching for typos (adjust threshold based on search term length)
-        if (searchTerm.length >= 2) {
-          // Adaptive threshold - stricter for short words, more lenient for longer ones
-          const getThreshold = (wordLength: number, termLength: number) => {
-            const base = Math.min(wordLength, termLength) <= 4 ? 1 : 2;
-            return base + Math.floor(Math.max(wordLength, termLength) / 5);
-          };
+          if (exactWordMatch) return true;
 
-          // Check each word against the search term
-          return allWords.some((word) => {
-            // More lenient if searching for a short term
-            const threshold = getThreshold(word.length, searchTerm.length);
-
-            // Check complete word match
-            if (levenshtein.get(searchTerm, word) <= threshold) {
+          // Stricter substring matching - word must be at least 50% of the length of the field
+          // to avoid matching on tiny substrings
+          if (word.length >= 4) {
+            if (
+              albumName.includes(word) ||
+              artistName.includes(word) ||
+              genreName.includes(word) ||
+              releaseYear.includes(word)
+            ) {
               return true;
             }
+          }
 
-            // Also check if the beginning part matches with fuzzy search
-            // This helps with partial typing + typos
-            if (searchTerm.length <= word.length) {
-              const wordPrefix = word.substring(
-                0,
-                Math.min(word.length, searchTerm.length + 2)
-              );
-              return (
-                levenshtein.get(searchTerm, wordPrefix) <=
-                Math.min(2, threshold)
-              );
-            }
+          // Reduced fuzzy matching with tighter thresholds
+          if (word.length >= 4) {
+            // Stricter threshold for fuzzy matching
+            const threshold = Math.floor(word.length / 5);
 
-            return false;
-          });
-        }
+            // Only allow 1 character difference for words under 10 chars
+            if (threshold === 0) return false;
 
-        return false;
+            return [...albumWords, ...artistWords, ...genreWords].some(
+              (fieldWord) => {
+                // Only compare words of similar length
+                if (Math.abs(fieldWord.length - word.length) > 2) return false;
+
+                return levenshtein.get(word, fieldWord) <= threshold;
+              }
+            );
+          }
+
+          return false;
+        });
       })
       .sort((a, b) => {
         if (!a?.album || !b?.album) return 0;
